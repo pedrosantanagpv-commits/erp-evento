@@ -807,6 +807,156 @@
       line-height: 1.35;
     }
 
+
+
+    .event-hero {
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at top right, rgba(255, 212, 0, .20), transparent 30%),
+        linear-gradient(135deg, #111318 0%, #1b1f27 100%);
+      color: white;
+      border-radius: 22px;
+      padding: 22px;
+      margin-bottom: 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .event-hero small {
+      display: block;
+      color: rgba(255,255,255,.62);
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .event-hero h4 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: -.05em;
+    }
+
+    .event-hero p {
+      margin: 0;
+      color: rgba(255,255,255,.72);
+      line-height: 1.45;
+    }
+
+    .event-hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(120px, 1fr));
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin: 10px 0 18px;
+    }
+
+    .workflow-step {
+      border: 1px solid var(--line);
+      background: #fbfcff;
+      border-radius: 14px;
+      padding: 10px;
+      min-height: 72px;
+    }
+
+    .workflow-step span {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 850;
+      margin-bottom: 5px;
+    }
+
+    .workflow-step strong {
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .workflow-step.done {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .workflow-step.active {
+      background: #fff8c9;
+      border-color: #f4d000;
+      box-shadow: 0 12px 28px rgba(255, 212, 0, .14);
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 0;
+    }
+
+    .timeline {
+      position: relative;
+      display: grid;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .timeline-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .timeline-dot {
+      width: 14px;
+      height: 14px;
+      margin-top: 4px;
+      border-radius: 999px;
+      background: var(--yellow);
+      box-shadow: 0 0 0 5px rgba(255, 212, 0, .17);
+    }
+
+    .timeline-card {
+      border: 1px solid var(--line);
+      background: #fbfcff;
+      border-radius: 16px;
+      padding: 13px;
+    }
+
+    .timeline-card strong { display: block; margin-bottom: 4px; }
+    .timeline-card small { color: var(--muted); }
+    .timeline-card p { margin: 8px 0 0; color: #4b5563; line-height: 1.45; }
+
+    .comment-box {
+      border: 1px solid var(--line);
+      background: #fbfcff;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .comment-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .btn-orange {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
     .modal.wide { width: min(1080px, 100%); }
 
     .btn-blue {
@@ -919,7 +1069,7 @@
 
   <script>
     const API_BASE = '/api/erp';
-    const APP_VERSION = '0.0.4.1';
+    const APP_VERSION = '0.0.5';
 
     const state = {
       user: null,
@@ -932,6 +1082,7 @@
         veiculos: [],
         eventos: [],
         historico: [],
+        compras: [],
         kanban: null
       }
     };
@@ -1193,9 +1344,9 @@
           </div>
           <div class="content-panel">
             <div class="panel-head">
-              <div><h3>v${APP_VERSION} em operação</h3><p>Agora o ERP já relaciona associado, veículo, evento, detalhes e histórico.</p></div>
+              <div><h3>v${APP_VERSION} em operação</h3><p>Central de eventos com timeline, comentários, prazos e ações rápidas.</p></div>
             </div>
-            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use os módulos laterais para consultar detalhes, editar registros e mover eventos no Kanban.</div>
+            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use Eventos e Kanban para movimentar a operação, registrar comentários e acompanhar prazos.</div>
           </div>`;
       } catch (error) { renderError(error.message); }
     }
@@ -1226,6 +1377,13 @@
       const result = await apiGet('listar', { tabela: 'Historico_Eventos' });
       state.cache.historico = result.data || [];
       return state.cache.historico;
+    }
+
+    async function ensureComprasCache(force = false) {
+      if (!force && state.cache.compras.length) return state.cache.compras;
+      const result = await apiGet('listar', { tabela: 'Compras' });
+      state.cache.compras = result.data || [];
+      return state.cache.compras;
     }
 
     function findAssociadoById(id) {
@@ -1437,7 +1595,7 @@
     }
 
     async function renderEventos(filter = '') {
-      els.viewRoot.innerHTML = topbar('Eventos', 'Abertura e acompanhamento de ocorrências.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>') + loadingPanel('Carregando eventos...');
+      els.viewRoot.innerHTML = topbar('Eventos', 'Central de acompanhamento, comentários, prazos e movimentações.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>') + loadingPanel('Carregando eventos...');
       try {
         await ensureEventosCache(true);
         paintEventTable(filter);
@@ -1447,7 +1605,7 @@
     function paintEventTable(filter = '') {
       const data = state.cache.eventos.filter(item => `${item.numero_evento} ${item.placa} ${item.associado} ${item.tipo_evento} ${item.status_evento} ${item.responsavel}`.toLowerCase().includes(String(filter).toLowerCase()));
       els.viewRoot.innerHTML = `
-        ${topbar('Eventos', 'Abertura e acompanhamento de ocorrências.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>')}
+        ${topbar('Eventos', 'Central de acompanhamento, comentários, prazos e movimentações.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>')}
         <div class="content-panel"><div class="panel-head"><div><h3>Eventos cadastrados</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por placa, associado, status..." value="${escapeHtml(filter)}" oninput="paintEventTable(this.value)" /></div></div>
           ${data.length ? eventTable(data) : emptyState('Nenhum evento cadastrado.', 'Clique em “Novo evento” para abrir a primeira ocorrência.')}
         </div>`;
@@ -1457,7 +1615,7 @@
       return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Tipo</th><th>Placa</th><th>Associado</th><th>Responsável</th><th>Etapa</th><th>Status</th><th>Abertura</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.numero_evento || item.id_evento || '-')}</strong></td><td>${escapeHtml(item.tipo_evento || '-')}</td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.etapa_kanban)}</td><td>${statusBadge(item.status_evento)}</td><td>${dateBR(item.data_abertura)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openEventModalById(${jsArg(item.id_evento)})">Editar</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button><button class="btn btn-danger btn-small" onclick="cancelarEvento(${jsArg(item.id_evento)})">Cancelar</button></div></td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Central</button><button class="btn btn-ghost btn-small" onclick="openEventModalById(${jsArg(item.id_evento)})">Editar</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button><button class="btn btn-danger btn-small" onclick="cancelarEvento(${jsArg(item.id_evento)})">Cancelar</button></div></td>
         </tr>`).join('')}
       </tbody></table></div>`;
     }
@@ -1482,7 +1640,8 @@
     }
 
     function kanbanCard(item) {
-      return `<div class="kanban-card"><strong>${escapeHtml(item.numero_evento || item.placa || 'Evento')}</strong><p>${escapeHtml(item.associado || 'Associado não informado')}<br>${escapeHtml(item.tipo_evento || '')} • ${escapeHtml(item.responsavel || 'Sem responsável')}</p><div class="kanban-meta">${statusBadge(item.prioridade)}${statusBadge(item.status_evento)}<span class="badge dark">${escapeHtml(item.placa || '-')}</span></div><div class="row-actions" style="margin-top:12px"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Detalhes</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button></div></div>`;
+      const prazo = getPrazoEvento(item);
+      return `<div class="kanban-card"><strong>${escapeHtml(item.numero_evento || item.placa || 'Evento')}</strong><p>${escapeHtml(item.associado || 'Associado não informado')}<br>${escapeHtml(item.tipo_evento || '')} • ${escapeHtml(item.responsavel || 'Sem responsável')}<br>${prazo.daysText} em aberto</p><div class="kanban-meta">${statusBadge(item.prioridade)}${statusBadge(item.status_evento)}${statusBadge(prazo.label)}<span class="badge dark">${escapeHtml(item.placa || '-')}</span></div><div class="row-actions" style="margin-top:12px"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Central</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button></div></div>`;
     }
 
     function renderRelatorios() {
@@ -1575,24 +1734,172 @@
 
     async function openEventDetails(id) {
       try {
-        await Promise.all([ensureEventosCache(true), ensureVeiculosCache(true), ensureAssociadosCache(true), ensureHistoricoCache(true)]);
+        await Promise.all([
+          ensureEventosCache(true),
+          ensureVeiculosCache(true),
+          ensureAssociadosCache(true),
+          ensureHistoricoCache(true),
+          ensureComprasCache(true)
+        ]);
+
         const item = findEventById(id);
         if (!item) return toast('Evento não encontrado.', 'error');
+
         const veiculo = findVehicleByPlate(item.placa);
         const associado = findAssociadoById(item.id_associado) || state.cache.associados.find(a => normalizeText(a.nome) === normalizeText(item.associado));
         const historico = state.cache.historico.filter(h => String(h.id_evento) === String(item.id_evento));
-        openCustomModal('Detalhes do evento', `
+        const compras = state.cache.compras.filter(c => String(c.id_evento) === String(item.id_evento));
+        const prazo = getPrazoEvento(item);
+
+        openCustomModal('Central do evento', `
+          <div class="event-hero">
+            <div>
+              <small>Central operacional</small>
+              <h4>${escapeHtml(item.numero_evento || item.id_evento || 'Evento')}</h4>
+              <p>
+                ${escapeHtml(item.tipo_evento || 'Tipo não informado')} • Placa <strong>${escapeHtml(item.placa || '-')}</strong> •
+                ${escapeHtml(item.associado || 'Associado não informado')}
+              </p>
+              <div class="quick-actions">
+                ${statusBadge(item.etapa_kanban)}${statusBadge(item.status_evento)}${statusBadge(item.prioridade)}${statusBadge(prazo.label)}
+              </div>
+            </div>
+            <div class="event-hero-actions">
+              <button class="btn btn-yellow btn-small" onclick="closeModal(); openMoveEventModal(${jsArg(item.id_evento)})">Mover etapa</button>
+              <button class="btn btn-blue btn-small" onclick="openCommentEventModal(${jsArg(item.id_evento)})">Comentário</button>
+              <button class="btn btn-orange btn-small" onclick="openCompraModal(${jsArg(item.id_evento)})">Compra</button>
+              <button class="btn btn-ghost btn-small" onclick="closeModal(); openEventModalById(${jsArg(item.id_evento)})">Editar</button>
+            </div>
+          </div>
+
+          ${eventWorkflow(item)}
+
           <div class="detail-grid">
             ${detailCard('Número', item.numero_evento || item.id_evento)}${detailCard('Tipo', item.tipo_evento)}${detailCard('Prioridade', item.prioridade)}
             ${detailCard('Placa', item.placa)}${detailCard('Associado', item.associado)}${detailCard('Telefone', item.telefone || associado?.telefone)}
-            ${detailCard('Etapa', item.etapa_kanban)}${detailCard('Status', item.status_evento)}${detailCard('Responsável', item.responsavel)}
-            ${detailCard('Setor', item.setor_atual)}${detailCard('Oficina', item.oficina)}${detailCard('Abertura', dateBR(item.data_abertura))}
+            ${detailCard('Etapa atual', item.etapa_kanban)}${detailCard('Status atual', item.status_evento)}${detailCard('Responsável', item.responsavel)}
+            ${detailCard('Setor', item.setor_atual)}${detailCard('Oficina', item.oficina)}${detailCard('Dias em aberto', prazo.daysText)}
             ${detailCard('Valor estimado', money(item.valor_estimado))}${detailCard('Valor aprovado', money(item.valor_aprovado))}${detailCard('Veículo', veiculo ? [veiculo.marca, veiculo.modelo, veiculo.ano_modelo].filter(Boolean).join(' ') : '-')}
           </div>
+
+          <div class="detail-section">
+            <h4>Ações rápidas</h4>
+            <div class="quick-actions">
+              <button class="btn btn-ghost btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Vistoria', 'Em vistoria')">Enviar para vistoria</button>
+              <button class="btn btn-ghost btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Regulação', 'Em regulação')">Enviar para regulação</button>
+              <button class="btn btn-ghost btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Compras', 'Em compras')">Enviar para compras</button>
+              <button class="btn btn-ghost btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Reparo', 'Em reparo')">Enviar para reparo</button>
+              <button class="btn btn-yellow btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Finalizado', 'Finalizado')">Finalizar evento</button>
+              <button class="btn btn-danger btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Finalizado', 'Recusado')">Recusar evento</button>
+            </div>
+          </div>
+
           <div class="detail-section"><h4>Descrição</h4><p>${escapeHtml(item.descricao || 'Sem descrição.')}</p></div>
           <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
-          <div class="detail-section"><h4>Histórico do evento</h4>${historyList(historico)}</div>`, true);
+          <div class="detail-section"><h4>Compras do evento</h4>${miniComprasTable(compras)}</div>
+          <div class="detail-section"><h4>Timeline / Histórico</h4>${timelineList(historico)}</div>
+        `, true);
       } catch (error) { toast(error.message, 'error'); }
+    }
+
+    function getPrazoEvento(item) {
+      const fim = String(item.status_evento || '').toLowerCase().includes('finalizado') || String(item.status_evento || '').toLowerCase().includes('recusado') || String(item.status_evento || '').toLowerCase().includes('cancelado');
+      const abertura = new Date(item.data_abertura || item.data_ultima_atualizacao || new Date());
+      const now = new Date();
+      const diff = Number.isNaN(abertura.getTime()) ? 0 : Math.max(0, Math.floor((now - abertura) / 86400000));
+      let label = 'Dentro do prazo';
+      if (fim) label = 'Encerrado';
+      else if (diff >= 7) label = 'Atrasado';
+      else if (diff >= 4) label = 'Atenção';
+      return { days: diff, daysText: `${diff} dia(s)`, label };
+    }
+
+    function workflowSteps() {
+      return ['Aberto', 'Análise', 'Vistoria', 'Regulação', 'Compras', 'Reparo', 'Aguardando Aprovação', 'Finalizado'];
+    }
+
+    function eventWorkflow(item) {
+      const etapas = parseOptions('etapas_kanban_evento', workflowSteps());
+      const atual = String(item.etapa_kanban || 'Aberto');
+      const currentIndex = Math.max(0, etapas.findIndex(e => normalizeText(e) === normalizeText(atual)));
+      return `<div class="workflow">${etapas.map((etapa, index) => {
+        const cls = index < currentIndex ? 'done' : (index === currentIndex ? 'active' : '');
+        return `<div class="workflow-step ${cls}"><span>Etapa ${index + 1}</span><strong>${escapeHtml(etapa)}</strong></div>`;
+      }).join('')}</div>`;
+    }
+
+    async function quickMoveEvent(id, etapa, status) {
+      const comentario = `Movimentação rápida pela Central do Evento: ${etapa} / ${status}.`;
+      try {
+        await apiPost({ action: 'mover_evento_kanban', id_evento: id, nova_etapa: etapa, novo_status: status, comentario });
+        state.cache.eventos = [];
+        state.cache.historico = [];
+        state.cache.kanban = null;
+        toast('Evento movimentado com sucesso.');
+        closeModal();
+        await openEventDetails(id);
+      } catch (error) { toast(error.message, 'error'); }
+    }
+
+    async function openCommentEventModal(id) {
+      await ensureEventosCache();
+      const item = findEventById(id);
+      if (!item) return toast('Evento não encontrado.', 'error');
+      openModal('Adicionar comentário', `
+        <div class="lookup-note full">Comentário interno no evento <strong>${escapeHtml(item.numero_evento || item.id_evento)}</strong>. Ele ficará salvo no histórico.</div>
+        <div class="form-grid">
+          ${textareaField('comentario', 'Comentário interno', 'Ex.: associado enviou documento, oficina retornou orçamento, tratativa feita por WhatsApp...', 'full')}
+        </div>`, 'Salvar comentário', async (data) => {
+          if (!String(data.comentario || '').trim()) throw new Error('Digite o comentário.');
+          await apiPost({
+            action: 'criar',
+            tabela: 'Historico_Eventos',
+            dados: {
+              id_evento: id,
+              data_hora: new Date().toISOString(),
+              usuario: state.user?.email || state.user?.nome || 'Sistema',
+              acao: 'Comentário interno',
+              status_anterior: item.status_evento || '',
+              status_novo: item.status_evento || '',
+              etapa_anterior: item.etapa_kanban || '',
+              etapa_nova: item.etapa_kanban || '',
+              comentario: data.comentario
+            }
+          });
+          state.cache.historico = [];
+          toast('Comentário registrado com sucesso.');
+          setTimeout(() => openEventDetails(id), 120);
+        });
+    }
+
+    async function openCompraModal(id) {
+      await ensureEventosCache();
+      const item = findEventById(id);
+      if (!item) return toast('Evento não encontrado.', 'error');
+      const statusCompra = parseOptions('status_compra', ['Solicitado', 'Em cotação', 'Aguardando aprovação', 'Aprovado', 'Comprado', 'Entregue', 'Cancelado']);
+      openModal('Criar solicitação de compra', `
+        <div class="lookup-note full">Evento: <strong>${escapeHtml(item.numero_evento || item.id_evento)}</strong> • Placa: <strong>${escapeHtml(item.placa || '-')}</strong></div>
+        <div class="form-grid">
+          ${field('item', 'Item / peça', 'Ex.: para-choque dianteiro')}${field('fornecedor', 'Fornecedor', 'Nome do fornecedor')}
+          ${field('valor_cotado', 'Valor cotado', '0')}${field('valor_aprovado', 'Valor aprovado', '0')}
+          ${selectField('status_compra', 'Status da compra', statusCompra, 'Solicitado')}${field('responsavel', 'Responsável', 'Nome do responsável', '', item.responsavel || '')}
+          ${textareaField('observacoes', 'Observações', 'Detalhes da cotação ou compra', 'full')}
+        </div>`, 'Criar compra', async (data) => {
+          if (!String(data.item || '').trim()) throw new Error('Informe o item/peça.');
+          await apiPost({
+            action: 'criar',
+            tabela: 'Compras',
+            dados: {
+              ...data,
+              id_evento: id,
+              placa: item.placa || '',
+              data_solicitacao: new Date().toISOString()
+            }
+          });
+          state.cache.compras = [];
+          toast('Solicitação de compra criada.');
+          setTimeout(() => openEventDetails(id), 120);
+        });
     }
 
     async function openMoveEventModal(id) {
@@ -1635,9 +1942,19 @@
       return `<div class="mini-table"><div class="mini-row header"><div>Evento</div><div>Placa/tipo</div><div>Status</div><div>Ação</div></div>${items.map(e => `<div class="mini-row"><div><strong>${escapeHtml(e.numero_evento || e.id_evento || '-')}</strong></div><div>${escapeHtml(e.placa || '-')} • ${escapeHtml(e.tipo_evento || '-')}</div><div>${statusBadge(e.status_evento)}</div><div><button class="btn btn-blue btn-small" onclick="closeModal(); openEventDetails(${jsArg(e.id_evento)})">Abrir</button></div></div>`).join('')}</div>`;
     }
 
+    function miniComprasTable(items) {
+      if (!items.length) return emptyState('Nenhuma compra vinculada.', 'Crie uma solicitação de compra pela Central do Evento quando necessário.');
+      return `<div class="mini-table"><div class="mini-row header"><div>Item</div><div>Fornecedor</div><div>Status</div><div>Valor</div></div>${items.map(c => `<div class="mini-row"><div><strong>${escapeHtml(c.item || '-')}</strong></div><div>${escapeHtml(c.fornecedor || '-')}</div><div>${statusBadge(c.status_compra)}</div><div>${money(c.valor_aprovado || c.valor_cotado || 0)}</div></div>`).join('')}</div>`;
+    }
+
     function historyList(items) {
-      if (!items.length) return emptyState('Sem histórico registrado.', 'O histórico será alimentado quando o evento for movido pelo Kanban.');
+      if (!items.length) return emptyState('Sem histórico registrado.', 'O histórico será alimentado quando o evento for movimentado ou comentado.');
       return `<div class="history-list">${items.slice().reverse().map(h => `<div class="history-item"><strong>${escapeHtml(h.acao || 'Movimentação')}</strong><small>${dateTimeBR(h.data_hora)} • ${escapeHtml(h.usuario || 'Sistema')}</small><p>${escapeHtml(h.etapa_anterior || '-')} → ${escapeHtml(h.etapa_nova || '-')}<br>${escapeHtml(h.status_anterior || '-')} → ${escapeHtml(h.status_novo || '-')}</p>${h.comentario ? `<p>${escapeHtml(h.comentario)}</p>` : ''}</div>`).join('')}</div>`;
+    }
+
+    function timelineList(items) {
+      if (!items.length) return emptyState('Sem movimentações ainda.', 'Movimente o evento ou adicione comentários para construir a linha do tempo.');
+      return `<div class="timeline">${items.slice().reverse().map(h => `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-card"><strong>${escapeHtml(h.acao || 'Movimentação')}</strong><small>${dateTimeBR(h.data_hora)} • ${escapeHtml(h.usuario || 'Sistema')}</small><p><strong>${escapeHtml(h.etapa_anterior || '-')} → ${escapeHtml(h.etapa_nova || '-')}</strong><br>${escapeHtml(h.status_anterior || '-')} → ${escapeHtml(h.status_novo || '-')}</p>${h.comentario ? `<p>${escapeHtml(h.comentario)}</p>` : ''}</div></div>`).join('')}</div>`;
     }
 
     function detailCard(label, value) {
@@ -1728,6 +2045,9 @@
     window.openEventModalById = openEventModalById;
     window.openEventDetails = openEventDetails;
     window.openMoveEventModal = openMoveEventModal;
+    window.openCommentEventModal = openCommentEventModal;
+    window.openCompraModal = openCompraModal;
+    window.quickMoveEvent = quickMoveEvent;
     window.cancelarEvento = cancelarEvento;
     window.paintAssociadoTable = paintAssociadoTable;
     window.paintVehicleTable = paintVehicleTable;
