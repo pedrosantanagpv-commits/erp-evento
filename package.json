@@ -1,8 +1,8 @@
 {
   "name": "erp-evento-mvp",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
-  "description": "MVP de ERP para proteção veicular com módulo completo de compras, vistorias, eventos, Kanban, Vercel e Google Apps Script.",
+  "description": "MVP de ERP para proteção veicular com relatórios e indicadores avançados, filtros operacionais, compras, vistorias, eventos e Kanban.",
   "scripts": {
     "dev": "vercel dev",
     "start": "vercel dev"
