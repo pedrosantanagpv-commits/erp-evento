@@ -1,23 +1,26 @@
-# ERP Evento MVP v0.0.4.1
+# ERP Evento MVP v0.0.5
 
-Versão operacional do MVP do ERP para proteção veicular.
+Versão focada na **Central de Eventos**, transformando o módulo de eventos em uma tela operacional para acompanhamento de ocorrências de proteção veicular.
 
 ## O que entrou nesta versão
 
-- Tela de detalhes do associado.
-- Veículos vinculados ao associado.
-- Eventos relacionados ao associado.
-- Tela de detalhes do veículo.
-- Eventos vinculados ao veículo pela placa.
-- Abertura/edição de evento com busca automática pela placa.
-- Preenchimento automático de associado, telefone, cidade, estado e vínculo interno ao encontrar a placa.
-- Tela de detalhes do evento.
-- Histórico do evento alimentado ao mover no Kanban.
-- Kanban com botão de mover etapa/status.
-- Confirmações internas para inativar/cancelar, sem depender do alerta padrão do navegador.
-- Botões de detalhes, edição, movimentação e cancelamento nas tabelas.
-- Mantém a correção de valores no formato brasileiro, como `65.000,00`.
-- Mantém proxy `/api/erp` na Vercel com novas tentativas automáticas quando o Apps Script oscila.
+- Central do evento com visual mais completo.
+- Linha de fluxo do evento: Aberto, Análise, Vistoria, Regulação, Compras, Reparo, Aguardando Aprovação e Finalizado.
+- Indicador de prazo: Dentro do prazo, Atenção, Atrasado ou Encerrado.
+- Dias em aberto calculados automaticamente.
+- Botões de ação rápida dentro do evento:
+  - Enviar para vistoria
+  - Enviar para regulação
+  - Enviar para compras
+  - Enviar para reparo
+  - Finalizar evento
+  - Recusar evento
+- Comentários internos salvos no histórico do evento.
+- Timeline visual do histórico.
+- Criação de solicitação de compra a partir do evento.
+- Compras vinculadas ao evento aparecem dentro da Central do Evento.
+- Kanban com prazo/dias em aberto nos cards.
+- Botão de “Central” no lugar de apenas “Detalhes” nos eventos.
 
 ## Arquivos principais
 
@@ -52,18 +55,15 @@ Senha: 123456
 ## Teste recomendado
 
 1. Entrar no ERP.
-2. Abrir Associados e clicar em Detalhes.
-3. Abrir Veículos e clicar em Detalhes.
-4. Abrir Eventos e criar um evento digitando uma placa já cadastrada.
-5. Usar o botão Buscar placa para puxar os dados automaticamente.
-6. Abrir o Kanban e mover o evento de etapa.
-7. Abrir Detalhes do evento e conferir o histórico.
+2. Abrir Eventos.
+3. Clicar em Central no evento teste.
+4. Adicionar comentário interno.
+5. Usar uma ação rápida, como Enviar para vistoria.
+6. Conferir a timeline.
+7. Criar uma solicitação de compra pelo botão Compra.
+8. Conferir se a compra aparece na Central do Evento.
+9. Abrir o Kanban e conferir a etapa atualizada.
 
 ## Atenção
 
 Não execute `setupBancoERP` depois que começar a cadastrar dados reais, porque essa função recria/limpa as abas iniciais do banco.
-
-
-## Correção 0.0.4.1
-- Corrigido o escape dos IDs usados nos botões Detalhes, Editar, Inativar, Mover e Cancelar.
-- Antes, os IDs eram inseridos no onclick com aspas duplas sem entidade HTML, o que quebrava o clique dos botões de ação.
