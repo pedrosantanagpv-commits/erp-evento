@@ -919,7 +919,7 @@
 
   <script>
     const API_BASE = '/api/erp';
-    const APP_VERSION = '0.0.4';
+    const APP_VERSION = '0.0.4.1';
 
     const state = {
       user: null,
@@ -991,7 +991,9 @@
     }
 
     function jsArg(value) {
-      return JSON.stringify(String(value ?? ''));
+      // Usado dentro de onclick="...".
+      // O JSON.stringify usa aspas duplas, então precisamos escapar para entidade HTML.
+      return escapeHtml(JSON.stringify(String(value ?? '')));
     }
 
     function delay(ms) {
