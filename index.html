@@ -228,6 +228,58 @@
       color: var(--dark);
     }
 
+    .btn-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .btn-small {
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcff;
+    }
+
+    .summary-item {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .summary-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .summary-item strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 22px;
+      letter-spacing: -.04em;
+    }
+
     .hint {
       margin-top: 18px;
       background: #fff9d7;
@@ -659,12 +711,14 @@
       .mobile-menu { display: inline-flex; }
       .main { padding: 18px; }
       .grid-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .topbar { align-items: stretch; flex-direction: column; }
       .actions { justify-content: flex-start; }
     }
 
     @media (max-width: 620px) {
       .grid-cards { grid-template-columns: 1fr; }
+      .summary-strip { grid-template-columns: 1fr; }
       .form-grid { grid-template-columns: 1fr; }
       .search { min-width: 100%; }
       .login-card { padding: 24px; }
@@ -723,6 +777,7 @@
 
       <nav class="nav">
         <button data-view="dashboard" class="active">📊 Dashboard</button>
+        <button data-view="associados">👥 Associados</button>
         <button data-view="veiculos">🚗 Veículos</button>
         <button data-view="eventos">🛠️ Eventos</button>
         <button data-view="kanban">🧩 Kanban</button>
@@ -760,6 +815,7 @@
       options: {},
       cache: {
         dashboard: null,
+        associados: [],
         veiculos: [],
         eventos: [],
         kanban: null
@@ -781,35 +837,34 @@
       userAvatar: document.getElementById('userAvatar')
     };
 
-  function parseMoneyBR(value) {
-    if (typeof value === 'number') return value;
+    function parseMoneyBR(value) {
+      if (typeof value === 'number') return value;
+      if (!value) return 0;
 
-    if (!value) return 0;
-
-    const texto = String(value)
+      const texto = String(value)
         .replace('R$', '')
         .replace(/\s/g, '')
         .trim();
 
-    if (texto.includes(',')) {
+      if (texto.includes(',')) {
         const convertido = texto
-            .replace(/\./g, '')
-            .replace(',', '.');
+          .replace(/\./g, '')
+          .replace(',', '.');
 
         const numero = Number(convertido);
         return Number.isNaN(numero) ? 0 : numero;
+      }
+
+      const numero = Number(texto);
+      return Number.isNaN(numero) ? 0 : numero;
     }
 
-    const numero = Number(texto);
-    return Number.isNaN(numero) ? 0 : numero;
-}
-
-function money(value) {
-    return new Intl.NumberFormat('pt-BR', {
+    function money(value) {
+      return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL'
-    }).format(parseMoneyBR(value));
-}
+      }).format(parseMoneyBR(value));
+    }
 
     function dateBR(value) {
       if (!value) return '-';
@@ -825,6 +880,14 @@ function money(value) {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
+    }
+
+    function jsArg(value) {
+      return JSON.stringify(String(value ?? ''));
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     function statusBadge(value) {
@@ -845,25 +908,66 @@ function money(value) {
       }, 3800);
     }
 
+    async function fetchJsonWithRetry(url, options = {}, attempts = 3) {
+      let lastError;
+
+      for (let attempt = 1; attempt <= attempts; attempt++) {
+        try {
+          const response = await fetch(url, {
+            cache: 'no-store',
+            ...options,
+            headers: {
+              ...(options.headers || {}),
+              'X-ERP-Request': String(Date.now())
+            }
+          });
+
+          const text = await response.text();
+          let data;
+
+          try {
+            data = JSON.parse(text);
+          } catch (error) {
+            throw new Error('A API não retornou JSON válido. Tentando novamente...');
+          }
+
+          const shouldRetry = !data.success && String(data.message || '').toLowerCase().includes('json válido');
+
+          if (shouldRetry && attempt < attempts) {
+            await delay(550 * attempt);
+            continue;
+          }
+
+          if (!data.success) {
+            throw new Error(data.message || 'Erro na API.');
+          }
+
+          return data;
+        } catch (error) {
+          lastError = error;
+          if (attempt < attempts) {
+            await delay(550 * attempt);
+            continue;
+          }
+        }
+      }
+
+      throw lastError || new Error('Erro de conexão com a API.');
+    }
+
     async function apiGet(action, params = {}) {
       const query = new URLSearchParams({
         action,
         token: state.token || '',
+        _ts: String(Date.now()),
         ...params
       });
 
-      const response = await fetch(`${API_BASE}?${query.toString()}`);
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.message || 'Erro na API.');
-      }
-
-      return data;
+      return fetchJsonWithRetry(`${API_BASE}?${query.toString()}`);
     }
 
     async function apiPost(payload = {}) {
-      const response = await fetch(API_BASE, {
+      return fetchJsonWithRetry(API_BASE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -872,14 +976,6 @@ function money(value) {
           ...payload
         })
       });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.message || 'Erro na API.');
-      }
-
-      return data;
     }
 
     function saveSession(session) {
@@ -989,6 +1085,7 @@ function money(value) {
       setActiveNav(view);
 
       if (view === 'dashboard') return renderDashboard();
+      if (view === 'associados') return renderAssociados();
       if (view === 'veiculos') return renderVeiculos();
       if (view === 'eventos') return renderEventos();
       if (view === 'kanban') return renderKanban();
@@ -1059,6 +1156,154 @@ function money(value) {
       `;
     }
 
+    async function renderAssociados(filter = '') {
+      els.viewRoot.innerHTML = topbar('Associados', 'Cadastro e consulta da base de associados.', '<button class="btn btn-yellow" onclick="openAssociadoModal()">+ Novo associado</button><button class="btn btn-ghost" onclick="renderAssociados()">Atualizar</button>') + loadingPanel('Carregando associados...');
+
+      try {
+        const result = await apiGet('listar', { tabela: 'Associados' });
+        state.cache.associados = result.data || [];
+        paintAssociadoTable(filter);
+      } catch (error) {
+        renderError(error.message);
+      }
+    }
+
+    function paintAssociadoTable(filter = '') {
+      const data = state.cache.associados.filter(item => {
+        const haystack = `${item.nome} ${item.cpf_cnpj} ${item.telefone} ${item.email} ${item.cidade} ${item.estado} ${item.status}`.toLowerCase();
+        return haystack.includes(String(filter).toLowerCase());
+      });
+
+      const ativos = state.cache.associados.filter(item => String(item.status).toLowerCase() === 'ativo').length;
+      const inativos = state.cache.associados.filter(item => String(item.status).toLowerCase() === 'inativo').length;
+
+      els.viewRoot.innerHTML = `
+        ${topbar('Associados', 'Cadastro e consulta da base de associados.', '<button class="btn btn-yellow" onclick="openAssociadoModal()">+ Novo associado</button><button class="btn btn-ghost" onclick="renderAssociados()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="summary-strip">
+            ${summaryItem('Total', state.cache.associados.length)}
+            ${summaryItem('Ativos', ativos)}
+            ${summaryItem('Inativos', inativos)}
+            ${summaryItem('Filtrados', data.length)}
+          </div>
+          <div class="panel-head">
+            <div>
+              <h3>Base de associados</h3>
+              <p>${data.length} registro(s) encontrado(s).</p>
+            </div>
+            <div class="toolbar">
+              <input class="search" placeholder="Buscar por nome, CPF/CNPJ, telefone..." value="${escapeHtml(filter)}" oninput="paintAssociadoTable(this.value)" />
+            </div>
+          </div>
+          ${data.length ? associadoTable(data) : emptyState('Nenhum associado cadastrado.', 'Clique em “Novo associado” para criar o primeiro registro.')}
+        </div>
+      `;
+    }
+
+    function associadoTable(data) {
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>CPF/CNPJ</th>
+                <th>Contato</th>
+                <th>Cidade/UF</th>
+                <th>Status</th>
+                <th>Cadastro</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(item => `
+                <tr>
+                  <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.email || '')}</small></td>
+                  <td>${escapeHtml(item.cpf_cnpj || '-')}</td>
+                  <td>${escapeHtml(item.telefone || '-')}</td>
+                  <td>${escapeHtml([item.cidade, item.estado].filter(Boolean).join('/') || '-')}</td>
+                  <td>${statusBadge(item.status)}</td>
+                  <td>${dateBR(item.data_cadastro)}</td>
+                  <td>
+                    <div class="row-actions">
+                      <button class="btn btn-ghost btn-small" onclick="openAssociadoModalById(${jsArg(item.id_associado)})">Editar</button>
+                      <button class="btn btn-danger btn-small" onclick="inativarAssociado(${jsArg(item.id_associado)})">Inativar</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function summaryItem(label, value) {
+      return `<div class="summary-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+    }
+
+    async function ensureAssociadosCache() {
+      if (state.cache.associados.length) return state.cache.associados;
+      const result = await apiGet('listar', { tabela: 'Associados' });
+      state.cache.associados = result.data || [];
+      return state.cache.associados;
+    }
+
+    function openAssociadoModalById(id) {
+      const item = state.cache.associados.find(a => String(a.id_associado) === String(id));
+      if (!item) return toast('Associado não encontrado na tela atual.', 'error');
+      openAssociadoModal(item);
+    }
+
+    function openAssociadoModal(item = null) {
+      const isEdit = Boolean(item?.id_associado);
+      const status = ['Ativo', 'Inativo', 'Pendente', 'Cancelado'];
+
+      openModal(isEdit ? 'Editar associado' : 'Novo associado', `
+        <div class="form-grid">
+          ${field('nome', 'Nome completo', 'Nome do associado', '', item?.nome || '')}
+          ${field('cpf_cnpj', 'CPF/CNPJ', '000.000.000-00', '', item?.cpf_cnpj || '')}
+          ${field('telefone', 'Telefone', '(81) 99999-9999', '', item?.telefone || '')}
+          ${field('email', 'E-mail', 'email@exemplo.com', '', item?.email || '')}
+          ${field('cep', 'CEP', '55000-000', '', item?.cep || '')}
+          ${field('endereco', 'Endereço', 'Rua, número', '', item?.endereco || '')}
+          ${field('bairro', 'Bairro', 'Bairro', '', item?.bairro || '')}
+          ${field('cidade', 'Cidade', 'Caruaru', '', item?.cidade || '')}
+          ${field('estado', 'Estado', 'PE', '', item?.estado || '')}
+          ${selectField('status', 'Status', status, item?.status || 'Ativo')}
+          ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
+        </div>
+      `, isEdit ? 'Salvar alterações' : 'Salvar associado', async (data) => {
+        const payload = {
+          action: isEdit ? 'editar' : 'criar',
+          tabela: 'Associados',
+          dados: data
+        };
+
+        if (isEdit) payload.id = item.id_associado;
+
+        await apiPost(payload);
+        toast(isEdit ? 'Associado atualizado com sucesso.' : 'Associado cadastrado com sucesso.');
+        await renderAssociados();
+      });
+    }
+
+    async function inativarAssociado(id) {
+      if (!confirm('Deseja inativar este associado?')) return;
+
+      try {
+        await apiPost({
+          action: 'excluir',
+          tabela: 'Associados',
+          id
+        });
+        toast('Associado inativado com sucesso.');
+        await renderAssociados();
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
     async function renderVeiculos(filter = '') {
       els.viewRoot.innerHTML = topbar('Veículos', 'Controle da base de veículos protegidos.', '<button class="btn btn-yellow" onclick="openVehicleModal()">+ Novo veículo</button><button class="btn btn-ghost" onclick="renderVeiculos()">Atualizar</button>') + loadingPanel('Carregando veículos...');
 
@@ -1080,6 +1325,12 @@ function money(value) {
       els.viewRoot.innerHTML = `
         ${topbar('Veículos', 'Controle da base de veículos protegidos.', '<button class="btn btn-yellow" onclick="openVehicleModal()">+ Novo veículo</button><button class="btn btn-ghost" onclick="renderVeiculos()">Atualizar</button>')}
         <div class="content-panel">
+          <div class="summary-strip">
+            ${summaryItem('Total', state.cache.veiculos.length)}
+            ${summaryItem('Ativos', state.cache.veiculos.filter(v => String(v.status).toLowerCase() === 'ativo').length)}
+            ${summaryItem('FIPE filtrado', money(data.reduce((sum, item) => sum + parseMoneyBR(item.valor_fipe), 0)))}
+            ${summaryItem('Mensalidade filtrada', money(data.reduce((sum, item) => sum + parseMoneyBR(item.mensalidade), 0)))}
+          </div>
           <div class="panel-head">
             <div>
               <h3>Base de veículos</h3>
@@ -1108,6 +1359,7 @@ function money(value) {
                 <th>Consultor</th>
                 <th>Status</th>
                 <th>Entrada</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -1121,6 +1373,12 @@ function money(value) {
                   <td>${escapeHtml(item.consultor || '-')}</td>
                   <td>${statusBadge(item.status)}</td>
                   <td>${dateBR(item.data_entrada)}</td>
+                  <td>
+                    <div class="row-actions">
+                      <button class="btn btn-ghost btn-small" onclick="openVehicleModalById(${jsArg(item.id_veiculo)})">Editar</button>
+                      <button class="btn btn-danger btn-small" onclick="inativarVeiculo(${jsArg(item.id_veiculo)})">Inativar</button>
+                    </div>
+                  </td>
                 </tr>
               `).join('')}
             </tbody>
@@ -1332,36 +1590,94 @@ function money(value) {
       els.modalRoot.innerHTML = '';
     }
 
-    function openVehicleModal() {
+    function openVehicleModalById(id) {
+      const item = state.cache.veiculos.find(v => String(v.id_veiculo) === String(id));
+      if (!item) return toast('Veículo não encontrado na tela atual.', 'error');
+      openVehicleModal(item);
+    }
+
+    async function openVehicleModal(item = null) {
+      const isEdit = Boolean(item?.id_veiculo);
       const combustiveis = ['Gasolina', 'Etanol', 'Flex', 'Diesel', 'GNV', 'Elétrico', 'Híbrido'];
       const status = parseOptions('status_veiculo', ['Ativo', 'Inativo', 'Pendente', 'Cancelado']);
 
-      openModal('Novo veículo', `
+      try {
+        await ensureAssociadosCache();
+      } catch (error) {
+        console.warn('Associados não carregados:', error.message);
+      }
+
+      const associadosAtivos = state.cache.associados.filter(a => String(a.status || 'Ativo').toLowerCase() === 'ativo');
+      const associadoHtml = associadosAtivos.length
+        ? `${selectAssociadoField(item?.id_associado || '')}${field('associado', 'Associado manual', 'Use apenas se não estiver cadastrado', '', item?.associado || '')}`
+        : field('associado', 'Associado', 'Nome do associado', '', item?.associado || '');
+
+      openModal(isEdit ? 'Editar veículo' : 'Novo veículo', `
         <div class="form-grid">
-          ${field('placa', 'Placa', 'ABC1D23')}
-          ${field('associado', 'Associado', 'Nome do associado')}
-          ${field('marca', 'Marca', 'Fiat, Chevrolet, Honda...')}
-          ${field('modelo', 'Modelo', 'Onix, Kwid, HB20...')}
-          ${field('ano_modelo', 'Ano/modelo', '2024')}
-          ${selectField('tipo_combustivel', 'Combustível', combustiveis)}
-          ${field('valor_fipe', 'Valor FIPE', '65000')}
-          ${field('mensalidade', 'Mensalidade', '189.90')}
-          ${field('consultor', 'Consultor', 'Nome do consultor')}
-          ${field('regional', 'Regional', 'Caruaru')}
-          ${field('cooperativa', 'Cooperativa', 'PE.001')}
-          ${selectField('status', 'Status', status, 'Ativo')}
-          ${field('rastreador', 'Rastreador', 'Sim/Não')}
-          ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full')}
+          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || '')}
+          ${associadoHtml}
+          ${field('marca', 'Marca', 'Fiat, Chevrolet, Honda...', '', item?.marca || '')}
+          ${field('modelo', 'Modelo', 'Onix, Kwid, HB20...', '', item?.modelo || '')}
+          ${field('ano_modelo', 'Ano/modelo', '2024', '', item?.ano_modelo || '')}
+          ${selectField('tipo_combustivel', 'Combustível', combustiveis, item?.tipo_combustivel || 'Flex')}
+          ${field('valor_fipe', 'Valor FIPE', '65000', '', item?.valor_fipe || '')}
+          ${field('mensalidade', 'Mensalidade', '189.90', '', item?.mensalidade || '')}
+          ${field('consultor', 'Consultor', 'Nome do consultor', '', item?.consultor || '')}
+          ${field('regional', 'Regional', 'Caruaru', '', item?.regional || '')}
+          ${field('cooperativa', 'Cooperativa', 'PE.001', '', item?.cooperativa || '')}
+          ${selectField('status', 'Status', status, item?.status || 'Ativo')}
+          ${field('rastreador', 'Rastreador', 'Sim/Não', '', item?.rastreador || '')}
+          ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
         </div>
-      `, 'Salvar veículo', async (data) => {
-        await apiPost({
-          action: 'criar',
+      `, isEdit ? 'Salvar alterações' : 'Salvar veículo', async (data) => {
+        data.placa = String(data.placa || '').toUpperCase().trim();
+
+        if (data.id_associado) {
+          const associadoSelecionado = state.cache.associados.find(a => String(a.id_associado) === String(data.id_associado));
+          if (associadoSelecionado) data.associado = associadoSelecionado.nome || data.associado;
+        }
+
+        const payload = {
+          action: isEdit ? 'editar' : 'criar',
           tabela: 'Veiculos',
           dados: data
-        });
-        toast('Veículo cadastrado com sucesso.');
+        };
+
+        if (isEdit) payload.id = item.id_veiculo;
+
+        await apiPost(payload);
+        toast(isEdit ? 'Veículo atualizado com sucesso.' : 'Veículo cadastrado com sucesso.');
         await renderVeiculos();
       });
+    }
+
+    function selectAssociadoField(selected = '') {
+      const options = ['<option value="">Selecionar associado cadastrado...</option>']
+        .concat(state.cache.associados.map(item => `<option value="${escapeHtml(item.id_associado)}" ${String(item.id_associado) === String(selected) ? 'selected' : ''}>${escapeHtml(item.nome || 'Sem nome')} ${item.cpf_cnpj ? '— ' + escapeHtml(item.cpf_cnpj) : ''}</option>`))
+        .join('');
+
+      return `
+        <div class="field">
+          <label>Associado cadastrado</label>
+          <select name="id_associado">${options}</select>
+        </div>
+      `;
+    }
+
+    async function inativarVeiculo(id) {
+      if (!confirm('Deseja inativar este veículo?')) return;
+
+      try {
+        await apiPost({
+          action: 'excluir',
+          tabela: 'Veiculos',
+          id
+        });
+        toast('Veículo inativado com sucesso.');
+        await renderVeiculos();
+      } catch (error) {
+        toast(error.message, 'error');
+      }
     }
 
     function openEventModal() {
@@ -1397,11 +1713,11 @@ function money(value) {
       });
     }
 
-    function field(name, label, placeholder = '', extraClass = '') {
+    function field(name, label, placeholder = '', extraClass = '', value = '') {
       return `
         <div class="field ${extraClass}">
           <label>${escapeHtml(label)}</label>
-          <input name="${escapeHtml(name)}" placeholder="${escapeHtml(placeholder)}" />
+          <input name="${escapeHtml(name)}" placeholder="${escapeHtml(placeholder)}" value="${escapeHtml(value)}" />
         </div>
       `;
     }
@@ -1417,22 +1733,29 @@ function money(value) {
       `;
     }
 
-    function textareaField(name, label, placeholder = '', extraClass = '') {
+    function textareaField(name, label, placeholder = '', extraClass = '', value = '') {
       return `
         <div class="field ${extraClass}">
           <label>${escapeHtml(label)}</label>
-          <textarea name="${escapeHtml(name)}" placeholder="${escapeHtml(placeholder)}"></textarea>
+          <textarea name="${escapeHtml(name)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value)}</textarea>
         </div>
       `;
     }
 
     window.closeModal = closeModal;
     window.renderDashboard = renderDashboard;
+    window.renderAssociados = renderAssociados;
     window.renderVeiculos = renderVeiculos;
     window.renderEventos = renderEventos;
     window.renderKanban = renderKanban;
+    window.openAssociadoModal = openAssociadoModal;
+    window.openAssociadoModalById = openAssociadoModalById;
+    window.inativarAssociado = inativarAssociado;
     window.openVehicleModal = openVehicleModal;
+    window.openVehicleModalById = openVehicleModalById;
+    window.inativarVeiculo = inativarVeiculo;
     window.openEventModal = openEventModal;
+    window.paintAssociadoTable = paintAssociadoTable;
     window.paintVehicleTable = paintVehicleTable;
     window.paintEventTable = paintEventTable;
 
