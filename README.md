@@ -1,18 +1,19 @@
-# ERP Evento MVP v0.0.6
+# ERP Evento MVP v0.0.7
 
-Versão focada no módulo técnico de **Vistorias e Regulação**, conectado à Central de Eventos.
+Versão focada no módulo operacional de **Compras**, conectado à Central de Eventos.
 
 ## O que entrou nesta versão
 
-- Novo menu **Vistorias** no ERP.
-- Tela de controle técnico com resumo de total, em aberto, finalizados e valor aprovado filtrado.
-- Cadastro de vistoria/regulação vinculado a um evento.
-- Edição e cancelamento de registros técnicos.
-- Detalhes técnicos com parecer, valores, entrada, saída e vínculo com o evento.
-- Botões dentro da Central do Evento para criar **Vistoria** ou **Regulação**.
-- Vistorias/regulações vinculadas aparecem dentro da Central do Evento.
-- Ao criar uma vistoria/regulação, o evento é movimentado automaticamente para a etapa correspondente.
-- Integração com a aba `Vistorias_Regulacao` já criada no Google Sheets.
+- Novo menu **Compras** no ERP.
+- Tela de controle de compras com resumo de total, pendentes, aguardando aprovação, entregues e valor filtrado.
+- Cadastro de compra avulsa ou vinculada a um evento.
+- Edição de compra, fornecedor, valores, responsável, status e observações.
+- Detalhes da compra com vínculo direto para abrir o evento.
+- Botão para marcar compra como entregue.
+- Cancelamento lógico de compras, sem apagar da planilha.
+- Compras aparecem com botão de abertura dentro da Central do Evento.
+- Ao criar compra vinculada, o evento pode ser movimentado para a etapa **Compras** automaticamente.
+- Integração com a aba `Compras` já criada no Google Sheets.
 
 ## Arquivos principais
 
@@ -47,13 +48,13 @@ Senha: 123456
 ## Teste recomendado
 
 1. Entrar no ERP.
-2. Abrir a Central de um evento.
-3. Clicar em **Vistoria** e criar um registro técnico.
-4. Conferir se o evento mudou para a etapa de Vistoria.
-5. Abrir o menu **Vistorias**.
-6. Abrir os detalhes do registro técnico.
-7. Editar o parecer ou valores.
-8. Voltar na Central do Evento e conferir se o registro aparece vinculado.
+2. Abrir o menu **Compras**.
+3. Criar uma compra vinculada a um evento.
+4. Conferir se ela aparece na tabela de compras.
+5. Abrir os detalhes da compra.
+6. Editar fornecedor, valores e status.
+7. Marcar a compra como entregue.
+8. Abrir a Central do Evento e conferir se a compra aparece vinculada.
 
 ## Atenção
 
