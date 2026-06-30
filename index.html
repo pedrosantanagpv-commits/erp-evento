@@ -1042,6 +1042,7 @@
         <button data-view="associados">👥 Associados</button>
         <button data-view="veiculos">🚗 Veículos</button>
         <button data-view="eventos">🛠️ Eventos</button>
+        <button data-view="vistorias">🔎 Vistorias</button>
         <button data-view="kanban">🧩 Kanban</button>
         <button data-view="relatorios">📈 Relatórios</button>
       </nav>
@@ -1069,7 +1070,7 @@
 
   <script>
     const API_BASE = '/api/erp';
-    const APP_VERSION = '0.0.5';
+    const APP_VERSION = '0.0.6';
 
     const state = {
       user: null,
@@ -1083,6 +1084,7 @@
         eventos: [],
         historico: [],
         compras: [],
+        regulacoes: [],
         kanban: null
       }
     };
@@ -1299,6 +1301,7 @@
       if (view === 'associados') return renderAssociados();
       if (view === 'veiculos') return renderVeiculos();
       if (view === 'eventos') return renderEventos();
+      if (view === 'vistorias') return renderVistorias();
       if (view === 'kanban') return renderKanban();
       if (view === 'relatorios') return renderRelatorios();
     }
@@ -1344,9 +1347,9 @@
           </div>
           <div class="content-panel">
             <div class="panel-head">
-              <div><h3>v${APP_VERSION} em operação</h3><p>Central de eventos com timeline, comentários, prazos e ações rápidas.</p></div>
+              <div><h3>v${APP_VERSION} em operação</h3><p>Central de eventos, vistorias/regulação, timeline, comentários e compras.</p></div>
             </div>
-            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use Eventos e Kanban para movimentar a operação, registrar comentários e acompanhar prazos.</div>
+            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use Eventos, Vistorias e Kanban para acompanhar a operação completa de proteção veicular.</div>
           </div>`;
       } catch (error) { renderError(error.message); }
     }
@@ -1386,6 +1389,13 @@
       return state.cache.compras;
     }
 
+    async function ensureRegulacoesCache(force = false) {
+      if (!force && state.cache.regulacoes.length) return state.cache.regulacoes;
+      const result = await apiGet('listar', { tabela: 'Vistorias_Regulacao' });
+      state.cache.regulacoes = result.data || [];
+      return state.cache.regulacoes;
+    }
+
     function findAssociadoById(id) {
       return state.cache.associados.find(a => String(a.id_associado) === String(id));
     }
@@ -1401,6 +1411,10 @@
 
     function findEventById(id) {
       return state.cache.eventos.find(e => String(e.id_evento) === String(id));
+    }
+
+    function findRegulacaoById(id) {
+      return state.cache.regulacoes.find(r => String(r.id_regulacao) === String(id));
     }
 
     async function renderAssociados(filter = '') {
@@ -1620,6 +1634,42 @@
       </tbody></table></div>`;
     }
 
+    async function renderVistorias(filter = '') {
+      els.viewRoot.innerHTML = topbar('Vistorias e Regulação', 'Controle técnico de vistorias, pareceres e valores aprovados.', '<button class="btn btn-yellow" onclick="openRegulacaoModal()">+ Nova vistoria</button><button class="btn btn-ghost" onclick="renderVistorias()">Atualizar</button>') + loadingPanel('Carregando vistorias e regulações...');
+      try {
+        await Promise.all([ensureRegulacoesCache(true), ensureEventosCache(true)]);
+        paintRegulacaoTable(filter);
+      } catch (error) { renderError(error.message); }
+    }
+
+    function paintRegulacaoTable(filter = '') {
+      const data = state.cache.regulacoes.filter(item => `${item.id_regulacao} ${item.id_evento} ${item.placa} ${item.tipo_vistoria} ${item.status} ${item.responsavel} ${item.parecer}`.toLowerCase().includes(String(filter).toLowerCase()));
+      const abertos = state.cache.regulacoes.filter(item => !['finalizado', 'concluido', 'concluído', 'cancelado'].includes(normalizeText(item.status))).length;
+      const finalizados = state.cache.regulacoes.filter(item => ['finalizado', 'concluido', 'concluído'].includes(normalizeText(item.status))).length;
+      const totalAprovado = data.reduce((sum, item) => sum + parseMoneyBR(item.valor_aprovado), 0);
+      els.viewRoot.innerHTML = `
+        ${topbar('Vistorias e Regulação', 'Controle técnico de vistorias, pareceres e valores aprovados.', '<button class="btn btn-yellow" onclick="openRegulacaoModal()">+ Nova vistoria</button><button class="btn btn-ghost" onclick="renderVistorias()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="summary-strip">${summaryItem('Total', state.cache.regulacoes.length)}${summaryItem('Em aberto', abertos)}${summaryItem('Finalizados', finalizados)}${summaryItem('Valor aprovado filtrado', money(totalAprovado))}</div>
+          <div class="panel-head"><div><h3>Controle técnico</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por placa, evento, status..." value="${escapeHtml(filter)}" oninput="paintRegulacaoTable(this.value)" /></div></div>
+          ${data.length ? regulacaoTable(data) : emptyState('Nenhuma vistoria ou regulação cadastrada.', 'Clique em “Nova vistoria” ou crie pelo botão dentro da Central do Evento.')}
+        </div>`;
+    }
+
+    function regulacaoTable(data) {
+      return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Tipo</th><th>Responsável</th><th>Status</th><th>Entrada</th><th>Saída</th><th>Valor aprovado</th><th>Ações</th></tr></thead><tbody>
+        ${data.map(item => `<tr>
+          <td><strong>${escapeHtml(eventLabel(item.id_evento))}</strong></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.tipo_vistoria || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_entrada)}</td><td>${dateBR(item.data_saida)}</td><td>${money(item.valor_aprovado || item.valor_orcado || 0)}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openRegulacaoDetails(${jsArg(item.id_regulacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openRegulacaoModalById(${jsArg(item.id_regulacao)})">Editar</button><button class="btn btn-danger btn-small" onclick="cancelarRegulacao(${jsArg(item.id_regulacao)})">Cancelar</button></div></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
+    }
+
+    function eventLabel(id) {
+      const e = findEventById(id);
+      return e ? (e.numero_evento || e.id_evento || id) : (id || '-');
+    }
+
     async function renderKanban() {
       els.viewRoot.innerHTML = topbar('Kanban de Eventos', 'Visualização dos eventos por etapa operacional.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderKanban()">Atualizar</button>') + loadingPanel('Carregando kanban...');
       try {
@@ -1739,7 +1789,8 @@
           ensureVeiculosCache(true),
           ensureAssociadosCache(true),
           ensureHistoricoCache(true),
-          ensureComprasCache(true)
+          ensureComprasCache(true),
+          ensureRegulacoesCache(true)
         ]);
 
         const item = findEventById(id);
@@ -1749,6 +1800,7 @@
         const associado = findAssociadoById(item.id_associado) || state.cache.associados.find(a => normalizeText(a.nome) === normalizeText(item.associado));
         const historico = state.cache.historico.filter(h => String(h.id_evento) === String(item.id_evento));
         const compras = state.cache.compras.filter(c => String(c.id_evento) === String(item.id_evento));
+        const regulacoes = state.cache.regulacoes.filter(r => String(r.id_evento) === String(item.id_evento));
         const prazo = getPrazoEvento(item);
 
         openCustomModal('Central do evento', `
@@ -1767,6 +1819,8 @@
             <div class="event-hero-actions">
               <button class="btn btn-yellow btn-small" onclick="closeModal(); openMoveEventModal(${jsArg(item.id_evento)})">Mover etapa</button>
               <button class="btn btn-blue btn-small" onclick="openCommentEventModal(${jsArg(item.id_evento)})">Comentário</button>
+              <button class="btn btn-ghost btn-small" onclick="openRegulacaoModal(null, ${jsArg(item.id_evento)}, 'Vistoria')">Vistoria</button>
+              <button class="btn btn-ghost btn-small" onclick="openRegulacaoModal(null, ${jsArg(item.id_evento)}, 'Regulação')">Regulação</button>
               <button class="btn btn-orange btn-small" onclick="openCompraModal(${jsArg(item.id_evento)})">Compra</button>
               <button class="btn btn-ghost btn-small" onclick="closeModal(); openEventModalById(${jsArg(item.id_evento)})">Editar</button>
             </div>
@@ -1796,6 +1850,7 @@
 
           <div class="detail-section"><h4>Descrição</h4><p>${escapeHtml(item.descricao || 'Sem descrição.')}</p></div>
           <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
+          <div class="detail-section"><h4>Vistorias e regulação</h4>${miniRegulacoesTable(regulacoes)}</div>
           <div class="detail-section"><h4>Compras do evento</h4>${miniComprasTable(compras)}</div>
           <div class="detail-section"><h4>Timeline / Histórico</h4>${timelineList(historico)}</div>
         `, true);
@@ -1902,6 +1957,108 @@
         });
     }
 
+    function eventSelectField(selected = '') {
+      const eventos = state.cache.eventos || [];
+      const options = eventos.map(e => {
+        const id = e.id_evento || '';
+        const label = `${e.numero_evento || e.id_evento || 'Evento'} • ${e.placa || '-'} • ${e.associado || '-'}`;
+        return `<option value="${escapeHtml(id)}" ${String(id) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+      }).join('');
+      return `<div class="field full"><label>Evento vinculado</label><select name="id_evento" id="regEventSelect"><option value="">Selecione um evento</option>${options}</select></div>`;
+    }
+
+    async function openRegulacaoModalById(id) {
+      await ensureRegulacoesCache();
+      const item = findRegulacaoById(id);
+      if (!item) return toast('Registro técnico não encontrado.', 'error');
+      openRegulacaoModal(item);
+    }
+
+    async function openRegulacaoModal(item = null, eventId = '', tipoPadrao = 'Vistoria') {
+      const isEdit = Boolean(item?.id_regulacao);
+      try { await ensureEventosCache(true); } catch (error) { console.warn(error.message); }
+      const evento = findEventById(item?.id_evento || eventId);
+      const statusReg = ['Solicitado', 'Agendado', 'Em vistoria', 'Em análise', 'Aguardando parecer', 'Aguardando aprovação', 'Aprovado', 'Finalizado', 'Cancelado'];
+      const tipos = ['Vistoria', 'Regulação', 'Auditoria', 'Entrada em oficina', 'Parecer técnico'];
+      const eventField = eventId && !isEdit ? hiddenField('id_evento', eventId) + `<div class="lookup-note full">Evento vinculado: <strong>${escapeHtml(evento?.numero_evento || eventId)}</strong> • Placa: <strong>${escapeHtml(evento?.placa || '-')}</strong></div>` : eventSelectField(item?.id_evento || eventId || '');
+      openModal(isEdit ? 'Editar vistoria/regulação' : 'Nova vistoria/regulação', `
+        <div class="form-grid">
+          ${eventField}
+          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || evento?.placa || '')}${selectField('tipo_vistoria', 'Tipo', tipos, item?.tipo_vistoria || tipoPadrao)}
+          ${selectField('status', 'Status', statusReg, item?.status || 'Solicitado')}${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || state.user?.nome || '')}
+          ${field('data_entrada', 'Data de entrada', '30/06/2026', '', item?.data_entrada ? dateBR(item.data_entrada) : dateBR(new Date()))}${field('data_saida', 'Data de saída', 'Preencher ao concluir', '', item?.data_saida || '')}
+          ${field('valor_orcado', 'Valor orçado', '0', '', item?.valor_orcado || '')}${field('valor_aprovado', 'Valor aprovado', '0', '', item?.valor_aprovado || '')}
+          ${textareaField('parecer', 'Parecer técnico', 'Resumo técnico da vistoria/regulação...', 'full', item?.parecer || '')}
+          ${textareaField('observacoes', 'Observações', 'Anotações internas...', 'full', item?.observacoes || '')}
+        </div>`, isEdit ? 'Salvar registro' : 'Criar registro', async (data) => {
+          if (!data.id_evento) throw new Error('Selecione ou vincule um evento.');
+          if (!data.placa && findEventById(data.id_evento)?.placa) data.placa = findEventById(data.id_evento).placa;
+          const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Vistorias_Regulacao', dados: data };
+          if (isEdit) payload.id = item.id_regulacao;
+          await apiPost(payload);
+
+          if (!isEdit) {
+            const movEtapa = normalizeText(data.tipo_vistoria).includes('regulacao') ? 'Regulação' : 'Vistoria';
+            const movStatus = normalizeText(data.tipo_vistoria).includes('regulacao') ? 'Em regulação' : 'Em vistoria';
+            try {
+              await apiPost({ action: 'mover_evento_kanban', id_evento: data.id_evento, nova_etapa: movEtapa, novo_status: movStatus, comentario: `${data.tipo_vistoria || 'Vistoria'} criada pelo módulo técnico.` });
+            } catch (err) { console.warn(err.message); }
+          }
+
+          state.cache.regulacoes = [];
+          state.cache.eventos = [];
+          state.cache.historico = [];
+          toast(isEdit ? 'Registro técnico atualizado.' : 'Registro técnico criado.');
+          if (state.view === 'vistorias') await renderVistorias();
+        });
+      attachRegulacaoEventLookup();
+    }
+
+    function attachRegulacaoEventLookup() {
+      const select = els.modalRoot.querySelector('#regEventSelect');
+      const placa = els.modalRoot.querySelector('[name="placa"]');
+      if (!select || !placa) return;
+      const fill = () => {
+        const evento = findEventById(select.value);
+        if (evento?.placa && !placa.value) placa.value = evento.placa;
+      };
+      select.addEventListener('change', fill);
+      fill();
+    }
+
+    async function openRegulacaoDetails(id) {
+      try {
+        await Promise.all([ensureRegulacoesCache(true), ensureEventosCache(true)]);
+        const item = findRegulacaoById(id);
+        if (!item) return toast('Registro técnico não encontrado.', 'error');
+        const evento = findEventById(item.id_evento);
+        openCustomModal('Detalhes técnicos', `
+          <div class="event-hero">
+            <div><small>Vistoria / Regulação</small><h4>${escapeHtml(item.tipo_vistoria || 'Registro técnico')}</h4><p>${escapeHtml(evento?.numero_evento || item.id_evento || '-')} • Placa <strong>${escapeHtml(item.placa || evento?.placa || '-')}</strong></p><div class="quick-actions">${statusBadge(item.status)}${statusBadge(evento?.status_evento)}${statusBadge(evento?.etapa_kanban)}</div></div>
+            <div class="event-hero-actions"><button class="btn btn-ghost btn-small" onclick="closeModal(); openRegulacaoModalById(${jsArg(item.id_regulacao)})">Editar</button>${evento ? `<button class="btn btn-blue btn-small" onclick="closeModal(); openEventDetails(${jsArg(evento.id_evento)})">Abrir evento</button>` : ''}</div>
+          </div>
+          <div class="detail-grid">
+            ${detailCard('Evento', evento?.numero_evento || item.id_evento)}${detailCard('Placa', item.placa || evento?.placa)}${detailCard('Responsável', item.responsavel)}
+            ${detailCard('Status', item.status)}${detailCard('Entrada', dateBR(item.data_entrada))}${detailCard('Saída', dateBR(item.data_saida))}
+            ${detailCard('Valor orçado', money(item.valor_orcado))}${detailCard('Valor aprovado', money(item.valor_aprovado))}${detailCard('Associado', evento?.associado || '-')}
+          </div>
+          <div class="detail-section"><h4>Parecer técnico</h4><p>${escapeHtml(item.parecer || 'Sem parecer registrado.')}</p></div>
+          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
+        `, true);
+      } catch (error) { toast(error.message, 'error'); }
+    }
+
+    async function cancelarRegulacao(id) {
+      await ensureRegulacoesCache();
+      const item = findRegulacaoById(id);
+      confirmAction('Cancelar registro técnico', `Deseja cancelar ${item?.tipo_vistoria || 'este registro'} da placa ${item?.placa || '-'}?`, 'Cancelar registro', async () => {
+        await apiPost({ action: 'editar', tabela: 'Vistorias_Regulacao', id, dados: { status: 'Cancelado' } });
+        state.cache.regulacoes = [];
+        toast('Registro técnico cancelado.');
+        await renderVistorias();
+      });
+    }
+
     async function openMoveEventModal(id) {
       await ensureEventosCache();
       const item = findEventById(id);
@@ -1945,6 +2102,11 @@
     function miniComprasTable(items) {
       if (!items.length) return emptyState('Nenhuma compra vinculada.', 'Crie uma solicitação de compra pela Central do Evento quando necessário.');
       return `<div class="mini-table"><div class="mini-row header"><div>Item</div><div>Fornecedor</div><div>Status</div><div>Valor</div></div>${items.map(c => `<div class="mini-row"><div><strong>${escapeHtml(c.item || '-')}</strong></div><div>${escapeHtml(c.fornecedor || '-')}</div><div>${statusBadge(c.status_compra)}</div><div>${money(c.valor_aprovado || c.valor_cotado || 0)}</div></div>`).join('')}</div>`;
+    }
+
+    function miniRegulacoesTable(items) {
+      if (!items.length) return emptyState('Nenhuma vistoria/regulação vinculada.', 'Crie uma vistoria ou regulação pela Central do Evento quando necessário.');
+      return `<div class="mini-table"><div class="mini-row header"><div>Tipo</div><div>Responsável</div><div>Status</div><div>Ação</div></div>${items.map(r => `<div class="mini-row"><div><strong>${escapeHtml(r.tipo_vistoria || '-')}</strong><br><small>${dateBR(r.data_entrada)}</small></div><div>${escapeHtml(r.responsavel || '-')}</div><div>${statusBadge(r.status)}</div><div><button class="btn btn-blue btn-small" onclick="closeModal(); openRegulacaoDetails(${jsArg(r.id_regulacao)})">Abrir</button></div></div>`).join('')}</div>`;
     }
 
     function historyList(items) {
@@ -2032,6 +2194,7 @@
     window.renderAssociados = renderAssociados;
     window.renderVeiculos = renderVeiculos;
     window.renderEventos = renderEventos;
+    window.renderVistorias = renderVistorias;
     window.renderKanban = renderKanban;
     window.openAssociadoModal = openAssociadoModal;
     window.openAssociadoModalById = openAssociadoModalById;
@@ -2047,11 +2210,16 @@
     window.openMoveEventModal = openMoveEventModal;
     window.openCommentEventModal = openCommentEventModal;
     window.openCompraModal = openCompraModal;
+    window.openRegulacaoModal = openRegulacaoModal;
+    window.openRegulacaoModalById = openRegulacaoModalById;
+    window.openRegulacaoDetails = openRegulacaoDetails;
+    window.cancelarRegulacao = cancelarRegulacao;
     window.quickMoveEvent = quickMoveEvent;
     window.cancelarEvento = cancelarEvento;
     window.paintAssociadoTable = paintAssociadoTable;
     window.paintVehicleTable = paintVehicleTable;
     window.paintEventTable = paintEventTable;
+    window.paintRegulacaoTable = paintRegulacaoTable;
 
     async function init() {
       const session = getSession();
