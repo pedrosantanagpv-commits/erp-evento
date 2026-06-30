@@ -1,0 +1,13 @@
+{
+  "name": "erp-evento-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MVP de ERP para proteção veicular com front-end Vercel e API Google Apps Script.",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

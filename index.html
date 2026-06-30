@@ -1,0 +1,1431 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ERP Evento | Proteção Veicular</title>
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --surface: #ffffff;
+      --surface-2: #f0f2f6;
+      --dark: #111318;
+      --dark-2: #1b1f27;
+      --muted: #717784;
+      --line: #e6e8ee;
+      --yellow: #ffd400;
+      --yellow-2: #e9bd00;
+      --green: #16a34a;
+      --red: #dc2626;
+      --orange: #f97316;
+      --blue: #2563eb;
+      --radius: 18px;
+      --shadow: 0 18px 45px rgba(18, 23, 34, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .hidden { display: none !important; }
+
+    .login-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(255, 212, 0, .18), transparent 28%),
+        linear-gradient(135deg, #111318 0%, #1b1f27 46%, #08090c 100%);
+      overflow: hidden;
+    }
+
+    .login-hero {
+      padding: 64px;
+      color: white;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .brand-mark {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      background: var(--yellow);
+      color: #111;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      box-shadow: 0 18px 35px rgba(255, 212, 0, .18);
+    }
+
+    .login-title {
+      max-width: 720px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--yellow);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 2px;
+      background: var(--yellow);
+      border-radius: 999px;
+    }
+
+    h1 {
+      margin: 18px 0 18px;
+      font-size: clamp(38px, 5vw, 74px);
+      line-height: .96;
+      letter-spacing: -0.06em;
+    }
+
+    .login-title p {
+      margin: 0;
+      color: rgba(255,255,255,.68);
+      font-size: 18px;
+      line-height: 1.55;
+      max-width: 610px;
+    }
+
+    .login-badges {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: rgba(255,255,255,.74);
+      font-size: 13px;
+    }
+
+    .login-badges span {
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      padding: 10px 14px;
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+    }
+
+    .login-panel-wrap {
+      display: grid;
+      place-items: center;
+      padding: 36px;
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.9));
+    }
+
+    .login-card {
+      width: min(440px, 100%);
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: 0 28px 80px rgba(0,0,0,.14);
+      padding: 34px;
+    }
+
+    .login-card h2 {
+      margin: 0 0 8px;
+      letter-spacing: -.04em;
+      font-size: 30px;
+    }
+
+    .login-card p {
+      margin: 0 0 26px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #555b66;
+      letter-spacing: .08em;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fbfcff;
+      border-radius: 14px;
+      padding: 13px 14px;
+      outline: none;
+      transition: .2s ease;
+    }
+
+    .field textarea {
+      min-height: 94px;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--yellow-2);
+      box-shadow: 0 0 0 4px rgba(255, 212, 0, .16);
+      background: white;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border-radius: 14px;
+      min-height: 44px;
+      padding: 0 16px;
+      font-weight: 850;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--dark);
+      color: white;
+      box-shadow: 0 12px 26px rgba(17, 19, 24, .18);
+    }
+
+    .btn-primary:hover { background: #000; }
+
+    .btn-yellow {
+      background: var(--yellow);
+      color: #111;
+    }
+
+    .btn-ghost {
+      background: #f1f2f5;
+      color: var(--dark);
+    }
+
+    .hint {
+      margin-top: 18px;
+      background: #fff9d7;
+      border: 1px solid #fff0a5;
+      color: #5a4900;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 282px 1fr;
+    }
+
+    .sidebar {
+      background: var(--dark);
+      color: white;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .side-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 6px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .side-brand strong {
+      display: block;
+      font-size: 15px;
+      letter-spacing: -.02em;
+    }
+
+    .side-brand small {
+      color: rgba(255,255,255,.52);
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      color: rgba(255,255,255,.72);
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      border-radius: 14px;
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 750;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: rgba(255,255,255,.08);
+      color: white;
+    }
+
+    .nav button.active {
+      box-shadow: inset 3px 0 0 var(--yellow);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding-top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .user-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--yellow);
+      color: #111;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .user-mini strong { font-size: 13px; display:block; }
+    .user-mini small { color: rgba(255,255,255,.5); }
+
+    .main {
+      padding: 28px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .topbar h2 {
+      margin: 0 0 8px;
+      letter-spacing: -.055em;
+      font-size: clamp(28px, 4vw, 42px);
+    }
+
+    .topbar p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .metric {
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric::after {
+      content: "";
+      position: absolute;
+      right: -26px;
+      top: -26px;
+      width: 88px;
+      height: 88px;
+      background: rgba(255, 212, 0, .18);
+      border-radius: 50%;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 9px;
+      font-size: 31px;
+      letter-spacing: -.05em;
+    }
+
+    .metric small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+    }
+
+    .content-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h3 {
+      margin: 0;
+      letter-spacing: -.035em;
+    }
+
+    .panel-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search {
+      min-width: 260px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 13px;
+      outline: none;
+      background: #fbfcff;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+      font-size: 14px;
+    }
+
+    th {
+      background: #fbfcff;
+      color: #515761;
+      font-size: 12px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    tr:hover td { background: #fffdf1; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 850;
+      background: #eef2ff;
+      color: #273786;
+      white-space: nowrap;
+    }
+
+    .badge.green { background: #dcfce7; color: #166534; }
+    .badge.red { background: #fee2e2; color: #991b1b; }
+    .badge.orange { background: #ffedd5; color: #9a3412; }
+    .badge.dark { background: #e5e7eb; color: #111827; }
+
+    .empty {
+      padding: 44px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty strong {
+      display: block;
+      color: var(--dark);
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .kanban {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(280px, 1fr);
+      gap: 14px;
+      overflow-x: auto;
+      padding: 16px;
+      min-height: 520px;
+    }
+
+    .kanban-col {
+      background: #f5f6fa;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+    }
+
+    .kanban-col h4 {
+      margin: 2px 4px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .kanban-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 10px 22px rgba(17, 19, 24, .05);
+    }
+
+    .kanban-card strong {
+      display: block;
+      margin-bottom: 5px;
+      letter-spacing: -.025em;
+    }
+
+    .kanban-card p {
+      margin: 0 0 11px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .kanban-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 12, .56);
+      backdrop-filter: blur(10px);
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .modal {
+      width: min(780px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      background: white;
+      border-radius: 26px;
+      box-shadow: 0 30px 100px rgba(0,0,0,.32);
+      border: 1px solid var(--line);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      letter-spacing: -.04em;
+      font-size: 24px;
+    }
+
+    .modal-body { padding: 22px 24px 24px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .form-grid .full { grid-column: 1 / -1; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 80;
+      max-width: 420px;
+      padding: 14px 16px;
+      background: #111318;
+      color: white;
+      border-radius: 16px;
+      box-shadow: 0 18px 42px rgba(0,0,0,.22);
+      display: none;
+      line-height: 1.4;
+    }
+
+    .toast.show { display: block; }
+    .toast.success { border-left: 5px solid var(--green); }
+    .toast.error { border-left: 5px solid var(--red); }
+
+    .loading {
+      opacity: .7;
+      pointer-events: none;
+    }
+
+    .mobile-menu {
+      display: none;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .login-page { grid-template-columns: 1fr; }
+      .login-hero { display: none; }
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; z-index: 30; transform: translateX(-105%); transition: .2s ease; width: 282px; }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-menu { display: inline-flex; }
+      .main { padding: 18px; }
+      .grid-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .topbar { align-items: stretch; flex-direction: column; }
+      .actions { justify-content: flex-start; }
+    }
+
+    @media (max-width: 620px) {
+      .grid-cards { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .search { min-width: 100%; }
+      .login-card { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <section id="loginPage" class="login-page">
+    <div class="login-hero">
+      <div class="brand-mark">ERP</div>
+      <div class="login-title">
+        <span class="eyebrow">Gestão de proteção veicular</span>
+        <h1>Controle operacional, dados e eventos em uma única tela.</h1>
+        <p>Primeira versão do ERP para organizar associados, veículos, eventos, vistorias, compras, reclamações e relatórios.</p>
+      </div>
+      <div class="login-badges">
+        <span>Google Sheets como banco</span>
+        <span>Apps Script como API</span>
+        <span>Vercel no front-end</span>
+      </div>
+    </div>
+
+    <div class="login-panel-wrap">
+      <form id="loginForm" class="login-card">
+        <h2>Entrar no ERP</h2>
+        <p>Use o usuário administrador inicial para acessar o painel.</p>
+
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input id="email" name="email" type="email" value="admin@gpv.com" autocomplete="email" required />
+        </div>
+
+        <div class="field">
+          <label for="senha">Senha</label>
+          <input id="senha" name="senha" type="password" value="123456" autocomplete="current-password" required />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Acessar ERP</button>
+
+        <div class="hint">
+          Login inicial: <strong>admin@gpv.com</strong><br />Senha inicial: <strong>123456</strong>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section id="appPage" class="app hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="side-brand">
+        <div class="brand-mark">ERP</div>
+        <div>
+          <strong>ERP Evento</strong>
+          <small>Proteção Veicular</small>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button data-view="dashboard" class="active">📊 Dashboard</button>
+        <button data-view="veiculos">🚗 Veículos</button>
+        <button data-view="eventos">🛠️ Eventos</button>
+        <button data-view="kanban">🧩 Kanban</button>
+        <button data-view="relatorios">📈 Relatórios</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-mini">
+          <div class="avatar" id="userAvatar">A</div>
+          <div>
+            <strong id="userName">Administrador</strong>
+            <small id="userRole">Super Admin</small>
+          </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-ghost">Sair</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <button id="mobileMenu" class="btn btn-ghost mobile-menu">☰ Menu</button>
+      <div id="viewRoot"></div>
+    </main>
+  </section>
+
+  <div id="modalRoot" class="modal-backdrop hidden"></div>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const API_BASE = '/api/erp';
+
+    const state = {
+      user: null,
+      token: '',
+      view: 'dashboard',
+      options: {},
+      cache: {
+        dashboard: null,
+        veiculos: [],
+        eventos: [],
+        kanban: null
+      }
+    };
+
+    const els = {
+      loginPage: document.getElementById('loginPage'),
+      appPage: document.getElementById('appPage'),
+      loginForm: document.getElementById('loginForm'),
+      viewRoot: document.getElementById('viewRoot'),
+      modalRoot: document.getElementById('modalRoot'),
+      toast: document.getElementById('toast'),
+      sidebar: document.getElementById('sidebar'),
+      mobileMenu: document.getElementById('mobileMenu'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      userName: document.getElementById('userName'),
+      userRole: document.getElementById('userRole'),
+      userAvatar: document.getElementById('userAvatar')
+    };
+
+    function money(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(Number(value || 0));
+    }
+
+    function dateBR(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleDateString('pt-BR');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function statusBadge(value) {
+      const text = String(value || 'Sem status');
+      const lower = text.toLowerCase();
+      let cls = 'dark';
+      if (['ativo', 'aberto', 'finalizado', 'resolvida', 'entregue', 'aprovado'].some(s => lower.includes(s))) cls = 'green';
+      if (['recusado', 'cancelado', 'inativo'].some(s => lower.includes(s))) cls = 'red';
+      if (['pendente', 'análise', 'vistoria', 'regulação', 'compras', 'cotação', 'aguardando'].some(s => lower.includes(s))) cls = 'orange';
+      return `<span class="badge ${cls}">${escapeHtml(text)}</span>`;
+    }
+
+    function toast(message, type = 'success') {
+      els.toast.textContent = message;
+      els.toast.className = `toast show ${type}`;
+      setTimeout(() => {
+        els.toast.className = 'toast';
+      }, 3800);
+    }
+
+    async function apiGet(action, params = {}) {
+      const query = new URLSearchParams({
+        action,
+        token: state.token || '',
+        ...params
+      });
+
+      const response = await fetch(`${API_BASE}?${query.toString()}`);
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Erro na API.');
+      }
+
+      return data;
+    }
+
+    async function apiPost(payload = {}) {
+      const response = await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: state.token || '',
+          usuario: state.user?.email || 'Sistema',
+          ...payload
+        })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Erro na API.');
+      }
+
+      return data;
+    }
+
+    function saveSession(session) {
+      localStorage.setItem('erp_evento_session', JSON.stringify(session));
+    }
+
+    function getSession() {
+      try {
+        return JSON.parse(localStorage.getItem('erp_evento_session') || 'null');
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function clearSession() {
+      localStorage.removeItem('erp_evento_session');
+    }
+
+    function showApp() {
+      els.loginPage.classList.add('hidden');
+      els.appPage.classList.remove('hidden');
+      els.userName.textContent = state.user?.nome || 'Usuário';
+      els.userRole.textContent = state.user?.perfil || 'Perfil';
+      els.userAvatar.textContent = (state.user?.nome || 'A').slice(0, 1).toUpperCase();
+      renderView('dashboard');
+    }
+
+    function showLogin() {
+      els.appPage.classList.add('hidden');
+      els.loginPage.classList.remove('hidden');
+    }
+
+    async function loadOptions() {
+      try {
+        const result = await apiGet('opcoes');
+        state.options = result.data || {};
+      } catch (error) {
+        console.warn('Não foi possível carregar opções:', error.message);
+      }
+    }
+
+    function parseOptions(key, fallback = []) {
+      const value = state.options[key];
+      if (!value) return fallback;
+      return String(value).split(',').map(item => item.trim()).filter(Boolean);
+    }
+
+    function selectOptions(items, selected = '') {
+      return items.map(item => `<option value="${escapeHtml(item)}" ${String(item) === String(selected) ? 'selected' : ''}>${escapeHtml(item)}</option>`).join('');
+    }
+
+    els.loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = new FormData(event.currentTarget);
+      const button = event.currentTarget.querySelector('button');
+
+      try {
+        button.classList.add('loading');
+        button.textContent = 'Entrando...';
+
+        const result = await apiPost({
+          action: 'login',
+          email: form.get('email'),
+          senha: form.get('senha')
+        });
+
+        state.user = result.usuario;
+        state.token = result.token;
+        saveSession({ user: state.user, token: state.token });
+        await loadOptions();
+        showApp();
+        toast('Login realizado com sucesso.');
+      } catch (error) {
+        toast(error.message, 'error');
+      } finally {
+        button.classList.remove('loading');
+        button.textContent = 'Acessar ERP';
+      }
+    });
+
+    els.logoutBtn.addEventListener('click', () => {
+      clearSession();
+      state.user = null;
+      state.token = '';
+      showLogin();
+    });
+
+    els.mobileMenu.addEventListener('click', () => {
+      els.sidebar.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.nav button').forEach(button => {
+      button.addEventListener('click', () => {
+        renderView(button.dataset.view);
+        els.sidebar.classList.remove('open');
+      });
+    });
+
+    function setActiveNav(view) {
+      document.querySelectorAll('.nav button').forEach(button => {
+        button.classList.toggle('active', button.dataset.view === view);
+      });
+    }
+
+    async function renderView(view) {
+      state.view = view;
+      setActiveNav(view);
+
+      if (view === 'dashboard') return renderDashboard();
+      if (view === 'veiculos') return renderVeiculos();
+      if (view === 'eventos') return renderEventos();
+      if (view === 'kanban') return renderKanban();
+      if (view === 'relatorios') return renderRelatorios();
+    }
+
+    function topbar(title, subtitle, actions = '') {
+      return `
+        <div class="topbar">
+          <div>
+            <h2>${title}</h2>
+            <p>${subtitle}</p>
+          </div>
+          <div class="actions">${actions}</div>
+        </div>
+      `;
+    }
+
+    async function renderDashboard() {
+      els.viewRoot.innerHTML = topbar('Dashboard Geral', 'Visão rápida da operação e dos principais indicadores.') + skeletonDashboard();
+
+      try {
+        const result = await apiGet('dashboard');
+        const d = result.data || {};
+        state.cache.dashboard = d;
+
+        els.viewRoot.innerHTML = `
+          ${topbar('Dashboard Geral', 'Visão rápida da operação e dos principais indicadores.', '<button class="btn btn-yellow" onclick="renderDashboard()">Atualizar</button>')}
+          <div class="grid-cards">
+            ${metric('Associados', d.total_associados, 'Base cadastrada')}
+            ${metric('Veículos', d.total_veiculos, `${d.veiculos_ativos || 0} ativos`)}
+            ${metric('Eventos abertos', d.eventos_abertos, `${d.total_eventos || 0} eventos no total`)}
+            ${metric('Reclamações', d.reclamacoes_abertas, 'Abertas ou em andamento')}
+            ${metric('Compras pendentes', d.compras_pendentes, 'Ainda não entregues')}
+            ${metric('FIPE total', money(d.valor_fipe_total), 'Soma dos veículos')}
+            ${metric('Mensalidade prevista', money(d.mensalidade_total_prevista), 'Receita bruta estimada')}
+            ${metric('Status da API', 'Online', 'Apps Script conectado')}
+          </div>
+          <div class="content-panel">
+            <div class="panel-head">
+              <div>
+                <h3>Próximos módulos</h3>
+                <p>Essa é a primeira interface. Agora vamos evoluir campo por campo conforme a operação real.</p>
+              </div>
+            </div>
+            <div class="empty">
+              <strong>Banco conectado com sucesso.</strong>
+              Cadastre alguns veículos e eventos para começar a preencher os indicadores.
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        renderError(error.message);
+      }
+    }
+
+    function skeletonDashboard() {
+      return '<div class="grid-cards">' + Array.from({ length: 8 }).map(() => '<div class="card metric"><span>Carregando</span><strong>...</strong><small>Aguarde</small></div>').join('') + '</div>';
+    }
+
+    function metric(label, value, note) {
+      return `
+        <div class="card metric">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value)}</strong>
+          <small>${escapeHtml(note)}</small>
+        </div>
+      `;
+    }
+
+    async function renderVeiculos(filter = '') {
+      els.viewRoot.innerHTML = topbar('Veículos', 'Controle da base de veículos protegidos.', '<button class="btn btn-yellow" onclick="openVehicleModal()">+ Novo veículo</button><button class="btn btn-ghost" onclick="renderVeiculos()">Atualizar</button>') + loadingPanel('Carregando veículos...');
+
+      try {
+        const result = await apiGet('listar', { tabela: 'Veiculos' });
+        state.cache.veiculos = result.data || [];
+        paintVehicleTable(filter);
+      } catch (error) {
+        renderError(error.message);
+      }
+    }
+
+    function paintVehicleTable(filter = '') {
+      const data = state.cache.veiculos.filter(item => {
+        const haystack = `${item.placa} ${item.associado} ${item.modelo} ${item.marca} ${item.consultor} ${item.regional}`.toLowerCase();
+        return haystack.includes(String(filter).toLowerCase());
+      });
+
+      els.viewRoot.innerHTML = `
+        ${topbar('Veículos', 'Controle da base de veículos protegidos.', '<button class="btn btn-yellow" onclick="openVehicleModal()">+ Novo veículo</button><button class="btn btn-ghost" onclick="renderVeiculos()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="panel-head">
+            <div>
+              <h3>Base de veículos</h3>
+              <p>${data.length} registro(s) encontrado(s).</p>
+            </div>
+            <div class="toolbar">
+              <input class="search" placeholder="Buscar por placa, associado, modelo..." value="${escapeHtml(filter)}" oninput="paintVehicleTable(this.value)" />
+            </div>
+          </div>
+          ${data.length ? vehicleTable(data) : emptyState('Nenhum veículo cadastrado.', 'Clique em “Novo veículo” para criar o primeiro registro.')}
+        </div>
+      `;
+    }
+
+    function vehicleTable(data) {
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Placa</th>
+                <th>Associado</th>
+                <th>Veículo</th>
+                <th>FIPE</th>
+                <th>Mensalidade</th>
+                <th>Consultor</th>
+                <th>Status</th>
+                <th>Entrada</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(item => `
+                <tr>
+                  <td><strong>${escapeHtml(item.placa || '-')}</strong></td>
+                  <td>${escapeHtml(item.associado || '-')}</td>
+                  <td>${escapeHtml([item.marca, item.modelo, item.ano_modelo].filter(Boolean).join(' ') || '-')}</td>
+                  <td>${money(item.valor_fipe)}</td>
+                  <td>${money(item.mensalidade)}</td>
+                  <td>${escapeHtml(item.consultor || '-')}</td>
+                  <td>${statusBadge(item.status)}</td>
+                  <td>${dateBR(item.data_entrada)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function renderEventos(filter = '') {
+      els.viewRoot.innerHTML = topbar('Eventos', 'Abertura e acompanhamento de ocorrências.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>') + loadingPanel('Carregando eventos...');
+
+      try {
+        const result = await apiGet('listar', { tabela: 'Eventos' });
+        state.cache.eventos = result.data || [];
+        paintEventTable(filter);
+      } catch (error) {
+        renderError(error.message);
+      }
+    }
+
+    function paintEventTable(filter = '') {
+      const data = state.cache.eventos.filter(item => {
+        const haystack = `${item.numero_evento} ${item.placa} ${item.associado} ${item.tipo_evento} ${item.status_evento} ${item.responsavel}`.toLowerCase();
+        return haystack.includes(String(filter).toLowerCase());
+      });
+
+      els.viewRoot.innerHTML = `
+        ${topbar('Eventos', 'Abertura e acompanhamento de ocorrências.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="panel-head">
+            <div>
+              <h3>Eventos cadastrados</h3>
+              <p>${data.length} registro(s) encontrado(s).</p>
+            </div>
+            <div class="toolbar">
+              <input class="search" placeholder="Buscar por placa, associado, status..." value="${escapeHtml(filter)}" oninput="paintEventTable(this.value)" />
+            </div>
+          </div>
+          ${data.length ? eventTable(data) : emptyState('Nenhum evento cadastrado.', 'Clique em “Novo evento” para abrir a primeira ocorrência.')}
+        </div>
+      `;
+    }
+
+    function eventTable(data) {
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Evento</th>
+                <th>Tipo</th>
+                <th>Placa</th>
+                <th>Associado</th>
+                <th>Responsável</th>
+                <th>Etapa</th>
+                <th>Status</th>
+                <th>Abertura</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(item => `
+                <tr>
+                  <td><strong>${escapeHtml(item.numero_evento || item.id_evento || '-')}</strong></td>
+                  <td>${escapeHtml(item.tipo_evento || '-')}</td>
+                  <td><strong>${escapeHtml(item.placa || '-')}</strong></td>
+                  <td>${escapeHtml(item.associado || '-')}</td>
+                  <td>${escapeHtml(item.responsavel || '-')}</td>
+                  <td>${statusBadge(item.etapa_kanban)}</td>
+                  <td>${statusBadge(item.status_evento)}</td>
+                  <td>${dateBR(item.data_abertura)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function renderKanban() {
+      els.viewRoot.innerHTML = topbar('Kanban de Eventos', 'Visualização dos eventos por etapa operacional.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderKanban()">Atualizar</button>') + loadingPanel('Carregando kanban...');
+
+      try {
+        const result = await apiGet('kanban_eventos');
+        const etapas = result.etapas || [];
+        const data = result.data || {};
+        state.cache.kanban = result;
+
+        els.viewRoot.innerHTML = `
+          ${topbar('Kanban de Eventos', 'Visualização dos eventos por etapa operacional.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderKanban()">Atualizar</button>')}
+          <div class="content-panel">
+            <div class="kanban">
+              ${etapas.map(etapa => {
+                const items = data[etapa] || [];
+                return `
+                  <div class="kanban-col">
+                    <h4>${escapeHtml(etapa)} <span class="badge dark">${items.length}</span></h4>
+                    ${items.length ? items.map(kanbanCard).join('') : '<div class="empty"><strong>Vazio</strong>Sem eventos nesta etapa.</div>'}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        renderError(error.message);
+      }
+    }
+
+    function kanbanCard(item) {
+      return `
+        <div class="kanban-card">
+          <strong>${escapeHtml(item.numero_evento || item.placa || 'Evento')}</strong>
+          <p>${escapeHtml(item.associado || 'Associado não informado')}<br>${escapeHtml(item.descricao || item.tipo_evento || '')}</p>
+          <div class="kanban-meta">
+            ${statusBadge(item.prioridade)}
+            ${statusBadge(item.status_evento)}
+            <span class="badge dark">${escapeHtml(item.placa || '-')}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRelatorios() {
+      const d = state.cache.dashboard || {};
+      els.viewRoot.innerHTML = `
+        ${topbar('Relatórios', 'Resumo inicial com base nos dados já cadastrados.', '<button class="btn btn-yellow" onclick="renderDashboard()">Ver dashboard</button>')}
+        <div class="grid-cards">
+          ${metric('Base ativa', d.veiculos_ativos || 0, 'Veículos ativos')}
+          ${metric('Eventos em andamento', d.eventos_abertos || 0, 'Não finalizados')}
+          ${metric('FIPE total', money(d.valor_fipe_total || 0), 'Valor protegido')}
+          ${metric('Mensalidade prevista', money(d.mensalidade_total_prevista || 0), 'Estimativa mensal')}
+        </div>
+        <div class="content-panel">
+          <div class="panel-head">
+            <div>
+              <h3>Relatórios avançados</h3>
+              <p>Na próxima etapa entram filtros por regional, consultor, modelo, combustível, status e período.</p>
+            </div>
+          </div>
+          <div class="empty">
+            <strong>Módulo em construção.</strong>
+            A estrutura já está pronta para receber os relatórios operacionais.
+          </div>
+        </div>
+      `;
+    }
+
+    function loadingPanel(text) {
+      return `<div class="content-panel"><div class="empty"><strong>${escapeHtml(text)}</strong>Aguarde um momento.</div></div>`;
+    }
+
+    function emptyState(title, subtitle) {
+      return `<div class="empty"><strong>${escapeHtml(title)}</strong>${escapeHtml(subtitle)}</div>`;
+    }
+
+    function renderError(message) {
+      els.viewRoot.innerHTML = `
+        ${topbar('Erro ao carregar', 'A API respondeu com falha ou o proxy não está publicado corretamente.')}
+        <div class="content-panel">
+          <div class="empty">
+            <strong>Não foi possível carregar os dados.</strong>
+            ${escapeHtml(message)}
+          </div>
+        </div>
+      `;
+      toast(message, 'error');
+    }
+
+    function openModal(title, bodyHtml, submitText, onSubmit) {
+      els.modalRoot.classList.remove('hidden');
+      els.modalRoot.innerHTML = `
+        <div class="modal">
+          <div class="modal-head">
+            <h3>${escapeHtml(title)}</h3>
+            <button class="btn btn-ghost" type="button" onclick="closeModal()">Fechar</button>
+          </div>
+          <div class="modal-body">
+            <form id="modalForm">
+              ${bodyHtml}
+              <div class="modal-actions">
+                <button class="btn btn-ghost" type="button" onclick="closeModal()">Cancelar</button>
+                <button class="btn btn-yellow" type="submit">${escapeHtml(submitText)}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modalForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = event.currentTarget.querySelector('button[type="submit"]');
+        const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+        try {
+          button.classList.add('loading');
+          button.textContent = 'Salvando...';
+          await onSubmit(data);
+          closeModal();
+        } catch (error) {
+          toast(error.message, 'error');
+        } finally {
+          button.classList.remove('loading');
+          button.textContent = submitText;
+        }
+      });
+    }
+
+    function closeModal() {
+      els.modalRoot.classList.add('hidden');
+      els.modalRoot.innerHTML = '';
+    }
+
+    function openVehicleModal() {
+      const combustiveis = ['Gasolina', 'Etanol', 'Flex', 'Diesel', 'GNV', 'Elétrico', 'Híbrido'];
+      const status = parseOptions('status_veiculo', ['Ativo', 'Inativo', 'Pendente', 'Cancelado']);
+
+      openModal('Novo veículo', `
+        <div class="form-grid">
+          ${field('placa', 'Placa', 'ABC1D23')}
+          ${field('associado', 'Associado', 'Nome do associado')}
+          ${field('marca', 'Marca', 'Fiat, Chevrolet, Honda...')}
+          ${field('modelo', 'Modelo', 'Onix, Kwid, HB20...')}
+          ${field('ano_modelo', 'Ano/modelo', '2024')}
+          ${selectField('tipo_combustivel', 'Combustível', combustiveis)}
+          ${field('valor_fipe', 'Valor FIPE', '65000')}
+          ${field('mensalidade', 'Mensalidade', '189.90')}
+          ${field('consultor', 'Consultor', 'Nome do consultor')}
+          ${field('regional', 'Regional', 'Caruaru')}
+          ${field('cooperativa', 'Cooperativa', 'PE.001')}
+          ${selectField('status', 'Status', status, 'Ativo')}
+          ${field('rastreador', 'Rastreador', 'Sim/Não')}
+          ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full')}
+        </div>
+      `, 'Salvar veículo', async (data) => {
+        await apiPost({
+          action: 'criar',
+          tabela: 'Veiculos',
+          dados: data
+        });
+        toast('Veículo cadastrado com sucesso.');
+        await renderVeiculos();
+      });
+    }
+
+    function openEventModal() {
+      const tipos = parseOptions('tipo_evento', ['Roubo', 'Furto', 'Colisão', 'Pane', 'Assistência', 'Terceiro', 'Outro']);
+      const prioridades = parseOptions('prioridades', ['Baixa', 'Média', 'Alta', 'Urgente']);
+
+      openModal('Novo evento', `
+        <div class="form-grid">
+          ${selectField('tipo_evento', 'Tipo de evento', tipos)}
+          ${selectField('prioridade', 'Prioridade', prioridades, 'Média')}
+          ${field('placa', 'Placa', 'ABC1D23')}
+          ${field('associado', 'Associado', 'Nome do associado')}
+          ${field('telefone', 'Telefone', '(81) 99999-9999')}
+          ${field('cidade', 'Cidade', 'Caruaru')}
+          ${field('estado', 'Estado', 'PE')}
+          ${field('responsavel', 'Responsável', 'Nome do responsável')}
+          ${field('setor_atual', 'Setor atual', 'Eventos')}
+          ${field('oficina', 'Oficina', 'Oficina parceira')}
+          ${field('valor_estimado', 'Valor estimado', '0')}
+          ${field('valor_aprovado', 'Valor aprovado', '0')}
+          ${textareaField('descricao', 'Descrição do evento', 'Descreva o ocorrido', 'full')}
+          ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full')}
+        </div>
+      `, 'Abrir evento', async (data) => {
+        await apiPost({
+          action: 'criar',
+          tabela: 'Eventos',
+          dados: data
+        });
+        toast('Evento aberto com sucesso.');
+        if (state.view === 'kanban') await renderKanban();
+        else await renderEventos();
+      });
+    }
+
+    function field(name, label, placeholder = '', extraClass = '') {
+      return `
+        <div class="field ${extraClass}">
+          <label>${escapeHtml(label)}</label>
+          <input name="${escapeHtml(name)}" placeholder="${escapeHtml(placeholder)}" />
+        </div>
+      `;
+    }
+
+    function selectField(name, label, options = [], selected = '') {
+      return `
+        <div class="field">
+          <label>${escapeHtml(label)}</label>
+          <select name="${escapeHtml(name)}">
+            ${selectOptions(options, selected)}
+          </select>
+        </div>
+      `;
+    }
+
+    function textareaField(name, label, placeholder = '', extraClass = '') {
+      return `
+        <div class="field ${extraClass}">
+          <label>${escapeHtml(label)}</label>
+          <textarea name="${escapeHtml(name)}" placeholder="${escapeHtml(placeholder)}"></textarea>
+        </div>
+      `;
+    }
+
+    window.closeModal = closeModal;
+    window.renderDashboard = renderDashboard;
+    window.renderVeiculos = renderVeiculos;
+    window.renderEventos = renderEventos;
+    window.renderKanban = renderKanban;
+    window.openVehicleModal = openVehicleModal;
+    window.openEventModal = openEventModal;
+    window.paintVehicleTable = paintVehicleTable;
+    window.paintEventTable = paintEventTable;
+
+    async function init() {
+      const session = getSession();
+      if (session?.user && session?.token) {
+        state.user = session.user;
+        state.token = session.token;
+        await loadOptions();
+        showApp();
+      } else {
+        showLogin();
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
