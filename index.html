@@ -1044,6 +1044,7 @@
         <button data-view="eventos">🛠️ Eventos</button>
         <button data-view="vistorias">🔎 Vistorias</button>
         <button data-view="compras">🛒 Compras</button>
+        <button data-view="reclamacoes">📣 Reclamações</button>
         <button data-view="kanban">🧩 Kanban</button>
         <button data-view="relatorios">📈 Relatórios</button>
       </nav>
@@ -1071,7 +1072,7 @@
 
   <script>
     const API_BASE = '/api/erp';
-    const APP_VERSION = '0.0.7';
+    const APP_VERSION = '0.0.9';
 
     const state = {
       user: null,
@@ -1086,6 +1087,7 @@
         historico: [],
         compras: [],
         regulacoes: [],
+        reclamacoes: [],
         kanban: null
       }
     };
@@ -1304,6 +1306,7 @@
       if (view === 'eventos') return renderEventos();
       if (view === 'vistorias') return renderVistorias();
       if (view === 'compras') return renderCompras();
+      if (view === 'reclamacoes') return renderReclamacoes();
       if (view === 'kanban') return renderKanban();
       if (view === 'relatorios') return renderRelatorios();
     }
@@ -1349,9 +1352,9 @@
           </div>
           <div class="content-panel">
             <div class="panel-head">
-              <div><h3>v${APP_VERSION} em operação</h3><p>Central de eventos, vistorias/regulação, timeline, comentários e compras.</p></div>
+              <div><h3>v${APP_VERSION} em operação</h3><p>Central de eventos, vistorias/regulação, compras, relatórios e SAC/reclamações.</p></div>
             </div>
-            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use Eventos, Vistorias e Kanban para acompanhar a operação completa de proteção veicular.</div>
+            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use Eventos, Vistorias, Compras, Reclamações e Relatórios para acompanhar a operação completa de proteção veicular.</div>
           </div>`;
       } catch (error) { renderError(error.message); }
     }
@@ -1396,6 +1399,13 @@
       const result = await apiGet('listar', { tabela: 'Vistorias_Regulacao' });
       state.cache.regulacoes = result.data || [];
       return state.cache.regulacoes;
+    }
+
+    async function ensureReclamacoesCache(force = false) {
+      if (!force && state.cache.reclamacoes.length) return state.cache.reclamacoes;
+      const result = await apiGet('listar', { tabela: 'Reclamacoes' });
+      state.cache.reclamacoes = result.data || [];
+      return state.cache.reclamacoes;
     }
 
     function findAssociadoById(id) {
@@ -1710,6 +1720,179 @@
       </tbody></table></div>`;
     }
 
+
+    async function renderReclamacoes(filter = '') {
+      els.viewRoot.innerHTML = topbar('Reclamações / SAC', 'Controle de reclamações, tratativas, responsáveis e prazos de resposta.', '<button class="btn btn-yellow" onclick="openReclamacaoModal()">+ Nova reclamação</button><button class="btn btn-ghost" onclick="renderReclamacoes()">Atualizar</button>') + loadingPanel('Carregando reclamações...');
+      try {
+        await Promise.all([ensureReclamacoesCache(true), ensureAssociadosCache(), ensureVeiculosCache(), ensureEventosCache()]);
+        paintReclamacaoTable(filter);
+      } catch (error) { renderError(error.message); }
+    }
+
+    function getPrazoReclamacao(item) {
+      const status = normalizeText(item.status);
+      if (['resolvida', 'finalizada', 'cancelada'].includes(status)) {
+        return { label: 'Encerrado', cls: 'green', dias: 0, text: 'Encerrado' };
+      }
+      if (!item.prazo_resposta) {
+        return { label: 'Sem prazo', cls: 'dark', dias: null, text: 'Sem prazo' };
+      }
+      const prazo = new Date(item.prazo_resposta);
+      if (Number.isNaN(prazo.getTime())) {
+        return { label: 'Prazo inválido', cls: 'orange', dias: null, text: 'Prazo inválido' };
+      }
+      const hoje = new Date();
+      prazo.setHours(23,59,59,999);
+      hoje.setHours(0,0,0,0);
+      const dias = Math.ceil((prazo.getTime() - hoje.getTime()) / 86400000);
+      if (dias < 0) return { label: 'Atrasada', cls: 'red', dias, text: `${Math.abs(dias)} dia(s) atrasada` };
+      if (dias <= 1) return { label: 'Atenção', cls: 'orange', dias, text: dias === 0 ? 'Vence hoje' : 'Vence amanhã' };
+      return { label: 'No prazo', cls: 'green', dias, text: `${dias} dia(s) restantes` };
+    }
+
+    function prazoBadgeReclamacao(item) {
+      const prazo = getPrazoReclamacao(item);
+      return `<span class="badge ${prazo.cls}">${escapeHtml(prazo.label)}</span>`;
+    }
+
+    function paintReclamacaoTable(filter = '') {
+      const termo = String(filter || '').toLowerCase();
+      const statusFiltro = document.getElementById('filtroSacStatus')?.value || '';
+      const prioridadeFiltro = document.getElementById('filtroSacPrioridade')?.value || '';
+      const categoriaFiltro = document.getElementById('filtroSacCategoria')?.value || '';
+      const prazoFiltro = document.getElementById('filtroSacPrazo')?.value || '';
+
+      let data = state.cache.reclamacoes.filter(item => `${item.id_reclamacao} ${item.origem} ${item.categoria} ${item.status} ${item.prioridade} ${item.associado} ${item.telefone} ${item.placa} ${item.responsavel} ${item.descricao}`.toLowerCase().includes(termo));
+      if (statusFiltro) data = data.filter(item => String(item.status) === statusFiltro);
+      if (prioridadeFiltro) data = data.filter(item => String(item.prioridade) === prioridadeFiltro);
+      if (categoriaFiltro) data = data.filter(item => String(item.categoria) === categoriaFiltro);
+      if (prazoFiltro) data = data.filter(item => getPrazoReclamacao(item).label === prazoFiltro);
+
+      const abertas = state.cache.reclamacoes.filter(item => !['resolvida', 'finalizada', 'cancelada'].includes(normalizeText(item.status))).length;
+      const atrasadas = state.cache.reclamacoes.filter(item => getPrazoReclamacao(item).label === 'Atrasada').length;
+      const atencao = state.cache.reclamacoes.filter(item => getPrazoReclamacao(item).label === 'Atenção').length;
+      const resolvidas = state.cache.reclamacoes.filter(item => ['resolvida', 'finalizada'].includes(normalizeText(item.status))).length;
+
+      const statusOptions = uniqueValues(state.cache.reclamacoes.map(r => r.status).concat(parseOptions('status_reclamacao', [])));
+      const prioridadeOptions = uniqueValues(state.cache.reclamacoes.map(r => r.prioridade).concat(parseOptions('prioridades', [])));
+      const categorias = uniqueValues(state.cache.reclamacoes.map(r => r.categoria).concat(['Atendimento', 'Demora no reparo', 'Financeiro', 'Oficina', 'Consultor', 'Rastreamento', 'Evento', 'Outros']));
+
+      els.viewRoot.innerHTML = `
+        ${topbar('Reclamações / SAC', 'Controle de reclamações, tratativas, responsáveis e prazos de resposta.', '<button class="btn btn-yellow" onclick="openReclamacaoModal()">+ Nova reclamação</button><button class="btn btn-ghost" onclick="renderReclamacoes()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="summary-strip">${summaryItem('Total', state.cache.reclamacoes.length)}${summaryItem('Abertas', abertas)}${summaryItem('Atenção', atencao)}${summaryItem('Atrasadas', atrasadas)}${summaryItem('Resolvidas/finalizadas', resolvidas)}</div>
+          <div class="panel-head"><div><h3>Central de Reclamações</h3><p>${data.length} registro(s) encontrado(s).</p></div></div>
+          <div class="filters-grid">
+            <div class="field"><label>Busca geral</label><input id="filtroSacBusca" placeholder="Associado, placa, telefone, responsável..." value="${escapeHtml(filter)}" oninput="paintReclamacaoTable(this.value)" /></div>
+            <div class="field"><label>Status</label><select id="filtroSacStatus" onchange="paintReclamacaoTable(document.getElementById('filtroSacBusca')?.value || '')"><option value="">Todos</option>${selectOptions(statusOptions, statusFiltro)}</select></div>
+            <div class="field"><label>Prioridade</label><select id="filtroSacPrioridade" onchange="paintReclamacaoTable(document.getElementById('filtroSacBusca')?.value || '')"><option value="">Todas</option>${selectOptions(prioridadeOptions, prioridadeFiltro)}</select></div>
+            <div class="field"><label>Categoria</label><select id="filtroSacCategoria" onchange="paintReclamacaoTable(document.getElementById('filtroSacBusca')?.value || '')"><option value="">Todas</option>${selectOptions(categorias, categoriaFiltro)}</select></div>
+            <div class="field"><label>Prazo</label><select id="filtroSacPrazo" onchange="paintReclamacaoTable(document.getElementById('filtroSacBusca')?.value || '')"><option value="">Todos</option>${selectOptions(['No prazo','Atenção','Atrasada','Sem prazo','Encerrado'], prazoFiltro)}</select></div>
+            <div class="field"><label>&nbsp;</label><button class="btn btn-ghost" type="button" onclick="limparFiltrosSac()">Limpar filtros</button></div>
+          </div>
+          ${data.length ? reclamacaoTable(data) : emptyState('Nenhuma reclamação encontrada.', 'Clique em “Nova reclamação” para registrar a primeira tratativa de SAC.')}
+        </div>`;
+    }
+
+    function limparFiltrosSac() {
+      ['filtroSacBusca','filtroSacStatus','filtroSacPrioridade','filtroSacCategoria','filtroSacPrazo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      paintReclamacaoTable('');
+    }
+
+    function reclamacaoTable(data) {
+      return `<div class="table-wrap"><table><thead><tr><th>Associado</th><th>Placa</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Prazo</th><th>Responsável</th><th>Abertura</th><th>Ações</th></tr></thead><tbody>
+        ${data.map(item => `<tr>
+          <td><strong>${escapeHtml(item.associado || '-')}</strong><br><small>${escapeHtml(item.telefone || '')}</small></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.categoria || '-')}<br><small>${escapeHtml(item.origem || '')}</small></td><td>${statusBadge(item.prioridade)}</td><td>${statusBadge(item.status)}</td><td>${prazoBadgeReclamacao(item)}<br><small>${escapeHtml(getPrazoReclamacao(item).text)}</small></td><td>${escapeHtml(item.responsavel || '-')}</td><td>${dateBR(item.data_abertura)}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openReclamacaoDetails(${jsArg(item.id_reclamacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openReclamacaoModalById(${jsArg(item.id_reclamacao)})">Editar</button><button class="btn btn-yellow btn-small" onclick="resolverReclamacao(${jsArg(item.id_reclamacao)})">Resolver</button><button class="btn btn-danger btn-small" onclick="cancelarReclamacao(${jsArg(item.id_reclamacao)})">Cancelar</button></div></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
+    }
+
+    function openReclamacaoModalById(id) {
+      const item = findReclamacaoById(id);
+      if (!item) return toast('Reclamação não encontrada na tela atual.', 'error');
+      openReclamacaoModal(item);
+    }
+
+    async function openReclamacaoModal(item = null) {
+      const isEdit = Boolean(item?.id_reclamacao);
+      await Promise.all([ensureAssociadosCache(), ensureVeiculosCache()]);
+      const statusOptions = parseOptions('status_reclamacao', ['Aberta','Em análise','Aguardando resposta','Resolvida','Finalizada','Cancelada']);
+      const prioridades = parseOptions('prioridades', ['Baixa','Média','Alta','Urgente']);
+      const categorias = ['Atendimento', 'Demora no reparo', 'Financeiro', 'Oficina', 'Consultor', 'Rastreamento', 'Evento', 'Outros'];
+      openModal(isEdit ? 'Editar reclamação' : 'Nova reclamação', `
+        <div class="form-grid">
+          ${field('associado', 'Associado', 'Nome do associado', '', item?.associado || '')}${field('telefone', 'Telefone', '(81) 99999-9999', '', item?.telefone || '')}
+          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || '')}${field('origem', 'Origem', 'WhatsApp, telefone, presencial...', '', item?.origem || 'WhatsApp')}
+          ${selectField('categoria', 'Categoria', categorias, item?.categoria || 'Atendimento')}${selectField('prioridade', 'Prioridade', prioridades, item?.prioridade || 'Média')}
+          ${selectField('status', 'Status', statusOptions, item?.status || 'Aberta')}${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || state.user?.nome || '')}
+          ${field('prazo_resposta', 'Prazo de resposta', '2026-07-01', '', item?.prazo_resposta ? String(item.prazo_resposta).slice(0,10) : '')}${field('data_finalizacao', 'Data de finalização', 'Preencher ao finalizar', '', item?.data_finalizacao ? String(item.data_finalizacao).slice(0,10) : '')}
+          ${textareaField('descricao', 'Descrição da reclamação', 'Descreva o problema relatado pelo associado.', 'full', item?.descricao || '')}
+          ${textareaField('observacoes', 'Tratativa / observações', 'Registre a tratativa, orientação ou retorno dado.', 'full', item?.observacoes || '')}
+        </div>`, isEdit ? 'Salvar reclamação' : 'Registrar reclamação', async (data) => {
+          if (['Resolvida', 'Finalizada'].includes(data.status) && !data.data_finalizacao) data.data_finalizacao = new Date().toISOString();
+          const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Reclamacoes', dados: data };
+          if (isEdit) payload.id = item.id_reclamacao;
+          await apiPost(payload);
+          state.cache.reclamacoes = [];
+          toast(isEdit ? 'Reclamação atualizada com sucesso.' : 'Reclamação registrada com sucesso.');
+          await renderReclamacoes();
+        });
+    }
+
+    async function openReclamacaoDetails(id) {
+      try {
+        await Promise.all([ensureReclamacoesCache(), ensureVeiculosCache(), ensureEventosCache()]);
+        const item = findReclamacaoById(id);
+        if (!item) return toast('Reclamação não encontrada.', 'error');
+        const prazo = getPrazoReclamacao(item);
+        const veiculo = findVehicleByPlate(item.placa);
+        const eventos = state.cache.eventos.filter(e => normalizeText(e.placa) === normalizeText(item.placa) || normalizeText(e.associado) === normalizeText(item.associado));
+        openCustomModal('Detalhes da reclamação / SAC', `
+          <div class="detail-grid">
+            ${detailCard('Protocolo', item.id_reclamacao)}${detailCard('Status', item.status)}${detailCard('Prioridade', item.prioridade)}
+            ${detailCard('Associado', item.associado)}${detailCard('Telefone', item.telefone)}${detailCard('Placa', item.placa)}
+            ${detailCard('Categoria', item.categoria)}${detailCard('Origem', item.origem)}${detailCard('Responsável', item.responsavel)}
+            ${detailCard('Data de abertura', dateBR(item.data_abertura))}${detailCard('Prazo de resposta', dateBR(item.prazo_resposta))}${detailCard('Situação do prazo', prazo.text)}
+          </div>
+          <div class="detail-section"><h4>Descrição</h4><p>${escapeHtml(item.descricao || 'Sem descrição.')}</p></div>
+          <div class="detail-section"><h4>Tratativa / observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
+          <div class="detail-section"><h4>Veículo relacionado</h4>${veiculo ? miniVeiculosTable([veiculo]) : emptyState('Nenhum veículo encontrado pela placa.', 'Edite a reclamação e confira se a placa está correta.')}</div>
+          <div class="detail-section"><h4>Eventos relacionados</h4>${miniEventosTable(eventos)}</div>
+          <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal(); openReclamacaoModalById(${jsArg(item.id_reclamacao)})">Editar</button><button class="btn btn-yellow" type="button" onclick="closeModal(); resolverReclamacao(${jsArg(item.id_reclamacao)})">Marcar como resolvida</button><button class="btn btn-danger" type="button" onclick="closeModal(); cancelarReclamacao(${jsArg(item.id_reclamacao)})">Cancelar</button></div>
+        `, true);
+      } catch (error) { toast(error.message, 'error'); }
+    }
+
+    async function resolverReclamacao(id) {
+      const item = findReclamacaoById(id);
+      confirmAction('Resolver reclamação', `Deseja marcar esta reclamação como resolvida? ${item?.associado || ''}`, 'Resolver', async () => {
+        const obsAtual = item?.observacoes || '';
+        const linha = `${dateTimeBR(new Date())} - ${state.user?.nome || 'Sistema'} marcou como resolvida.`;
+        await apiPost({ action: 'editar', tabela: 'Reclamacoes', id, dados: { status: 'Resolvida', data_finalizacao: new Date().toISOString(), observacoes: [obsAtual, linha].filter(Boolean).join('\n') } });
+        state.cache.reclamacoes = [];
+        toast('Reclamação resolvida com sucesso.');
+        await renderReclamacoes();
+      });
+    }
+
+    async function finalizarReclamacao(id) {
+      await apiPost({ action: 'editar', tabela: 'Reclamacoes', id, dados: { status: 'Finalizada', data_finalizacao: new Date().toISOString() } });
+      state.cache.reclamacoes = [];
+      toast('Reclamação finalizada com sucesso.');
+      await renderReclamacoes();
+    }
+
+    async function cancelarReclamacao(id) {
+      const item = findReclamacaoById(id);
+      confirmAction('Cancelar reclamação', `Deseja cancelar esta reclamação? ${item?.associado || ''}`, 'Cancelar reclamação', async () => {
+        await apiPost({ action: 'editar', tabela: 'Reclamacoes', id, dados: { status: 'Cancelada', data_finalizacao: new Date().toISOString() } });
+        state.cache.reclamacoes = [];
+        toast('Reclamação cancelada com sucesso.');
+        await renderReclamacoes();
+      });
+    }
+
     async function renderKanban() {
       els.viewRoot.innerHTML = topbar('Kanban de Eventos', 'Visualização dos eventos por etapa operacional.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderKanban()">Atualizar</button>') + loadingPanel('Carregando kanban...');
       try {
@@ -1734,12 +1917,283 @@
       return `<div class="kanban-card"><strong>${escapeHtml(item.numero_evento || item.placa || 'Evento')}</strong><p>${escapeHtml(item.associado || 'Associado não informado')}<br>${escapeHtml(item.tipo_evento || '')} • ${escapeHtml(item.responsavel || 'Sem responsável')}<br>${prazo.daysText} em aberto</p><div class="kanban-meta">${statusBadge(item.prioridade)}${statusBadge(item.status_evento)}${statusBadge(prazo.label)}<span class="badge dark">${escapeHtml(item.placa || '-')}</span></div><div class="row-actions" style="margin-top:12px"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Central</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button></div></div>`;
     }
 
-    function renderRelatorios() {
-      const d = state.cache.dashboard || {};
-      els.viewRoot.innerHTML = `
-        ${topbar('Relatórios', 'Resumo inicial com base nos dados já cadastrados.', '<button class="btn btn-yellow" onclick="renderDashboard()">Ver dashboard</button>')}
-        <div class="grid-cards">${metric('Base ativa', d.veiculos_ativos || 0, 'Veículos ativos')}${metric('Eventos em andamento', d.eventos_abertos || 0, 'Não finalizados')}${metric('FIPE total', money(d.valor_fipe_total || 0), 'Valor protegido')}${metric('Mensalidade prevista', money(d.mensalidade_total_prevista || 0), 'Estimativa mensal')}</div>
-        <div class="content-panel"><div class="panel-head"><div><h3>Relatórios avançados</h3><p>Na próxima etapa entram filtros por regional, consultor, modelo, combustível, status e período.</p></div></div><div class="empty"><strong>Módulo em construção.</strong>A estrutura já está pronta para receber os relatórios operacionais.</div></div>`;
+    async function renderRelatorios() {
+      els.viewRoot.innerHTML = topbar('Relatórios e Indicadores', 'Painel gerencial com filtros por regional, consultor, status, etapa, prazo e compras.', '<button class="btn btn-ghost" onclick="renderRelatorios()">Atualizar</button>') + loadingPanel('Carregando relatórios...');
+      try {
+        await Promise.all([
+          ensureAssociadosCache(true),
+          ensureVeiculosCache(true),
+          ensureEventosCache(true),
+          ensureComprasCache(true),
+          ensureRegulacoesCache(true)
+        ]);
+
+        const regionais = uniqueValues(state.cache.veiculos.map(v => v.regional).concat(state.cache.eventos.map(e => e.regional || '')));
+        const consultores = uniqueValues(state.cache.veiculos.map(v => v.consultor));
+        const statusVeiculos = uniqueValues(state.cache.veiculos.map(v => v.status));
+        const combustiveis = uniqueValues(state.cache.veiculos.map(v => v.tipo_combustivel));
+        const statusEventos = uniqueValues(state.cache.eventos.map(e => e.status_evento));
+        const etapasEventos = uniqueValues(state.cache.eventos.map(e => e.etapa_kanban));
+        const statusCompras = uniqueValues(state.cache.compras.map(c => c.status_compra));
+
+        els.viewRoot.innerHTML = `
+          ${topbar('Relatórios e Indicadores', 'Painel gerencial com filtros por regional, consultor, status, etapa, prazo e compras.', '<button class="btn btn-yellow" onclick="exportRelatorioCSV()">Exportar CSV</button><button class="btn btn-ghost" onclick="renderRelatorios()">Atualizar</button>')}
+          <div class="content-panel">
+            <div class="panel-head">
+              <div><h3>Filtros gerenciais</h3><p>Use os filtros abaixo para cruzar base, eventos, compras e prazos operacionais.</p></div>
+              <div class="toolbar"><button class="btn btn-ghost btn-small" onclick="limparFiltrosRelatorio()">Limpar filtros</button></div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Busca geral</label><input id="reportSearch" placeholder="Placa, associado, evento, fornecedor..." oninput="paintRelatorios()" /></div>
+              <div class="field"><label>Regional</label><select id="reportRegional" onchange="paintRelatorios()"><option value="">Todas</option>${optionList(regionais)}</select></div>
+              <div class="field"><label>Consultor</label><select id="reportConsultor" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(consultores)}</select></div>
+              <div class="field"><label>Status do veículo</label><select id="reportStatusVeiculo" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(statusVeiculos)}</select></div>
+              <div class="field"><label>Combustível</label><select id="reportCombustivel" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(combustiveis)}</select></div>
+              <div class="field"><label>Status do evento</label><select id="reportStatusEvento" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(statusEventos)}</select></div>
+              <div class="field"><label>Etapa do evento</label><select id="reportEtapaEvento" onchange="paintRelatorios()"><option value="">Todas</option>${optionList(etapasEventos)}</select></div>
+              <div class="field"><label>Status da compra</label><select id="reportStatusCompra" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(statusCompras)}</select></div>
+              <div class="field"><label>Prazo do evento</label><select id="reportPrazoEvento" onchange="paintRelatorios()"><option value="">Todos</option><option>Dentro do prazo</option><option>Atenção</option><option>Atrasado</option><option>Encerrado</option></select></div>
+            </div>
+          </div>
+          <div id="reportsContent"></div>
+        `;
+        paintRelatorios();
+      } catch (error) { renderError(error.message); }
+    }
+
+    function optionList(items) {
+      return items.map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join('');
+    }
+
+    function uniqueValues(items) {
+      return Array.from(new Set((items || []).map(item => String(item || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    }
+
+    function getReportFilters() {
+      const value = id => document.getElementById(id)?.value || '';
+      return {
+        search: normalizeText(value('reportSearch')),
+        regional: value('reportRegional'),
+        consultor: value('reportConsultor'),
+        statusVeiculo: value('reportStatusVeiculo'),
+        combustivel: value('reportCombustivel'),
+        statusEvento: value('reportStatusEvento'),
+        etapaEvento: value('reportEtapaEvento'),
+        statusCompra: value('reportStatusCompra'),
+        prazoEvento: value('reportPrazoEvento')
+      };
+    }
+
+    function limparFiltrosRelatorio() {
+      ['reportSearch', 'reportRegional', 'reportConsultor', 'reportStatusVeiculo', 'reportCombustivel', 'reportStatusEvento', 'reportEtapaEvento', 'reportStatusCompra', 'reportPrazoEvento'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      paintRelatorios();
+    }
+
+    function buildReportData() {
+      const f = getReportFilters();
+      const matchText = (text) => !f.search || normalizeText(text).includes(f.search);
+      const same = (value, selected) => !selected || String(value || '') === String(selected);
+      const plateSetFromVehicles = new Set();
+
+      let veiculos = state.cache.veiculos.filter(v => {
+        const text = `${v.placa} ${v.associado} ${v.modelo} ${v.marca} ${v.consultor} ${v.regional} ${v.status} ${v.tipo_combustivel}`;
+        const ok = matchText(text)
+          && same(v.regional, f.regional)
+          && same(v.consultor, f.consultor)
+          && same(v.status, f.statusVeiculo)
+          && same(v.tipo_combustivel, f.combustivel);
+        if (ok) plateSetFromVehicles.add(normalizePlate(v.placa));
+        return ok;
+      });
+
+      let eventos = state.cache.eventos.filter(e => {
+        const prazo = getPrazoEvento(e).label;
+        const vehicle = findVehicleByPlate(e.placa);
+        const text = `${e.numero_evento} ${e.placa} ${e.associado} ${e.tipo_evento} ${e.status_evento} ${e.etapa_kanban} ${e.responsavel} ${e.cidade} ${e.estado}`;
+        const okSearch = matchText(text);
+        const okRegional = same(vehicle?.regional || e.regional, f.regional);
+        const okConsultor = same(vehicle?.consultor || e.consultor, f.consultor);
+        const okVehicleStatus = same(vehicle?.status, f.statusVeiculo);
+        const okCombustivel = same(vehicle?.tipo_combustivel, f.combustivel);
+        const okEvento = same(e.status_evento, f.statusEvento) && same(e.etapa_kanban, f.etapaEvento) && same(prazo, f.prazoEvento);
+        return okSearch && okRegional && okConsultor && okVehicleStatus && okCombustivel && okEvento;
+      });
+
+      const eventIds = new Set(eventos.map(e => String(e.id_evento || '')));
+
+      let compras = state.cache.compras.filter(c => {
+        const evento = findEventById(c.id_evento);
+        const vehicle = findVehicleByPlate(c.placa || evento?.placa);
+        const prazo = evento ? getPrazoEvento(evento).label : '';
+        const text = `${c.id_compra} ${c.id_evento} ${c.placa} ${c.item} ${c.fornecedor} ${c.status_compra} ${c.responsavel} ${evento?.associado || ''}`;
+        return matchText(text)
+          && same(c.status_compra, f.statusCompra)
+          && same(vehicle?.regional || evento?.regional, f.regional)
+          && same(vehicle?.consultor || evento?.consultor, f.consultor)
+          && same(vehicle?.status, f.statusVeiculo)
+          && same(vehicle?.tipo_combustivel, f.combustivel)
+          && same(evento?.status_evento, f.statusEvento)
+          && same(evento?.etapa_kanban, f.etapaEvento)
+          && same(prazo, f.prazoEvento);
+      });
+
+      let regulacoes = state.cache.regulacoes.filter(r => {
+        const evento = findEventById(r.id_evento);
+        const vehicle = findVehicleByPlate(r.placa || evento?.placa);
+        const prazo = evento ? getPrazoEvento(evento).label : '';
+        const text = `${r.id_regulacao} ${r.id_evento} ${r.placa} ${r.tipo_vistoria} ${r.status} ${r.responsavel} ${r.parecer} ${evento?.associado || ''}`;
+        return matchText(text)
+          && same(vehicle?.regional || evento?.regional, f.regional)
+          && same(vehicle?.consultor || evento?.consultor, f.consultor)
+          && same(vehicle?.status, f.statusVeiculo)
+          && same(vehicle?.tipo_combustivel, f.combustivel)
+          && same(evento?.status_evento, f.statusEvento)
+          && same(evento?.etapa_kanban, f.etapaEvento)
+          && same(prazo, f.prazoEvento);
+      });
+
+      return { filters: f, veiculos, eventos, compras, regulacoes, eventIds, plateSetFromVehicles };
+    }
+
+    function paintRelatorios() {
+      const root = document.getElementById('reportsContent');
+      if (!root) return;
+      const { veiculos, eventos, compras, regulacoes } = buildReportData();
+      const veiculosAtivos = veiculos.filter(v => normalizeText(v.status) === 'ativo').length;
+      const valorFipe = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.valor_fipe), 0);
+      const mensalidade = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.mensalidade), 0);
+      const eventosAbertos = eventos.filter(e => isEventoAberto(e)).length;
+      const eventosAtrasados = eventos.filter(e => getPrazoEvento(e).label === 'Atrasado').length;
+      const comprasPendentes = compras.filter(c => !['entregue', 'cancelado'].includes(normalizeText(c.status_compra))).length;
+      const valorCompras = compras.reduce((sum, c) => sum + parseMoneyBR(c.valor_aprovado || c.valor_cotado), 0);
+      const regulacoesAbertas = regulacoes.filter(r => !['finalizado', 'cancelado', 'recusado'].includes(normalizeText(r.status))).length;
+
+      root.innerHTML = `
+        <div class="grid-cards">
+          ${metric('Veículos filtrados', veiculos.length, `${veiculosAtivos} ativo(s)`)}
+          ${metric('Eventos filtrados', eventos.length, `${eventosAbertos} em andamento`)}
+          ${metric('Eventos atrasados', eventosAtrasados, '7 dias ou mais em aberto')}
+          ${metric('FIPE filtrada', money(valorFipe), 'Valor protegido filtrado')}
+          ${metric('Mensalidade filtrada', money(mensalidade), 'Receita prevista filtrada')}
+          ${metric('Compras pendentes', comprasPendentes, `${money(valorCompras)} em compras filtradas`)}
+          ${metric('Vistorias abertas', regulacoesAbertas, `${regulacoes.length} registro(s) técnico(s)`)}
+          ${metric('Ticket médio FIPE', money(veiculos.length ? valorFipe / veiculos.length : 0), 'Média por veículo filtrado')}
+        </div>
+
+        <div class="content-panel">
+          <div class="panel-head"><div><h3>Distribuição operacional</h3><p>Ranking por etapa, status, regional, consultor, combustível e compras.</p></div></div>
+          <div class="form-grid">
+            ${reportBlock('Eventos por etapa', groupCount(eventos, e => e.etapa_kanban || 'Sem etapa'), 'eventos')}
+            ${reportBlock('Eventos por status', groupCount(eventos, e => e.status_evento || 'Sem status'), 'eventos')}
+            ${reportBlock('Eventos por prazo', groupCount(eventos, e => getPrazoEvento(e).label), 'eventos')}
+            ${reportBlock('Veículos por regional', groupCount(veiculos, v => v.regional || 'Sem regional'), 'veículos')}
+            ${reportBlock('Veículos por consultor', groupCount(veiculos, v => v.consultor || 'Sem consultor'), 'veículos')}
+            ${reportBlock('Combustível', groupCount(veiculos, v => v.tipo_combustivel || 'Sem combustível'), 'veículos')}
+            ${reportBlock('Compras por status', groupCount(compras, c => c.status_compra || 'Sem status'), 'compras')}
+            ${reportBlock('Regulação por status', groupCount(regulacoes, r => r.status || 'Sem status'), 'registros')}
+          </div>
+        </div>
+
+        <div class="content-panel">
+          <div class="panel-head"><div><h3>Eventos que exigem atenção</h3><p>Eventos filtrados em atenção ou atraso, com acesso rápido à Central.</p></div></div>
+          ${reportAttentionTable(eventos)}
+        </div>
+
+        <div class="content-panel">
+          <div class="panel-head"><div><h3>Compras pendentes</h3><p>Itens ainda não entregues ou cancelados.</p></div></div>
+          ${reportCompraPendenteTable(compras)}
+        </div>
+
+        <div class="content-panel">
+          <div class="panel-head"><div><h3>Base de veículos filtrada</h3><p>Resumo para análise de carteira, FIPE, mensalidade, regional e consultor.</p></div></div>
+          ${reportVehicleTable(veiculos)}
+        </div>
+      `;
+    }
+
+    function normalizePlate(value) {
+      return String(value || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    }
+
+    function isEventoAberto(item) {
+      const status = normalizeText(item.status_evento);
+      return !['finalizado', 'recusado', 'cancelado'].includes(status);
+    }
+
+    function groupCount(items, keyFn) {
+      const map = new Map();
+      (items || []).forEach(item => {
+        const key = String(keyFn(item) || 'Não informado');
+        map.set(key, (map.get(key) || 0) + 1);
+      });
+      return Array.from(map.entries()).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value || a.label.localeCompare(b.label, 'pt-BR'));
+    }
+
+    function reportBlock(title, rows, suffix = 'registro(s)') {
+      const max = Math.max(1, ...rows.map(r => r.value));
+      const shown = rows.slice(0, 7);
+      return `<div class="detail-section"><h4>${escapeHtml(title)}</h4>${shown.length ? shown.map(row => reportBar(row.label, row.value, max, suffix)).join('') : '<div class="empty"><strong>Sem dados</strong>Nenhum item encontrado no filtro atual.</div>'}</div>`;
+    }
+
+    function reportBar(label, value, max, suffix) {
+      const width = Math.max(6, Math.round((value / max) * 100));
+      return `<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)} ${escapeHtml(suffix)}</span></div><div style="height:10px;background:#eef0f5;border-radius:999px;overflow:hidden;margin-top:6px"><div style="height:100%;width:${width}%;background:linear-gradient(90deg,#111318,#ffd400);border-radius:999px"></div></div></div>`;
+    }
+
+    function reportAttentionTable(eventos) {
+      const data = eventos
+        .filter(e => ['Atenção', 'Atrasado'].includes(getPrazoEvento(e).label) && isEventoAberto(e))
+        .sort((a, b) => getPrazoEvento(b).days - getPrazoEvento(a).days)
+        .slice(0, 20);
+      if (!data.length) return emptyState('Nenhum evento em atenção ou atraso.', 'Os eventos filtrados estão dentro do prazo ou encerrados.');
+      return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Associado</th><th>Etapa</th><th>Status</th><th>Prazo</th><th>Responsável</th><th>Ação</th></tr></thead><tbody>
+        ${data.map(item => {
+          const prazo = getPrazoEvento(item);
+          return `<tr><td><strong>${escapeHtml(item.numero_evento || item.id_evento)}</strong></td><td>${escapeHtml(item.placa || '-')}</td><td>${escapeHtml(item.associado || '-')}</td><td>${statusBadge(item.etapa_kanban)}</td><td>${statusBadge(item.status_evento)}</td><td>${statusBadge(`${prazo.label} • ${prazo.daysText}`)}</td><td>${escapeHtml(item.responsavel || '-')}</td><td><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Central</button></td></tr>`;
+        }).join('')}
+      </tbody></table></div>`;
+    }
+
+    function reportCompraPendenteTable(compras) {
+      const data = compras
+        .filter(c => !['entregue', 'cancelado'].includes(normalizeText(c.status_compra)))
+        .slice(0, 20);
+      if (!data.length) return emptyState('Nenhuma compra pendente.', 'Não há compras em aberto dentro do filtro atual.');
+      return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Item</th><th>Fornecedor</th><th>Status</th><th>Valor</th><th>Ação</th></tr></thead><tbody>
+        ${data.map(item => `<tr><td><strong>${escapeHtml(eventLabel(item.id_evento))}</strong></td><td>${escapeHtml(item.placa || '-')}</td><td>${escapeHtml(item.item || '-')}</td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${statusBadge(item.status_compra)}</td><td>${money(item.valor_aprovado || item.valor_cotado || 0)}</td><td><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(item.id_compra)})">Abrir</button></td></tr>`).join('')}
+      </tbody></table></div>`;
+    }
+
+    function reportVehicleTable(veiculos) {
+      const data = veiculos.slice(0, 30);
+      if (!data.length) return emptyState('Nenhum veículo encontrado.', 'Ajuste os filtros para visualizar a base.');
+      return `<div class="table-wrap"><table><thead><tr><th>Placa</th><th>Associado</th><th>Modelo</th><th>Regional</th><th>Consultor</th><th>Status</th><th>FIPE</th><th>Mensalidade</th><th>Ação</th></tr></thead><tbody>
+        ${data.map(item => `<tr><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml(`${item.marca || ''} ${item.modelo || ''}`.trim() || '-')}</td><td>${escapeHtml(item.regional || '-')}</td><td>${escapeHtml(item.consultor || '-')}</td><td>${statusBadge(item.status)}</td><td>${money(item.valor_fipe || 0)}</td><td>${money(item.mensalidade || 0)}</td><td><button class="btn btn-blue btn-small" onclick="openVehicleDetails(${jsArg(item.id_veiculo)})">Abrir</button></td></tr>`).join('')}
+      </tbody></table></div>${veiculos.length > 30 ? `<div class="hint">Mostrando os 30 primeiros de ${veiculos.length} veículo(s) filtrado(s).</div>` : ''}`;
+    }
+
+    function exportRelatorioCSV() {
+      const { veiculos, eventos, compras, regulacoes } = buildReportData();
+      const rows = [];
+      rows.push(['Tipo', 'Identificador', 'Placa', 'Associado/Item', 'Status', 'Etapa/Fornecedor', 'Valor', 'Responsável']);
+      veiculos.forEach(v => rows.push(['Veículo', v.id_veiculo || '', v.placa || '', v.associado || '', v.status || '', `${v.regional || ''} / ${v.consultor || ''}`, parseMoneyBR(v.valor_fipe || 0), v.consultor || '']));
+      eventos.forEach(e => rows.push(['Evento', e.numero_evento || e.id_evento || '', e.placa || '', e.associado || '', e.status_evento || '', e.etapa_kanban || '', parseMoneyBR(e.valor_estimado || e.valor_aprovado || 0), e.responsavel || '']));
+      compras.forEach(c => rows.push(['Compra', c.id_compra || '', c.placa || '', c.item || '', c.status_compra || '', c.fornecedor || '', parseMoneyBR(c.valor_aprovado || c.valor_cotado || 0), c.responsavel || '']));
+      regulacoes.forEach(r => rows.push(['Vistoria/Regulação', r.id_regulacao || '', r.placa || '', r.tipo_vistoria || '', r.status || '', r.parecer || '', parseMoneyBR(r.valor_aprovado || r.valor_orcado || 0), r.responsavel || '']));
+      const csv = rows.map(row => row.map(cell => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(';')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `relatorio-erp-evento-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast('Relatório CSV gerado.');
     }
 
     async function openEventModalById(id) {
@@ -2300,7 +2754,12 @@
     window.renderEventos = renderEventos;
     window.renderVistorias = renderVistorias;
     window.renderCompras = renderCompras;
+    window.renderReclamacoes = renderReclamacoes;
     window.renderKanban = renderKanban;
+    window.renderRelatorios = renderRelatorios;
+    window.paintRelatorios = paintRelatorios;
+    window.limparFiltrosRelatorio = limparFiltrosRelatorio;
+    window.exportRelatorioCSV = exportRelatorioCSV;
     window.openAssociadoModal = openAssociadoModal;
     window.openAssociadoModalById = openAssociadoModalById;
     window.openAssociadoDetails = openAssociadoDetails;
@@ -2320,6 +2779,14 @@
     window.openCompraDetails = openCompraDetails;
     window.marcarCompraEntregue = marcarCompraEntregue;
     window.cancelarCompra = cancelarCompra;
+    window.openReclamacaoModal = openReclamacaoModal;
+    window.openReclamacaoModalById = openReclamacaoModalById;
+    window.openReclamacaoDetails = openReclamacaoDetails;
+    window.resolverReclamacao = resolverReclamacao;
+    window.finalizarReclamacao = finalizarReclamacao;
+    window.cancelarReclamacao = cancelarReclamacao;
+    window.paintReclamacaoTable = paintReclamacaoTable;
+    window.limparFiltrosSac = limparFiltrosSac;
     window.openRegulacaoModal = openRegulacaoModal;
     window.openRegulacaoModalById = openRegulacaoModalById;
     window.openRegulacaoDetails = openRegulacaoDetails;
