@@ -1,4 +1,4 @@
-# ERP Evento MVP v0.0.4
+# ERP Evento MVP v0.0.4.1
 
 Versão operacional do MVP do ERP para proteção veicular.
 
@@ -62,3 +62,8 @@ Senha: 123456
 ## Atenção
 
 Não execute `setupBancoERP` depois que começar a cadastrar dados reais, porque essa função recria/limpa as abas iniciais do banco.
+
+
+## Correção 0.0.4.1
+- Corrigido o escape dos IDs usados nos botões Detalhes, Editar, Inativar, Mover e Cancelar.
+- Antes, os IDs eram inseridos no onclick com aspas duplas sem entidade HTML, o que quebrava o clique dos botões de ação.
