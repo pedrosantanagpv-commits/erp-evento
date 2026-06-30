@@ -781,12 +781,35 @@
       userAvatar: document.getElementById('userAvatar')
     };
 
-    function money(value) {
-      return new Intl.NumberFormat('pt-BR', {
+  function parseMoneyBR(value) {
+    if (typeof value === 'number') return value;
+
+    if (!value) return 0;
+
+    const texto = String(value)
+        .replace('R$', '')
+        .replace(/\s/g, '')
+        .trim();
+
+    if (texto.includes(',')) {
+        const convertido = texto
+            .replace(/\./g, '')
+            .replace(',', '.');
+
+        const numero = Number(convertido);
+        return Number.isNaN(numero) ? 0 : numero;
+    }
+
+    const numero = Number(texto);
+    return Number.isNaN(numero) ? 0 : numero;
+}
+
+function money(value) {
+    return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL'
-      }).format(Number(value || 0));
-    }
+    }).format(parseMoneyBR(value));
+}
 
     function dateBR(value) {
       if (!value) return '-';
