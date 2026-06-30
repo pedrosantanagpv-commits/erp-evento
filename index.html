@@ -702,6 +702,118 @@
       margin-bottom: 14px;
     }
 
+
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .detail-card {
+      border: 1px solid var(--line);
+      background: #fbfcff;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .detail-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 7px;
+    }
+
+    .detail-card strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .detail-section {
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      margin-top: 18px;
+    }
+
+    .detail-section h4 {
+      margin: 0 0 10px;
+      letter-spacing: -.03em;
+      font-size: 17px;
+    }
+
+    .mini-table {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .mini-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 10px;
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      align-items: center;
+      font-size: 13px;
+      background: white;
+    }
+
+    .mini-row:last-child { border-bottom: 0; }
+    .mini-row.header {
+      background: #fbfcff;
+      color: #515761;
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      background: #fbfcff;
+      border-radius: 16px;
+      padding: 13px;
+    }
+
+    .history-item strong { display: block; margin-bottom: 5px; }
+    .history-item small { color: var(--muted); }
+
+    .plate-line {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .lookup-note {
+      border: 1px dashed #e8c500;
+      background: #fff9d7;
+      border-radius: 14px;
+      padding: 12px;
+      color: #5a4900;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .modal.wide { width: min(1080px, 100%); }
+
+    .btn-blue {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
     @media (max-width: 980px) {
       .login-page { grid-template-columns: 1fr; }
       .login-hero { display: none; }
@@ -807,6 +919,7 @@
 
   <script>
     const API_BASE = '/api/erp';
+    const APP_VERSION = '0.0.4';
 
     const state = {
       user: null,
@@ -818,6 +931,7 @@
         associados: [],
         veiculos: [],
         eventos: [],
+        historico: [],
         kanban: null
       }
     };
@@ -840,30 +954,17 @@
     function parseMoneyBR(value) {
       if (typeof value === 'number') return value;
       if (!value) return 0;
-
-      const texto = String(value)
-        .replace('R$', '')
-        .replace(/\s/g, '')
-        .trim();
-
+      const texto = String(value).replace('R$', '').replace(/\s/g, '').trim();
       if (texto.includes(',')) {
-        const convertido = texto
-          .replace(/\./g, '')
-          .replace(',', '.');
-
-        const numero = Number(convertido);
+        const numero = Number(texto.replace(/\./g, '').replace(',', '.'));
         return Number.isNaN(numero) ? 0 : numero;
       }
-
       const numero = Number(texto);
       return Number.isNaN(numero) ? 0 : numero;
     }
 
     function money(value) {
-      return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      }).format(parseMoneyBR(value));
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseMoneyBR(value));
     }
 
     function dateBR(value) {
@@ -871,6 +972,13 @@
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return value;
       return date.toLocaleDateString('pt-BR');
+    }
+
+    function dateTimeBR(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString('pt-BR');
     }
 
     function escapeHtml(value) {
@@ -890,79 +998,54 @@
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    function normalizeText(value) {
+      return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
     function statusBadge(value) {
       const text = String(value || 'Sem status');
-      const lower = text.toLowerCase();
+      const lower = normalizeText(text);
       let cls = 'dark';
       if (['ativo', 'aberto', 'finalizado', 'resolvida', 'entregue', 'aprovado'].some(s => lower.includes(s))) cls = 'green';
       if (['recusado', 'cancelado', 'inativo'].some(s => lower.includes(s))) cls = 'red';
-      if (['pendente', 'análise', 'vistoria', 'regulação', 'compras', 'cotação', 'aguardando'].some(s => lower.includes(s))) cls = 'orange';
+      if (['pendente', 'analise', 'vistoria', 'regulacao', 'compras', 'cotacao', 'aguardando'].some(s => lower.includes(s))) cls = 'orange';
       return `<span class="badge ${cls}">${escapeHtml(text)}</span>`;
     }
 
     function toast(message, type = 'success') {
       els.toast.textContent = message;
       els.toast.className = `toast show ${type}`;
-      setTimeout(() => {
-        els.toast.className = 'toast';
-      }, 3800);
+      setTimeout(() => { els.toast.className = 'toast'; }, 3800);
     }
 
     async function fetchJsonWithRetry(url, options = {}, attempts = 3) {
       let lastError;
-
       for (let attempt = 1; attempt <= attempts; attempt++) {
         try {
           const response = await fetch(url, {
             cache: 'no-store',
             ...options,
-            headers: {
-              ...(options.headers || {}),
-              'X-ERP-Request': String(Date.now())
-            }
+            headers: { ...(options.headers || {}), 'X-ERP-Request': String(Date.now()) }
           });
-
           const text = await response.text();
           let data;
-
           try {
             data = JSON.parse(text);
           } catch (error) {
             throw new Error('A API não retornou JSON válido. Tentando novamente...');
           }
-
-          const shouldRetry = !data.success && String(data.message || '').toLowerCase().includes('json válido');
-
-          if (shouldRetry && attempt < attempts) {
-            await delay(550 * attempt);
-            continue;
-          }
-
-          if (!data.success) {
-            throw new Error(data.message || 'Erro na API.');
-          }
-
+          if (!data.success) throw new Error(data.message || 'Erro na API.');
           return data;
         } catch (error) {
           lastError = error;
-          if (attempt < attempts) {
-            await delay(550 * attempt);
-            continue;
-          }
+          if (attempt < attempts) await delay(550 * attempt);
         }
       }
-
       throw lastError || new Error('Erro de conexão com a API.');
     }
 
     async function apiGet(action, params = {}) {
-      const query = new URLSearchParams({
-        action,
-        token: state.token || '',
-        _ts: String(Date.now()),
-        ...params
-      });
-
+      const query = new URLSearchParams({ action, token: state.token || '', _ts: String(Date.now()), ...params });
       return fetchJsonWithRetry(`${API_BASE}?${query.toString()}`);
     }
 
@@ -970,29 +1053,16 @@
       return fetchJsonWithRetry(API_BASE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: state.token || '',
-          usuario: state.user?.email || 'Sistema',
-          ...payload
-        })
+        body: JSON.stringify({ token: state.token || '', usuario: state.user?.email || 'Sistema', ...payload })
       });
     }
 
-    function saveSession(session) {
-      localStorage.setItem('erp_evento_session', JSON.stringify(session));
-    }
-
+    function saveSession(session) { localStorage.setItem('erp_evento_session', JSON.stringify(session)); }
     function getSession() {
-      try {
-        return JSON.parse(localStorage.getItem('erp_evento_session') || 'null');
-      } catch (error) {
-        return null;
-      }
+      try { return JSON.parse(localStorage.getItem('erp_evento_session') || 'null'); }
+      catch (error) { return null; }
     }
-
-    function clearSession() {
-      localStorage.removeItem('erp_evento_session');
-    }
+    function clearSession() { localStorage.removeItem('erp_evento_session'); }
 
     function showApp() {
       els.loginPage.classList.add('hidden');
@@ -1031,17 +1101,10 @@
       event.preventDefault();
       const form = new FormData(event.currentTarget);
       const button = event.currentTarget.querySelector('button');
-
       try {
         button.classList.add('loading');
         button.textContent = 'Entrando...';
-
-        const result = await apiPost({
-          action: 'login',
-          email: form.get('email'),
-          senha: form.get('senha')
-        });
-
+        const result = await apiPost({ action: 'login', email: form.get('email'), senha: form.get('senha') });
         state.user = result.usuario;
         state.token = result.token;
         saveSession({ user: state.user, token: state.token });
@@ -1063,9 +1126,7 @@
       showLogin();
     });
 
-    els.mobileMenu.addEventListener('click', () => {
-      els.sidebar.classList.toggle('open');
-    });
+    els.mobileMenu.addEventListener('click', () => { els.sidebar.classList.toggle('open'); });
 
     document.querySelectorAll('.nav button').forEach(button => {
       button.addEventListener('click', () => {
@@ -1075,15 +1136,12 @@
     });
 
     function setActiveNav(view) {
-      document.querySelectorAll('.nav button').forEach(button => {
-        button.classList.toggle('active', button.dataset.view === view);
-      });
+      document.querySelectorAll('.nav button').forEach(button => button.classList.toggle('active', button.dataset.view === view));
     }
 
     async function renderView(view) {
       state.view = view;
       setActiveNav(view);
-
       if (view === 'dashboard') return renderDashboard();
       if (view === 'associados') return renderAssociados();
       if (view === 'veiculos') return renderVeiculos();
@@ -1095,23 +1153,30 @@
     function topbar(title, subtitle, actions = '') {
       return `
         <div class="topbar">
-          <div>
-            <h2>${title}</h2>
-            <p>${subtitle}</p>
-          </div>
+          <div><h2>${title}</h2><p>${subtitle}</p></div>
           <div class="actions">${actions}</div>
         </div>
       `;
     }
 
+    function skeletonDashboard() {
+      return '<div class="grid-cards">' + Array.from({ length: 8 }).map(() => '<div class="card metric"><span>Carregando</span><strong>...</strong><small>Aguarde</small></div>').join('') + '</div>';
+    }
+
+    function metric(label, value, note) {
+      return `<div class="card metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></div>`;
+    }
+
+    function summaryItem(label, value) {
+      return `<div class="summary-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+    }
+
     async function renderDashboard() {
       els.viewRoot.innerHTML = topbar('Dashboard Geral', 'Visão rápida da operação e dos principais indicadores.') + skeletonDashboard();
-
       try {
         const result = await apiGet('dashboard');
         const d = result.data || {};
         state.cache.dashboard = d;
-
         els.viewRoot.innerHTML = `
           ${topbar('Dashboard Geral', 'Visão rápida da operação e dos principais indicadores.', '<button class="btn btn-yellow" onclick="renderDashboard()">Atualizar</button>')}
           <div class="grid-cards">
@@ -1126,131 +1191,93 @@
           </div>
           <div class="content-panel">
             <div class="panel-head">
-              <div>
-                <h3>Próximos módulos</h3>
-                <p>Essa é a primeira interface. Agora vamos evoluir campo por campo conforme a operação real.</p>
-              </div>
+              <div><h3>v${APP_VERSION} em operação</h3><p>Agora o ERP já relaciona associado, veículo, evento, detalhes e histórico.</p></div>
             </div>
-            <div class="empty">
-              <strong>Banco conectado com sucesso.</strong>
-              Cadastre alguns veículos e eventos para começar a preencher os indicadores.
-            </div>
-          </div>
-        `;
-      } catch (error) {
-        renderError(error.message);
-      }
+            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use os módulos laterais para consultar detalhes, editar registros e mover eventos no Kanban.</div>
+          </div>`;
+      } catch (error) { renderError(error.message); }
     }
 
-    function skeletonDashboard() {
-      return '<div class="grid-cards">' + Array.from({ length: 8 }).map(() => '<div class="card metric"><span>Carregando</span><strong>...</strong><small>Aguarde</small></div>').join('') + '</div>';
-    }
-
-    function metric(label, value, note) {
-      return `
-        <div class="card metric">
-          <span>${escapeHtml(label)}</span>
-          <strong>${escapeHtml(value)}</strong>
-          <small>${escapeHtml(note)}</small>
-        </div>
-      `;
-    }
-
-    async function renderAssociados(filter = '') {
-      els.viewRoot.innerHTML = topbar('Associados', 'Cadastro e consulta da base de associados.', '<button class="btn btn-yellow" onclick="openAssociadoModal()">+ Novo associado</button><button class="btn btn-ghost" onclick="renderAssociados()">Atualizar</button>') + loadingPanel('Carregando associados...');
-
-      try {
-        const result = await apiGet('listar', { tabela: 'Associados' });
-        state.cache.associados = result.data || [];
-        paintAssociadoTable(filter);
-      } catch (error) {
-        renderError(error.message);
-      }
-    }
-
-    function paintAssociadoTable(filter = '') {
-      const data = state.cache.associados.filter(item => {
-        const haystack = `${item.nome} ${item.cpf_cnpj} ${item.telefone} ${item.email} ${item.cidade} ${item.estado} ${item.status}`.toLowerCase();
-        return haystack.includes(String(filter).toLowerCase());
-      });
-
-      const ativos = state.cache.associados.filter(item => String(item.status).toLowerCase() === 'ativo').length;
-      const inativos = state.cache.associados.filter(item => String(item.status).toLowerCase() === 'inativo').length;
-
-      els.viewRoot.innerHTML = `
-        ${topbar('Associados', 'Cadastro e consulta da base de associados.', '<button class="btn btn-yellow" onclick="openAssociadoModal()">+ Novo associado</button><button class="btn btn-ghost" onclick="renderAssociados()">Atualizar</button>')}
-        <div class="content-panel">
-          <div class="summary-strip">
-            ${summaryItem('Total', state.cache.associados.length)}
-            ${summaryItem('Ativos', ativos)}
-            ${summaryItem('Inativos', inativos)}
-            ${summaryItem('Filtrados', data.length)}
-          </div>
-          <div class="panel-head">
-            <div>
-              <h3>Base de associados</h3>
-              <p>${data.length} registro(s) encontrado(s).</p>
-            </div>
-            <div class="toolbar">
-              <input class="search" placeholder="Buscar por nome, CPF/CNPJ, telefone..." value="${escapeHtml(filter)}" oninput="paintAssociadoTable(this.value)" />
-            </div>
-          </div>
-          ${data.length ? associadoTable(data) : emptyState('Nenhum associado cadastrado.', 'Clique em “Novo associado” para criar o primeiro registro.')}
-        </div>
-      `;
-    }
-
-    function associadoTable(data) {
-      return `
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>CPF/CNPJ</th>
-                <th>Contato</th>
-                <th>Cidade/UF</th>
-                <th>Status</th>
-                <th>Cadastro</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.map(item => `
-                <tr>
-                  <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.email || '')}</small></td>
-                  <td>${escapeHtml(item.cpf_cnpj || '-')}</td>
-                  <td>${escapeHtml(item.telefone || '-')}</td>
-                  <td>${escapeHtml([item.cidade, item.estado].filter(Boolean).join('/') || '-')}</td>
-                  <td>${statusBadge(item.status)}</td>
-                  <td>${dateBR(item.data_cadastro)}</td>
-                  <td>
-                    <div class="row-actions">
-                      <button class="btn btn-ghost btn-small" onclick="openAssociadoModalById(${jsArg(item.id_associado)})">Editar</button>
-                      <button class="btn btn-danger btn-small" onclick="inativarAssociado(${jsArg(item.id_associado)})">Inativar</button>
-                    </div>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }
-
-    function summaryItem(label, value) {
-      return `<div class="summary-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
-    }
-
-    async function ensureAssociadosCache() {
-      if (state.cache.associados.length) return state.cache.associados;
+    async function ensureAssociadosCache(force = false) {
+      if (!force && state.cache.associados.length) return state.cache.associados;
       const result = await apiGet('listar', { tabela: 'Associados' });
       state.cache.associados = result.data || [];
       return state.cache.associados;
     }
 
+    async function ensureVeiculosCache(force = false) {
+      if (!force && state.cache.veiculos.length) return state.cache.veiculos;
+      const result = await apiGet('listar', { tabela: 'Veiculos' });
+      state.cache.veiculos = result.data || [];
+      return state.cache.veiculos;
+    }
+
+    async function ensureEventosCache(force = false) {
+      if (!force && state.cache.eventos.length) return state.cache.eventos;
+      const result = await apiGet('listar', { tabela: 'Eventos' });
+      state.cache.eventos = result.data || [];
+      return state.cache.eventos;
+    }
+
+    async function ensureHistoricoCache(force = false) {
+      if (!force && state.cache.historico.length) return state.cache.historico;
+      const result = await apiGet('listar', { tabela: 'Historico_Eventos' });
+      state.cache.historico = result.data || [];
+      return state.cache.historico;
+    }
+
+    function findAssociadoById(id) {
+      return state.cache.associados.find(a => String(a.id_associado) === String(id));
+    }
+
+    function findVehicleById(id) {
+      return state.cache.veiculos.find(v => String(v.id_veiculo) === String(id));
+    }
+
+    function findVehicleByPlate(placa) {
+      const clean = String(placa || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      return state.cache.veiculos.find(v => String(v.placa || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === clean);
+    }
+
+    function findEventById(id) {
+      return state.cache.eventos.find(e => String(e.id_evento) === String(id));
+    }
+
+    async function renderAssociados(filter = '') {
+      els.viewRoot.innerHTML = topbar('Associados', 'Cadastro, consulta e relacionamento com veículos.', '<button class="btn btn-yellow" onclick="openAssociadoModal()">+ Novo associado</button><button class="btn btn-ghost" onclick="renderAssociados()">Atualizar</button>') + loadingPanel('Carregando associados...');
+      try {
+        await ensureAssociadosCache(true);
+        paintAssociadoTable(filter);
+      } catch (error) { renderError(error.message); }
+    }
+
+    function paintAssociadoTable(filter = '') {
+      const data = state.cache.associados.filter(item => `${item.nome} ${item.cpf_cnpj} ${item.telefone} ${item.email} ${item.cidade} ${item.estado} ${item.status}`.toLowerCase().includes(String(filter).toLowerCase()));
+      const ativos = state.cache.associados.filter(item => normalizeText(item.status) === 'ativo').length;
+      const inativos = state.cache.associados.filter(item => normalizeText(item.status) === 'inativo').length;
+      els.viewRoot.innerHTML = `
+        ${topbar('Associados', 'Cadastro, consulta e relacionamento com veículos.', '<button class="btn btn-yellow" onclick="openAssociadoModal()">+ Novo associado</button><button class="btn btn-ghost" onclick="renderAssociados()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="summary-strip">${summaryItem('Total', state.cache.associados.length)}${summaryItem('Ativos', ativos)}${summaryItem('Inativos', inativos)}${summaryItem('Filtrados', data.length)}</div>
+          <div class="panel-head"><div><h3>Base de associados</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por nome, CPF/CNPJ, telefone..." value="${escapeHtml(filter)}" oninput="paintAssociadoTable(this.value)" /></div></div>
+          ${data.length ? associadoTable(data) : emptyState('Nenhum associado cadastrado.', 'Clique em “Novo associado” para criar o primeiro registro.')}
+        </div>`;
+    }
+
+    function associadoTable(data) {
+      return `
+        <div class="table-wrap"><table><thead><tr><th>Nome</th><th>CPF/CNPJ</th><th>Contato</th><th>Cidade/UF</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>
+          ${data.map(item => `<tr>
+            <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.email || '')}</small></td>
+            <td>${escapeHtml(item.cpf_cnpj || '-')}</td><td>${escapeHtml(item.telefone || '-')}</td><td>${escapeHtml([item.cidade, item.estado].filter(Boolean).join('/') || '-')}</td>
+            <td>${statusBadge(item.status)}</td><td>${dateBR(item.data_cadastro)}</td>
+            <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openAssociadoDetails(${jsArg(item.id_associado)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openAssociadoModalById(${jsArg(item.id_associado)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarAssociado(${jsArg(item.id_associado)})">Inativar</button></div></td>
+          </tr>`).join('')}
+        </tbody></table></div>`;
+    }
+
     function openAssociadoModalById(id) {
-      const item = state.cache.associados.find(a => String(a.id_associado) === String(id));
+      const item = findAssociadoById(id);
       if (!item) return toast('Associado não encontrado na tela atual.', 'error');
       openAssociadoModal(item);
     }
@@ -1258,272 +1285,361 @@
     function openAssociadoModal(item = null) {
       const isEdit = Boolean(item?.id_associado);
       const status = ['Ativo', 'Inativo', 'Pendente', 'Cancelado'];
-
       openModal(isEdit ? 'Editar associado' : 'Novo associado', `
         <div class="form-grid">
-          ${field('nome', 'Nome completo', 'Nome do associado', '', item?.nome || '')}
-          ${field('cpf_cnpj', 'CPF/CNPJ', '000.000.000-00', '', item?.cpf_cnpj || '')}
-          ${field('telefone', 'Telefone', '(81) 99999-9999', '', item?.telefone || '')}
-          ${field('email', 'E-mail', 'email@exemplo.com', '', item?.email || '')}
-          ${field('cep', 'CEP', '55000-000', '', item?.cep || '')}
-          ${field('endereco', 'Endereço', 'Rua, número', '', item?.endereco || '')}
-          ${field('bairro', 'Bairro', 'Bairro', '', item?.bairro || '')}
-          ${field('cidade', 'Cidade', 'Caruaru', '', item?.cidade || '')}
-          ${field('estado', 'Estado', 'PE', '', item?.estado || '')}
-          ${selectField('status', 'Status', status, item?.status || 'Ativo')}
+          ${field('nome', 'Nome completo', 'Nome do associado', '', item?.nome || '')}${field('cpf_cnpj', 'CPF/CNPJ', '000.000.000-00', '', item?.cpf_cnpj || '')}
+          ${field('telefone', 'Telefone', '(81) 99999-9999', '', item?.telefone || '')}${field('email', 'E-mail', 'email@exemplo.com', '', item?.email || '')}
+          ${field('cep', 'CEP', '55000-000', '', item?.cep || '')}${field('endereco', 'Endereço', 'Rua, número', '', item?.endereco || '')}
+          ${field('bairro', 'Bairro', 'Bairro', '', item?.bairro || '')}${field('cidade', 'Cidade', 'Caruaru', '', item?.cidade || '')}
+          ${field('estado', 'Estado', 'PE', '', item?.estado || '')}${selectField('status', 'Status', status, item?.status || 'Ativo')}
           ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
-        </div>
-      `, isEdit ? 'Salvar alterações' : 'Salvar associado', async (data) => {
-        const payload = {
-          action: isEdit ? 'editar' : 'criar',
-          tabela: 'Associados',
-          dados: data
-        };
+        </div>`, isEdit ? 'Salvar alterações' : 'Salvar associado', async (data) => {
+          const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Associados', dados: data };
+          if (isEdit) payload.id = item.id_associado;
+          await apiPost(payload);
+          state.cache.associados = [];
+          toast(isEdit ? 'Associado atualizado com sucesso.' : 'Associado cadastrado com sucesso.');
+          await renderAssociados();
+        });
+    }
 
-        if (isEdit) payload.id = item.id_associado;
-
-        await apiPost(payload);
-        toast(isEdit ? 'Associado atualizado com sucesso.' : 'Associado cadastrado com sucesso.');
+    async function inativarAssociado(id) {
+      const item = findAssociadoById(id);
+      confirmAction('Inativar associado', `Deseja inativar ${item?.nome || 'este associado'}? Ele não será apagado da planilha.`, 'Inativar', async () => {
+        await apiPost({ action: 'excluir', tabela: 'Associados', id });
+        state.cache.associados = [];
+        toast('Associado inativado com sucesso.');
         await renderAssociados();
       });
     }
 
-    async function inativarAssociado(id) {
-      if (!confirm('Deseja inativar este associado?')) return;
-
+    async function openAssociadoDetails(id) {
       try {
-        await apiPost({
-          action: 'excluir',
-          tabela: 'Associados',
-          id
-        });
-        toast('Associado inativado com sucesso.');
-        await renderAssociados();
-      } catch (error) {
-        toast(error.message, 'error');
-      }
+        await Promise.all([ensureAssociadosCache(), ensureVeiculosCache(true), ensureEventosCache(true)]);
+        const item = findAssociadoById(id);
+        if (!item) return toast('Associado não encontrado.', 'error');
+        const veiculos = state.cache.veiculos.filter(v => String(v.id_associado) === String(item.id_associado) || normalizeText(v.associado) === normalizeText(item.nome));
+        const placas = veiculos.map(v => String(v.placa || '').toUpperCase());
+        const eventos = state.cache.eventos.filter(e => String(e.id_associado) === String(item.id_associado) || normalizeText(e.associado) === normalizeText(item.nome) || placas.includes(String(e.placa || '').toUpperCase()));
+        openCustomModal(`Detalhes do associado`, `
+          <div class="detail-grid">
+            ${detailCard('Nome', item.nome)}${detailCard('CPF/CNPJ', item.cpf_cnpj)}${detailCard('Status', item.status)}
+            ${detailCard('Telefone', item.telefone)}${detailCard('E-mail', item.email)}${detailCard('Cidade/UF', [item.cidade, item.estado].filter(Boolean).join('/'))}
+            ${detailCard('Endereço', [item.endereco, item.bairro].filter(Boolean).join(' - '))}${detailCard('Cadastro', dateBR(item.data_cadastro))}${detailCard('Veículos vinculados', veiculos.length)}
+          </div>
+          <div class="detail-section"><h4>Veículos vinculados</h4>${miniVeiculosTable(veiculos)}</div>
+          <div class="detail-section"><h4>Eventos relacionados</h4>${miniEventosTable(eventos)}</div>
+          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>`, true);
+      } catch (error) { toast(error.message, 'error'); }
     }
 
     async function renderVeiculos(filter = '') {
       els.viewRoot.innerHTML = topbar('Veículos', 'Controle da base de veículos protegidos.', '<button class="btn btn-yellow" onclick="openVehicleModal()">+ Novo veículo</button><button class="btn btn-ghost" onclick="renderVeiculos()">Atualizar</button>') + loadingPanel('Carregando veículos...');
-
       try {
-        const result = await apiGet('listar', { tabela: 'Veiculos' });
-        state.cache.veiculos = result.data || [];
+        await ensureVeiculosCache(true);
+        await ensureAssociadosCache();
         paintVehicleTable(filter);
-      } catch (error) {
-        renderError(error.message);
-      }
+      } catch (error) { renderError(error.message); }
     }
 
     function paintVehicleTable(filter = '') {
-      const data = state.cache.veiculos.filter(item => {
-        const haystack = `${item.placa} ${item.associado} ${item.modelo} ${item.marca} ${item.consultor} ${item.regional}`.toLowerCase();
-        return haystack.includes(String(filter).toLowerCase());
-      });
-
+      const data = state.cache.veiculos.filter(item => `${item.placa} ${item.associado} ${item.modelo} ${item.marca} ${item.consultor} ${item.regional} ${item.status}`.toLowerCase().includes(String(filter).toLowerCase()));
       els.viewRoot.innerHTML = `
         ${topbar('Veículos', 'Controle da base de veículos protegidos.', '<button class="btn btn-yellow" onclick="openVehicleModal()">+ Novo veículo</button><button class="btn btn-ghost" onclick="renderVeiculos()">Atualizar</button>')}
         <div class="content-panel">
-          <div class="summary-strip">
-            ${summaryItem('Total', state.cache.veiculos.length)}
-            ${summaryItem('Ativos', state.cache.veiculos.filter(v => String(v.status).toLowerCase() === 'ativo').length)}
-            ${summaryItem('FIPE filtrado', money(data.reduce((sum, item) => sum + parseMoneyBR(item.valor_fipe), 0)))}
-            ${summaryItem('Mensalidade filtrada', money(data.reduce((sum, item) => sum + parseMoneyBR(item.mensalidade), 0)))}
-          </div>
-          <div class="panel-head">
-            <div>
-              <h3>Base de veículos</h3>
-              <p>${data.length} registro(s) encontrado(s).</p>
-            </div>
-            <div class="toolbar">
-              <input class="search" placeholder="Buscar por placa, associado, modelo..." value="${escapeHtml(filter)}" oninput="paintVehicleTable(this.value)" />
-            </div>
-          </div>
+          <div class="summary-strip">${summaryItem('Total', state.cache.veiculos.length)}${summaryItem('Ativos', state.cache.veiculos.filter(v => normalizeText(v.status) === 'ativo').length)}${summaryItem('FIPE filtrado', money(data.reduce((sum, item) => sum + parseMoneyBR(item.valor_fipe), 0)))}${summaryItem('Mensalidade filtrada', money(data.reduce((sum, item) => sum + parseMoneyBR(item.mensalidade), 0)))}</div>
+          <div class="panel-head"><div><h3>Base de veículos</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por placa, associado, modelo..." value="${escapeHtml(filter)}" oninput="paintVehicleTable(this.value)" /></div></div>
           ${data.length ? vehicleTable(data) : emptyState('Nenhum veículo cadastrado.', 'Clique em “Novo veículo” para criar o primeiro registro.')}
-        </div>
-      `;
+        </div>`;
     }
 
     function vehicleTable(data) {
-      return `
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Placa</th>
-                <th>Associado</th>
-                <th>Veículo</th>
-                <th>FIPE</th>
-                <th>Mensalidade</th>
-                <th>Consultor</th>
-                <th>Status</th>
-                <th>Entrada</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.map(item => `
-                <tr>
-                  <td><strong>${escapeHtml(item.placa || '-')}</strong></td>
-                  <td>${escapeHtml(item.associado || '-')}</td>
-                  <td>${escapeHtml([item.marca, item.modelo, item.ano_modelo].filter(Boolean).join(' ') || '-')}</td>
-                  <td>${money(item.valor_fipe)}</td>
-                  <td>${money(item.mensalidade)}</td>
-                  <td>${escapeHtml(item.consultor || '-')}</td>
-                  <td>${statusBadge(item.status)}</td>
-                  <td>${dateBR(item.data_entrada)}</td>
-                  <td>
-                    <div class="row-actions">
-                      <button class="btn btn-ghost btn-small" onclick="openVehicleModalById(${jsArg(item.id_veiculo)})">Editar</button>
-                      <button class="btn btn-danger btn-small" onclick="inativarVeiculo(${jsArg(item.id_veiculo)})">Inativar</button>
-                    </div>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
+      return `<div class="table-wrap"><table><thead><tr><th>Placa</th><th>Associado</th><th>Veículo</th><th>FIPE</th><th>Mensalidade</th><th>Consultor</th><th>Status</th><th>Entrada</th><th>Ações</th></tr></thead><tbody>
+        ${data.map(item => `<tr>
+          <td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml([item.marca, item.modelo, item.ano_modelo].filter(Boolean).join(' ') || '-')}</td>
+          <td>${money(item.valor_fipe)}</td><td>${money(item.mensalidade)}</td><td>${escapeHtml(item.consultor || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_entrada)}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openVehicleDetails(${jsArg(item.id_veiculo)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openVehicleModalById(${jsArg(item.id_veiculo)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarVeiculo(${jsArg(item.id_veiculo)})">Inativar</button></div></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
+    }
+
+    function openVehicleModalById(id) {
+      const item = findVehicleById(id);
+      if (!item) return toast('Veículo não encontrado na tela atual.', 'error');
+      openVehicleModal(item);
+    }
+
+    async function openVehicleModal(item = null) {
+      const isEdit = Boolean(item?.id_veiculo);
+      const combustiveis = ['Gasolina', 'Etanol', 'Flex', 'Diesel', 'GNV', 'Elétrico', 'Híbrido'];
+      const status = parseOptions('status_veiculo', ['Ativo', 'Inativo', 'Pendente', 'Cancelado']);
+      try { await ensureAssociadosCache(); } catch (error) { console.warn('Associados não carregados:', error.message); }
+      const associadosAtivos = state.cache.associados.filter(a => normalizeText(a.status || 'Ativo') === 'ativo');
+      const associadoHtml = associadosAtivos.length ? `${selectAssociadoField(item?.id_associado || '')}${field('associado', 'Associado manual', 'Use apenas se não estiver cadastrado', '', item?.associado || '')}` : field('associado', 'Associado', 'Nome do associado', '', item?.associado || '');
+      openModal(isEdit ? 'Editar veículo' : 'Novo veículo', `
+        <div class="form-grid">
+          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || '')}${associadoHtml}
+          ${field('marca', 'Marca', 'Fiat, Chevrolet, Honda...', '', item?.marca || '')}${field('modelo', 'Modelo', 'Onix, Kwid, HB20...', '', item?.modelo || '')}
+          ${field('ano_modelo', 'Ano/modelo', '2024', '', item?.ano_modelo || '')}${selectField('tipo_combustivel', 'Combustível', combustiveis, item?.tipo_combustivel || 'Flex')}
+          ${field('valor_fipe', 'Valor FIPE', '65000', '', item?.valor_fipe || '')}${field('mensalidade', 'Mensalidade', '189.90', '', item?.mensalidade || '')}
+          ${field('consultor', 'Consultor', 'Nome do consultor', '', item?.consultor || '')}${field('regional', 'Regional', 'Caruaru', '', item?.regional || '')}
+          ${field('cooperativa', 'Cooperativa', 'PE.001', '', item?.cooperativa || '')}${selectField('status', 'Status', status, item?.status || 'Ativo')}
+          ${field('rastreador', 'Rastreador', 'Sim/Não', '', item?.rastreador || '')}${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
+        </div>`, isEdit ? 'Salvar alterações' : 'Salvar veículo', async (data) => {
+          data.placa = String(data.placa || '').toUpperCase().trim();
+          if (data.id_associado) {
+            const associadoSelecionado = findAssociadoById(data.id_associado);
+            if (associadoSelecionado) data.associado = associadoSelecionado.nome || data.associado;
+          }
+          const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Veiculos', dados: data };
+          if (isEdit) payload.id = item.id_veiculo;
+          await apiPost(payload);
+          state.cache.veiculos = [];
+          toast(isEdit ? 'Veículo atualizado com sucesso.' : 'Veículo cadastrado com sucesso.');
+          await renderVeiculos();
+        });
+    }
+
+    function selectAssociadoField(selected = '') {
+      const options = ['<option value="">Selecionar associado cadastrado...</option>'].concat(state.cache.associados.map(item => `<option value="${escapeHtml(item.id_associado)}" ${String(item.id_associado) === String(selected) ? 'selected' : ''}>${escapeHtml(item.nome || 'Sem nome')} ${item.cpf_cnpj ? '— ' + escapeHtml(item.cpf_cnpj) : ''}</option>`)).join('');
+      return `<div class="field"><label>Associado cadastrado</label><select name="id_associado">${options}</select></div>`;
+    }
+
+    async function inativarVeiculo(id) {
+      const item = findVehicleById(id);
+      confirmAction('Inativar veículo', `Deseja inativar o veículo ${item?.placa || ''}? Ele não será apagado da planilha.`, 'Inativar', async () => {
+        await apiPost({ action: 'excluir', tabela: 'Veiculos', id });
+        state.cache.veiculos = [];
+        toast('Veículo inativado com sucesso.');
+        await renderVeiculos();
+      });
+    }
+
+    async function openVehicleDetails(id) {
+      try {
+        await Promise.all([ensureVeiculosCache(), ensureAssociadosCache(true), ensureEventosCache(true)]);
+        const item = findVehicleById(id);
+        if (!item) return toast('Veículo não encontrado.', 'error');
+        const associado = findAssociadoById(item.id_associado) || state.cache.associados.find(a => normalizeText(a.nome) === normalizeText(item.associado));
+        const eventos = state.cache.eventos.filter(e => String(e.placa || '').toUpperCase() === String(item.placa || '').toUpperCase());
+        openCustomModal('Detalhes do veículo', `
+          <div class="detail-grid">
+            ${detailCard('Placa', item.placa)}${detailCard('Veículo', [item.marca, item.modelo, item.ano_modelo].filter(Boolean).join(' '))}${detailCard('Status', item.status)}
+            ${detailCard('Associado', item.associado)}${detailCard('Telefone', associado?.telefone || '-')}${detailCard('Regional', item.regional)}
+            ${detailCard('FIPE', money(item.valor_fipe))}${detailCard('Mensalidade', money(item.mensalidade))}${detailCard('Rastreador', item.rastreador)}
+            ${detailCard('Consultor', item.consultor)}${detailCard('Cooperativa', item.cooperativa)}${detailCard('Entrada', dateBR(item.data_entrada))}
+          </div>
+          <div class="detail-section"><h4>Eventos do veículo</h4>${miniEventosTable(eventos)}</div>
+          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>`, true);
+      } catch (error) { toast(error.message, 'error'); }
     }
 
     async function renderEventos(filter = '') {
       els.viewRoot.innerHTML = topbar('Eventos', 'Abertura e acompanhamento de ocorrências.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>') + loadingPanel('Carregando eventos...');
-
       try {
-        const result = await apiGet('listar', { tabela: 'Eventos' });
-        state.cache.eventos = result.data || [];
+        await ensureEventosCache(true);
         paintEventTable(filter);
-      } catch (error) {
-        renderError(error.message);
-      }
+      } catch (error) { renderError(error.message); }
     }
 
     function paintEventTable(filter = '') {
-      const data = state.cache.eventos.filter(item => {
-        const haystack = `${item.numero_evento} ${item.placa} ${item.associado} ${item.tipo_evento} ${item.status_evento} ${item.responsavel}`.toLowerCase();
-        return haystack.includes(String(filter).toLowerCase());
-      });
-
+      const data = state.cache.eventos.filter(item => `${item.numero_evento} ${item.placa} ${item.associado} ${item.tipo_evento} ${item.status_evento} ${item.responsavel}`.toLowerCase().includes(String(filter).toLowerCase()));
       els.viewRoot.innerHTML = `
         ${topbar('Eventos', 'Abertura e acompanhamento de ocorrências.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>')}
-        <div class="content-panel">
-          <div class="panel-head">
-            <div>
-              <h3>Eventos cadastrados</h3>
-              <p>${data.length} registro(s) encontrado(s).</p>
-            </div>
-            <div class="toolbar">
-              <input class="search" placeholder="Buscar por placa, associado, status..." value="${escapeHtml(filter)}" oninput="paintEventTable(this.value)" />
-            </div>
-          </div>
+        <div class="content-panel"><div class="panel-head"><div><h3>Eventos cadastrados</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por placa, associado, status..." value="${escapeHtml(filter)}" oninput="paintEventTable(this.value)" /></div></div>
           ${data.length ? eventTable(data) : emptyState('Nenhum evento cadastrado.', 'Clique em “Novo evento” para abrir a primeira ocorrência.')}
-        </div>
-      `;
+        </div>`;
     }
 
     function eventTable(data) {
-      return `
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Evento</th>
-                <th>Tipo</th>
-                <th>Placa</th>
-                <th>Associado</th>
-                <th>Responsável</th>
-                <th>Etapa</th>
-                <th>Status</th>
-                <th>Abertura</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.map(item => `
-                <tr>
-                  <td><strong>${escapeHtml(item.numero_evento || item.id_evento || '-')}</strong></td>
-                  <td>${escapeHtml(item.tipo_evento || '-')}</td>
-                  <td><strong>${escapeHtml(item.placa || '-')}</strong></td>
-                  <td>${escapeHtml(item.associado || '-')}</td>
-                  <td>${escapeHtml(item.responsavel || '-')}</td>
-                  <td>${statusBadge(item.etapa_kanban)}</td>
-                  <td>${statusBadge(item.status_evento)}</td>
-                  <td>${dateBR(item.data_abertura)}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
+      return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Tipo</th><th>Placa</th><th>Associado</th><th>Responsável</th><th>Etapa</th><th>Status</th><th>Abertura</th><th>Ações</th></tr></thead><tbody>
+        ${data.map(item => `<tr>
+          <td><strong>${escapeHtml(item.numero_evento || item.id_evento || '-')}</strong></td><td>${escapeHtml(item.tipo_evento || '-')}</td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.etapa_kanban)}</td><td>${statusBadge(item.status_evento)}</td><td>${dateBR(item.data_abertura)}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openEventModalById(${jsArg(item.id_evento)})">Editar</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button><button class="btn btn-danger btn-small" onclick="cancelarEvento(${jsArg(item.id_evento)})">Cancelar</button></div></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
     }
 
     async function renderKanban() {
       els.viewRoot.innerHTML = topbar('Kanban de Eventos', 'Visualização dos eventos por etapa operacional.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderKanban()">Atualizar</button>') + loadingPanel('Carregando kanban...');
-
       try {
         const result = await apiGet('kanban_eventos');
         const etapas = result.etapas || [];
         const data = result.data || {};
         state.cache.kanban = result;
-
+        state.cache.eventos = Object.values(data).flat();
         els.viewRoot.innerHTML = `
           ${topbar('Kanban de Eventos', 'Visualização dos eventos por etapa operacional.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderKanban()">Atualizar</button>')}
-          <div class="content-panel">
-            <div class="kanban">
-              ${etapas.map(etapa => {
-                const items = data[etapa] || [];
-                return `
-                  <div class="kanban-col">
-                    <h4>${escapeHtml(etapa)} <span class="badge dark">${items.length}</span></h4>
-                    ${items.length ? items.map(kanbanCard).join('') : '<div class="empty"><strong>Vazio</strong>Sem eventos nesta etapa.</div>'}
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      } catch (error) {
-        renderError(error.message);
-      }
+          <div class="content-panel"><div class="kanban">
+            ${etapas.map(etapa => {
+              const items = data[etapa] || [];
+              return `<div class="kanban-col"><h4>${escapeHtml(etapa)} <span class="badge dark">${items.length}</span></h4>${items.length ? items.map(kanbanCard).join('') : '<div class="empty"><strong>Vazio</strong>Sem eventos nesta etapa.</div>'}</div>`;
+            }).join('')}
+          </div></div>`;
+      } catch (error) { renderError(error.message); }
     }
 
     function kanbanCard(item) {
-      return `
-        <div class="kanban-card">
-          <strong>${escapeHtml(item.numero_evento || item.placa || 'Evento')}</strong>
-          <p>${escapeHtml(item.associado || 'Associado não informado')}<br>${escapeHtml(item.descricao || item.tipo_evento || '')}</p>
-          <div class="kanban-meta">
-            ${statusBadge(item.prioridade)}
-            ${statusBadge(item.status_evento)}
-            <span class="badge dark">${escapeHtml(item.placa || '-')}</span>
-          </div>
-        </div>
-      `;
+      return `<div class="kanban-card"><strong>${escapeHtml(item.numero_evento || item.placa || 'Evento')}</strong><p>${escapeHtml(item.associado || 'Associado não informado')}<br>${escapeHtml(item.tipo_evento || '')} • ${escapeHtml(item.responsavel || 'Sem responsável')}</p><div class="kanban-meta">${statusBadge(item.prioridade)}${statusBadge(item.status_evento)}<span class="badge dark">${escapeHtml(item.placa || '-')}</span></div><div class="row-actions" style="margin-top:12px"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Detalhes</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button></div></div>`;
     }
 
     function renderRelatorios() {
       const d = state.cache.dashboard || {};
       els.viewRoot.innerHTML = `
         ${topbar('Relatórios', 'Resumo inicial com base nos dados já cadastrados.', '<button class="btn btn-yellow" onclick="renderDashboard()">Ver dashboard</button>')}
-        <div class="grid-cards">
-          ${metric('Base ativa', d.veiculos_ativos || 0, 'Veículos ativos')}
-          ${metric('Eventos em andamento', d.eventos_abertos || 0, 'Não finalizados')}
-          ${metric('FIPE total', money(d.valor_fipe_total || 0), 'Valor protegido')}
-          ${metric('Mensalidade prevista', money(d.mensalidade_total_prevista || 0), 'Estimativa mensal')}
-        </div>
-        <div class="content-panel">
-          <div class="panel-head">
-            <div>
-              <h3>Relatórios avançados</h3>
-              <p>Na próxima etapa entram filtros por regional, consultor, modelo, combustível, status e período.</p>
-            </div>
+        <div class="grid-cards">${metric('Base ativa', d.veiculos_ativos || 0, 'Veículos ativos')}${metric('Eventos em andamento', d.eventos_abertos || 0, 'Não finalizados')}${metric('FIPE total', money(d.valor_fipe_total || 0), 'Valor protegido')}${metric('Mensalidade prevista', money(d.mensalidade_total_prevista || 0), 'Estimativa mensal')}</div>
+        <div class="content-panel"><div class="panel-head"><div><h3>Relatórios avançados</h3><p>Na próxima etapa entram filtros por regional, consultor, modelo, combustível, status e período.</p></div></div><div class="empty"><strong>Módulo em construção.</strong>A estrutura já está pronta para receber os relatórios operacionais.</div></div>`;
+    }
+
+    async function openEventModalById(id) {
+      await ensureEventosCache();
+      const item = findEventById(id);
+      if (!item) return toast('Evento não encontrado.', 'error');
+      openEventModal(item);
+    }
+
+    async function openEventModal(item = null) {
+      const isEdit = Boolean(item?.id_evento);
+      const tipos = parseOptions('tipo_evento', ['Roubo', 'Furto', 'Colisão', 'Pane', 'Assistência', 'Terceiro', 'Outro']);
+      const prioridades = parseOptions('prioridades', ['Baixa', 'Média', 'Alta', 'Urgente']);
+      try { await Promise.all([ensureVeiculosCache(), ensureAssociadosCache()]); } catch (error) { console.warn(error.message); }
+      openModal(isEdit ? 'Editar evento' : 'Novo evento', `
+        <div class="form-grid">
+          ${selectField('tipo_evento', 'Tipo de evento', tipos, item?.tipo_evento || '')}${selectField('prioridade', 'Prioridade', prioridades, item?.prioridade || 'Média')}
+          ${hiddenField('id_veiculo', item?.id_veiculo || '')}${hiddenField('id_associado', item?.id_associado || '')}${plateLookupField(item?.placa || '')}
+          ${field('associado', 'Associado', 'Nome do associado', '', item?.associado || '')}${field('telefone', 'Telefone', '(81) 99999-9999', '', item?.telefone || '')}
+          ${field('cidade', 'Cidade', 'Caruaru', '', item?.cidade || '')}${field('estado', 'Estado', 'PE', '', item?.estado || '')}
+          ${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || '')}${field('setor_atual', 'Setor atual', 'Eventos', '', item?.setor_atual || 'Eventos')}
+          ${field('oficina', 'Oficina', 'Oficina parceira', '', item?.oficina || '')}${field('valor_estimado', 'Valor estimado', '0', '', item?.valor_estimado || '')}
+          ${field('valor_aprovado', 'Valor aprovado', '0', '', item?.valor_aprovado || '')}${textareaField('descricao', 'Descrição do evento', 'Descreva o ocorrido', 'full', item?.descricao || '')}
+          ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
+          <div id="vehicleLookupNote" class="lookup-note full hidden"></div>
+        </div>`, isEdit ? 'Salvar evento' : 'Abrir evento', async (data) => {
+          data.placa = String(data.placa || '').toUpperCase().trim();
+          const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Eventos', dados: data };
+          if (isEdit) payload.id = item.id_evento;
+          await apiPost(payload);
+          state.cache.eventos = [];
+          toast(isEdit ? 'Evento atualizado com sucesso.' : 'Evento aberto com sucesso.');
+          if (state.view === 'kanban') await renderKanban(); else await renderEventos();
+        });
+      attachEventVehicleLookup();
+    }
+
+    function plateLookupField(value = '') {
+      return `<div class="field"><label>Placa</label><div class="plate-line"><input name="placa" placeholder="ABC1D23" value="${escapeHtml(value)}" /><button class="btn btn-ghost" type="button" id="btnLookupPlate">Buscar placa</button></div></div>`;
+    }
+
+    function attachEventVehicleLookup() {
+      const btn = els.modalRoot.querySelector('#btnLookupPlate');
+      const input = els.modalRoot.querySelector('[name="placa"]');
+      if (!btn || !input) return;
+      const lookup = () => preencherEventoPorPlaca(input.value);
+      btn.addEventListener('click', lookup);
+      input.addEventListener('blur', lookup);
+    }
+
+    function setFormValue(name, value) {
+      const input = els.modalRoot.querySelector(`[name="${name}"]`);
+      if (input && value !== undefined && value !== null && value !== '') input.value = value;
+    }
+
+    async function preencherEventoPorPlaca(placa) {
+      if (!String(placa || '').trim()) return;
+      try {
+        await Promise.all([ensureVeiculosCache(), ensureAssociadosCache()]);
+        const veiculo = findVehicleByPlate(placa);
+        const note = els.modalRoot.querySelector('#vehicleLookupNote');
+        if (!veiculo) {
+          if (note) { note.classList.remove('hidden'); note.textContent = 'Placa não encontrada na base. Preencha os dados manualmente ou cadastre o veículo antes.'; }
+          return;
+        }
+        const associado = findAssociadoById(veiculo.id_associado) || state.cache.associados.find(a => normalizeText(a.nome) === normalizeText(veiculo.associado));
+        setFormValue('placa', String(veiculo.placa || '').toUpperCase());
+        setFormValue('id_veiculo', veiculo.id_veiculo);
+        setFormValue('id_associado', veiculo.id_associado || associado?.id_associado || '');
+        setFormValue('associado', veiculo.associado || associado?.nome || '');
+        setFormValue('telefone', associado?.telefone || '');
+        setFormValue('cidade', associado?.cidade || '');
+        setFormValue('estado', associado?.estado || '');
+        setFormValue('valor_estimado', veiculo.valor_fipe || '');
+        if (note) {
+          note.classList.remove('hidden');
+          note.innerHTML = `Veículo localizado: <strong>${escapeHtml([veiculo.marca, veiculo.modelo, veiculo.ano_modelo].filter(Boolean).join(' '))}</strong>. Associado: <strong>${escapeHtml(veiculo.associado || associado?.nome || '-')}</strong>.`;
+        }
+        toast('Dados puxados pela placa.');
+      } catch (error) { toast(error.message, 'error'); }
+    }
+
+    async function openEventDetails(id) {
+      try {
+        await Promise.all([ensureEventosCache(true), ensureVeiculosCache(true), ensureAssociadosCache(true), ensureHistoricoCache(true)]);
+        const item = findEventById(id);
+        if (!item) return toast('Evento não encontrado.', 'error');
+        const veiculo = findVehicleByPlate(item.placa);
+        const associado = findAssociadoById(item.id_associado) || state.cache.associados.find(a => normalizeText(a.nome) === normalizeText(item.associado));
+        const historico = state.cache.historico.filter(h => String(h.id_evento) === String(item.id_evento));
+        openCustomModal('Detalhes do evento', `
+          <div class="detail-grid">
+            ${detailCard('Número', item.numero_evento || item.id_evento)}${detailCard('Tipo', item.tipo_evento)}${detailCard('Prioridade', item.prioridade)}
+            ${detailCard('Placa', item.placa)}${detailCard('Associado', item.associado)}${detailCard('Telefone', item.telefone || associado?.telefone)}
+            ${detailCard('Etapa', item.etapa_kanban)}${detailCard('Status', item.status_evento)}${detailCard('Responsável', item.responsavel)}
+            ${detailCard('Setor', item.setor_atual)}${detailCard('Oficina', item.oficina)}${detailCard('Abertura', dateBR(item.data_abertura))}
+            ${detailCard('Valor estimado', money(item.valor_estimado))}${detailCard('Valor aprovado', money(item.valor_aprovado))}${detailCard('Veículo', veiculo ? [veiculo.marca, veiculo.modelo, veiculo.ano_modelo].filter(Boolean).join(' ') : '-')}
           </div>
-          <div class="empty">
-            <strong>Módulo em construção.</strong>
-            A estrutura já está pronta para receber os relatórios operacionais.
-          </div>
-        </div>
-      `;
+          <div class="detail-section"><h4>Descrição</h4><p>${escapeHtml(item.descricao || 'Sem descrição.')}</p></div>
+          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
+          <div class="detail-section"><h4>Histórico do evento</h4>${historyList(historico)}</div>`, true);
+      } catch (error) { toast(error.message, 'error'); }
+    }
+
+    async function openMoveEventModal(id) {
+      await ensureEventosCache();
+      const item = findEventById(id);
+      if (!item) return toast('Evento não encontrado.', 'error');
+      const etapas = parseOptions('etapas_kanban_evento', ['Aberto', 'Análise', 'Vistoria', 'Regulação', 'Compras', 'Reparo', 'Aguardando Aprovação', 'Finalizado']);
+      const statuses = parseOptions('status_evento', ['Aberto', 'Em análise', 'Aguardando documento', 'Em vistoria', 'Em regulação', 'Em compras', 'Em reparo', 'Finalizado', 'Recusado', 'Cancelado']);
+      openModal('Mover evento no Kanban', `
+        <div class="lookup-note full">Evento: <strong>${escapeHtml(item.numero_evento || item.id_evento)}</strong> • Placa: <strong>${escapeHtml(item.placa || '-')}</strong> • Etapa atual: <strong>${escapeHtml(item.etapa_kanban || '-')}</strong></div>
+        <div class="form-grid">
+          ${selectField('nova_etapa', 'Nova etapa', etapas, item.etapa_kanban || 'Aberto')}${selectField('novo_status', 'Novo status', statuses, item.status_evento || 'Aberto')}
+          ${textareaField('comentario', 'Comentário da movimentação', 'Ex.: enviado para vistoria, aguardando documento...', 'full')}
+        </div>`, 'Mover evento', async (data) => {
+          await apiPost({ action: 'mover_evento_kanban', id_evento: id, nova_etapa: data.nova_etapa, novo_status: data.novo_status, comentario: data.comentario });
+          state.cache.eventos = [];
+          state.cache.historico = [];
+          toast('Evento movido com sucesso.');
+          if (state.view === 'kanban') await renderKanban(); else await renderEventos();
+        });
+    }
+
+    async function cancelarEvento(id) {
+      const item = findEventById(id);
+      confirmAction('Cancelar evento', `Deseja cancelar o evento ${item?.numero_evento || id}? Ele não será apagado da planilha.`, 'Cancelar evento', async () => {
+        await apiPost({ action: 'excluir', tabela: 'Eventos', id });
+        state.cache.eventos = [];
+        toast('Evento cancelado com sucesso.');
+        await renderEventos();
+      });
+    }
+
+    function miniVeiculosTable(items) {
+      if (!items.length) return emptyState('Nenhum veículo vinculado.', 'Cadastre ou edite um veículo para associar a este cadastro.');
+      return `<div class="mini-table"><div class="mini-row header"><div>Placa</div><div>Veículo</div><div>Status</div><div>Ação</div></div>${items.map(v => `<div class="mini-row"><div><strong>${escapeHtml(v.placa || '-')}</strong></div><div>${escapeHtml([v.marca, v.modelo, v.ano_modelo].filter(Boolean).join(' ') || '-')}</div><div>${statusBadge(v.status)}</div><div><button class="btn btn-blue btn-small" onclick="closeModal(); openVehicleDetails(${jsArg(v.id_veiculo)})">Abrir</button></div></div>`).join('')}</div>`;
+    }
+
+    function miniEventosTable(items) {
+      if (!items.length) return emptyState('Nenhum evento relacionado.', 'Os eventos aparecerão aqui quando forem abertos pela placa ou associado.');
+      return `<div class="mini-table"><div class="mini-row header"><div>Evento</div><div>Placa/tipo</div><div>Status</div><div>Ação</div></div>${items.map(e => `<div class="mini-row"><div><strong>${escapeHtml(e.numero_evento || e.id_evento || '-')}</strong></div><div>${escapeHtml(e.placa || '-')} • ${escapeHtml(e.tipo_evento || '-')}</div><div>${statusBadge(e.status_evento)}</div><div><button class="btn btn-blue btn-small" onclick="closeModal(); openEventDetails(${jsArg(e.id_evento)})">Abrir</button></div></div>`).join('')}</div>`;
+    }
+
+    function historyList(items) {
+      if (!items.length) return emptyState('Sem histórico registrado.', 'O histórico será alimentado quando o evento for movido pelo Kanban.');
+      return `<div class="history-list">${items.slice().reverse().map(h => `<div class="history-item"><strong>${escapeHtml(h.acao || 'Movimentação')}</strong><small>${dateTimeBR(h.data_hora)} • ${escapeHtml(h.usuario || 'Sistema')}</small><p>${escapeHtml(h.etapa_anterior || '-')} → ${escapeHtml(h.etapa_nova || '-')}<br>${escapeHtml(h.status_anterior || '-')} → ${escapeHtml(h.status_novo || '-')}</p>${h.comentario ? `<p>${escapeHtml(h.comentario)}</p>` : ''}</div>`).join('')}</div>`;
+    }
+
+    function detailCard(label, value) {
+      return `<div class="detail-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value || '-')}</strong></div>`;
     }
 
     function loadingPanel(text) {
@@ -1535,38 +1651,13 @@
     }
 
     function renderError(message) {
-      els.viewRoot.innerHTML = `
-        ${topbar('Erro ao carregar', 'A API respondeu com falha ou o proxy não está publicado corretamente.')}
-        <div class="content-panel">
-          <div class="empty">
-            <strong>Não foi possível carregar os dados.</strong>
-            ${escapeHtml(message)}
-          </div>
-        </div>
-      `;
+      els.viewRoot.innerHTML = `${topbar('Erro ao carregar', 'A API respondeu com falha ou o proxy não está publicado corretamente.')}<div class="content-panel"><div class="empty"><strong>Não foi possível carregar os dados.</strong>${escapeHtml(message)}</div></div>`;
       toast(message, 'error');
     }
 
     function openModal(title, bodyHtml, submitText, onSubmit) {
       els.modalRoot.classList.remove('hidden');
-      els.modalRoot.innerHTML = `
-        <div class="modal">
-          <div class="modal-head">
-            <h3>${escapeHtml(title)}</h3>
-            <button class="btn btn-ghost" type="button" onclick="closeModal()">Fechar</button>
-          </div>
-          <div class="modal-body">
-            <form id="modalForm">
-              ${bodyHtml}
-              <div class="modal-actions">
-                <button class="btn btn-ghost" type="button" onclick="closeModal()">Cancelar</button>
-                <button class="btn btn-yellow" type="submit">${escapeHtml(submitText)}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      `;
-
+      els.modalRoot.innerHTML = `<div class="modal"><div class="modal-head"><h3>${escapeHtml(title)}</h3><button class="btn btn-ghost" type="button" onclick="closeModal()">Fechar</button></div><div class="modal-body"><form id="modalForm">${bodyHtml}<div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">Cancelar</button><button class="btn btn-yellow" type="submit">${escapeHtml(submitText)}</button></div></form></div></div>`;
       document.getElementById('modalForm').addEventListener('submit', async (event) => {
         event.preventDefault();
         const button = event.currentTarget.querySelector('button[type="submit"]');
@@ -1576,12 +1667,23 @@
           button.textContent = 'Salvando...';
           await onSubmit(data);
           closeModal();
-        } catch (error) {
-          toast(error.message, 'error');
-        } finally {
-          button.classList.remove('loading');
-          button.textContent = submitText;
-        }
+        } catch (error) { toast(error.message, 'error'); }
+        finally { button.classList.remove('loading'); button.textContent = submitText; }
+      });
+    }
+
+    function openCustomModal(title, bodyHtml, wide = false) {
+      els.modalRoot.classList.remove('hidden');
+      els.modalRoot.innerHTML = `<div class="modal ${wide ? 'wide' : ''}"><div class="modal-head"><h3>${escapeHtml(title)}</h3><button class="btn btn-ghost" type="button" onclick="closeModal()">Fechar</button></div><div class="modal-body">${bodyHtml}<div class="modal-actions"><button class="btn btn-yellow" type="button" onclick="closeModal()">Fechar</button></div></div></div>`;
+    }
+
+    function confirmAction(title, message, confirmText, onConfirm) {
+      els.modalRoot.classList.remove('hidden');
+      els.modalRoot.innerHTML = `<div class="modal"><div class="modal-head"><h3>${escapeHtml(title)}</h3><button class="btn btn-ghost" type="button" onclick="closeModal()">Fechar</button></div><div class="modal-body"><div class="lookup-note">${escapeHtml(message)}</div><div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal()">Voltar</button><button id="confirmActionBtn" class="btn btn-danger" type="button">${escapeHtml(confirmText)}</button></div></div></div>`;
+      document.getElementById('confirmActionBtn').addEventListener('click', async () => {
+        const button = document.getElementById('confirmActionBtn');
+        try { button.classList.add('loading'); button.textContent = 'Processando...'; await onConfirm(); closeModal(); }
+        catch (error) { toast(error.message, 'error'); }
       });
     }
 
@@ -1590,156 +1692,20 @@
       els.modalRoot.innerHTML = '';
     }
 
-    function openVehicleModalById(id) {
-      const item = state.cache.veiculos.find(v => String(v.id_veiculo) === String(id));
-      if (!item) return toast('Veículo não encontrado na tela atual.', 'error');
-      openVehicleModal(item);
-    }
-
-    async function openVehicleModal(item = null) {
-      const isEdit = Boolean(item?.id_veiculo);
-      const combustiveis = ['Gasolina', 'Etanol', 'Flex', 'Diesel', 'GNV', 'Elétrico', 'Híbrido'];
-      const status = parseOptions('status_veiculo', ['Ativo', 'Inativo', 'Pendente', 'Cancelado']);
-
-      try {
-        await ensureAssociadosCache();
-      } catch (error) {
-        console.warn('Associados não carregados:', error.message);
-      }
-
-      const associadosAtivos = state.cache.associados.filter(a => String(a.status || 'Ativo').toLowerCase() === 'ativo');
-      const associadoHtml = associadosAtivos.length
-        ? `${selectAssociadoField(item?.id_associado || '')}${field('associado', 'Associado manual', 'Use apenas se não estiver cadastrado', '', item?.associado || '')}`
-        : field('associado', 'Associado', 'Nome do associado', '', item?.associado || '');
-
-      openModal(isEdit ? 'Editar veículo' : 'Novo veículo', `
-        <div class="form-grid">
-          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || '')}
-          ${associadoHtml}
-          ${field('marca', 'Marca', 'Fiat, Chevrolet, Honda...', '', item?.marca || '')}
-          ${field('modelo', 'Modelo', 'Onix, Kwid, HB20...', '', item?.modelo || '')}
-          ${field('ano_modelo', 'Ano/modelo', '2024', '', item?.ano_modelo || '')}
-          ${selectField('tipo_combustivel', 'Combustível', combustiveis, item?.tipo_combustivel || 'Flex')}
-          ${field('valor_fipe', 'Valor FIPE', '65000', '', item?.valor_fipe || '')}
-          ${field('mensalidade', 'Mensalidade', '189.90', '', item?.mensalidade || '')}
-          ${field('consultor', 'Consultor', 'Nome do consultor', '', item?.consultor || '')}
-          ${field('regional', 'Regional', 'Caruaru', '', item?.regional || '')}
-          ${field('cooperativa', 'Cooperativa', 'PE.001', '', item?.cooperativa || '')}
-          ${selectField('status', 'Status', status, item?.status || 'Ativo')}
-          ${field('rastreador', 'Rastreador', 'Sim/Não', '', item?.rastreador || '')}
-          ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
-        </div>
-      `, isEdit ? 'Salvar alterações' : 'Salvar veículo', async (data) => {
-        data.placa = String(data.placa || '').toUpperCase().trim();
-
-        if (data.id_associado) {
-          const associadoSelecionado = state.cache.associados.find(a => String(a.id_associado) === String(data.id_associado));
-          if (associadoSelecionado) data.associado = associadoSelecionado.nome || data.associado;
-        }
-
-        const payload = {
-          action: isEdit ? 'editar' : 'criar',
-          tabela: 'Veiculos',
-          dados: data
-        };
-
-        if (isEdit) payload.id = item.id_veiculo;
-
-        await apiPost(payload);
-        toast(isEdit ? 'Veículo atualizado com sucesso.' : 'Veículo cadastrado com sucesso.');
-        await renderVeiculos();
-      });
-    }
-
-    function selectAssociadoField(selected = '') {
-      const options = ['<option value="">Selecionar associado cadastrado...</option>']
-        .concat(state.cache.associados.map(item => `<option value="${escapeHtml(item.id_associado)}" ${String(item.id_associado) === String(selected) ? 'selected' : ''}>${escapeHtml(item.nome || 'Sem nome')} ${item.cpf_cnpj ? '— ' + escapeHtml(item.cpf_cnpj) : ''}</option>`))
-        .join('');
-
-      return `
-        <div class="field">
-          <label>Associado cadastrado</label>
-          <select name="id_associado">${options}</select>
-        </div>
-      `;
-    }
-
-    async function inativarVeiculo(id) {
-      if (!confirm('Deseja inativar este veículo?')) return;
-
-      try {
-        await apiPost({
-          action: 'excluir',
-          tabela: 'Veiculos',
-          id
-        });
-        toast('Veículo inativado com sucesso.');
-        await renderVeiculos();
-      } catch (error) {
-        toast(error.message, 'error');
-      }
-    }
-
-    function openEventModal() {
-      const tipos = parseOptions('tipo_evento', ['Roubo', 'Furto', 'Colisão', 'Pane', 'Assistência', 'Terceiro', 'Outro']);
-      const prioridades = parseOptions('prioridades', ['Baixa', 'Média', 'Alta', 'Urgente']);
-
-      openModal('Novo evento', `
-        <div class="form-grid">
-          ${selectField('tipo_evento', 'Tipo de evento', tipos)}
-          ${selectField('prioridade', 'Prioridade', prioridades, 'Média')}
-          ${field('placa', 'Placa', 'ABC1D23')}
-          ${field('associado', 'Associado', 'Nome do associado')}
-          ${field('telefone', 'Telefone', '(81) 99999-9999')}
-          ${field('cidade', 'Cidade', 'Caruaru')}
-          ${field('estado', 'Estado', 'PE')}
-          ${field('responsavel', 'Responsável', 'Nome do responsável')}
-          ${field('setor_atual', 'Setor atual', 'Eventos')}
-          ${field('oficina', 'Oficina', 'Oficina parceira')}
-          ${field('valor_estimado', 'Valor estimado', '0')}
-          ${field('valor_aprovado', 'Valor aprovado', '0')}
-          ${textareaField('descricao', 'Descrição do evento', 'Descreva o ocorrido', 'full')}
-          ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full')}
-        </div>
-      `, 'Abrir evento', async (data) => {
-        await apiPost({
-          action: 'criar',
-          tabela: 'Eventos',
-          dados: data
-        });
-        toast('Evento aberto com sucesso.');
-        if (state.view === 'kanban') await renderKanban();
-        else await renderEventos();
-      });
-    }
-
     function field(name, label, placeholder = '', extraClass = '', value = '') {
-      return `
-        <div class="field ${extraClass}">
-          <label>${escapeHtml(label)}</label>
-          <input name="${escapeHtml(name)}" placeholder="${escapeHtml(placeholder)}" value="${escapeHtml(value)}" />
-        </div>
-      `;
+      return `<div class="field ${extraClass}"><label>${escapeHtml(label)}</label><input name="${escapeHtml(name)}" placeholder="${escapeHtml(placeholder)}" value="${escapeHtml(value)}" /></div>`;
+    }
+
+    function hiddenField(name, value = '') {
+      return `<input type="hidden" name="${escapeHtml(name)}" value="${escapeHtml(value)}" />`;
     }
 
     function selectField(name, label, options = [], selected = '') {
-      return `
-        <div class="field">
-          <label>${escapeHtml(label)}</label>
-          <select name="${escapeHtml(name)}">
-            ${selectOptions(options, selected)}
-          </select>
-        </div>
-      `;
+      return `<div class="field"><label>${escapeHtml(label)}</label><select name="${escapeHtml(name)}">${selectOptions(options, selected)}</select></div>`;
     }
 
     function textareaField(name, label, placeholder = '', extraClass = '', value = '') {
-      return `
-        <div class="field ${extraClass}">
-          <label>${escapeHtml(label)}</label>
-          <textarea name="${escapeHtml(name)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value)}</textarea>
-        </div>
-      `;
+      return `<div class="field ${extraClass}"><label>${escapeHtml(label)}</label><textarea name="${escapeHtml(name)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value)}</textarea></div>`;
     }
 
     window.closeModal = closeModal;
@@ -1750,11 +1716,17 @@
     window.renderKanban = renderKanban;
     window.openAssociadoModal = openAssociadoModal;
     window.openAssociadoModalById = openAssociadoModalById;
+    window.openAssociadoDetails = openAssociadoDetails;
     window.inativarAssociado = inativarAssociado;
     window.openVehicleModal = openVehicleModal;
     window.openVehicleModalById = openVehicleModalById;
+    window.openVehicleDetails = openVehicleDetails;
     window.inativarVeiculo = inativarVeiculo;
     window.openEventModal = openEventModal;
+    window.openEventModalById = openEventModalById;
+    window.openEventDetails = openEventDetails;
+    window.openMoveEventModal = openMoveEventModal;
+    window.cancelarEvento = cancelarEvento;
     window.paintAssociadoTable = paintAssociadoTable;
     window.paintVehicleTable = paintVehicleTable;
     window.paintEventTable = paintEventTable;
@@ -1766,9 +1738,7 @@
         state.token = session.token;
         await loadOptions();
         showApp();
-      } else {
-        showLogin();
-      }
+      } else showLogin();
     }
 
     init();
