@@ -1043,6 +1043,7 @@
         <button data-view="veiculos">🚗 Veículos</button>
         <button data-view="eventos">🛠️ Eventos</button>
         <button data-view="vistorias">🔎 Vistorias</button>
+        <button data-view="compras">🛒 Compras</button>
         <button data-view="kanban">🧩 Kanban</button>
         <button data-view="relatorios">📈 Relatórios</button>
       </nav>
@@ -1070,7 +1071,7 @@
 
   <script>
     const API_BASE = '/api/erp';
-    const APP_VERSION = '0.0.6';
+    const APP_VERSION = '0.0.7';
 
     const state = {
       user: null,
@@ -1302,6 +1303,7 @@
       if (view === 'veiculos') return renderVeiculos();
       if (view === 'eventos') return renderEventos();
       if (view === 'vistorias') return renderVistorias();
+      if (view === 'compras') return renderCompras();
       if (view === 'kanban') return renderKanban();
       if (view === 'relatorios') return renderRelatorios();
     }
@@ -1415,6 +1417,10 @@
 
     function findRegulacaoById(id) {
       return state.cache.regulacoes.find(r => String(r.id_regulacao) === String(id));
+    }
+
+    function findCompraById(id) {
+      return state.cache.compras.find(c => String(c.id_compra) === String(id));
     }
 
     async function renderAssociados(filter = '') {
@@ -1668,6 +1674,40 @@
     function eventLabel(id) {
       const e = findEventById(id);
       return e ? (e.numero_evento || e.id_evento || id) : (id || '-');
+    }
+
+
+    async function renderCompras(filter = '') {
+      els.viewRoot.innerHTML = topbar('Compras', 'Controle de peças, fornecedores, aprovações e entregas vinculadas aos eventos.', '<button class="btn btn-yellow" onclick="openCompraAvulsaModal()">+ Nova compra</button><button class="btn btn-ghost" onclick="renderCompras()">Atualizar</button>') + loadingPanel('Carregando compras...');
+      try {
+        await Promise.all([ensureComprasCache(true), ensureEventosCache(true)]);
+        paintCompraTable(filter);
+      } catch (error) { renderError(error.message); }
+    }
+
+    function paintCompraTable(filter = '') {
+      const termo = String(filter || '').toLowerCase();
+      const data = state.cache.compras.filter(item => `${item.id_compra} ${item.id_evento} ${item.placa} ${item.item} ${item.fornecedor} ${item.status_compra} ${item.responsavel}`.toLowerCase().includes(termo));
+      const pendentes = state.cache.compras.filter(item => !['entregue', 'cancelado'].includes(normalizeText(item.status_compra))).length;
+      const aguardando = state.cache.compras.filter(item => normalizeText(item.status_compra).includes('aguardando')).length;
+      const entregues = state.cache.compras.filter(item => normalizeText(item.status_compra) === 'entregue').length;
+      const valorAprovado = data.reduce((sum, item) => sum + parseMoneyBR(item.valor_aprovado || item.valor_cotado), 0);
+      els.viewRoot.innerHTML = `
+        ${topbar('Compras', 'Controle de peças, fornecedores, aprovações e entregas vinculadas aos eventos.', '<button class="btn btn-yellow" onclick="openCompraAvulsaModal()">+ Nova compra</button><button class="btn btn-ghost" onclick="renderCompras()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="summary-strip">${summaryItem('Total', state.cache.compras.length)}${summaryItem('Pendentes', pendentes)}${summaryItem('Aguardando aprovação', aguardando)}${summaryItem('Entregues', entregues)}${summaryItem('Valor filtrado', money(valorAprovado))}</div>
+          <div class="panel-head"><div><h3>Controle de compras</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por peça, fornecedor, placa, status..." value="${escapeHtml(filter)}" oninput="paintCompraTable(this.value)" /></div></div>
+          ${data.length ? compraTable(data) : emptyState('Nenhuma compra cadastrada.', 'Crie uma compra pelo botão “Nova compra” ou pela Central do Evento.')}
+        </div>`;
+    }
+
+    function compraTable(data) {
+      return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Item</th><th>Fornecedor</th><th>Status</th><th>Valor aprovado</th><th>Solicitação</th><th>Ações</th></tr></thead><tbody>
+        ${data.map(item => `<tr>
+          <td><strong>${escapeHtml(eventLabel(item.id_evento))}</strong></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.item || '-')}</td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${statusBadge(item.status_compra)}</td><td>${money(item.valor_aprovado || item.valor_cotado || 0)}</td><td>${dateBR(item.data_solicitacao)}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(item.id_compra)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCompraModalById(${jsArg(item.id_compra)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarCompraEntregue(${jsArg(item.id_compra)})">Entregar</button><button class="btn btn-danger btn-small" onclick="cancelarCompra(${jsArg(item.id_compra)})">Cancelar</button></div></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
     }
 
     async function renderKanban() {
@@ -1927,34 +1967,98 @@
         });
     }
 
-    async function openCompraModal(id) {
-      await ensureEventosCache();
-      const item = findEventById(id);
-      if (!item) return toast('Evento não encontrado.', 'error');
+    async function openCompraModal(eventId = '', item = null) {
+      await Promise.all([ensureEventosCache(), ensureComprasCache()]);
+      const isEdit = Boolean(item);
+      const selectedEventId = item?.id_evento || eventId || '';
+      const evento = selectedEventId ? findEventById(selectedEventId) : null;
       const statusCompra = parseOptions('status_compra', ['Solicitado', 'Em cotação', 'Aguardando aprovação', 'Aprovado', 'Comprado', 'Entregue', 'Cancelado']);
-      openModal('Criar solicitação de compra', `
-        <div class="lookup-note full">Evento: <strong>${escapeHtml(item.numero_evento || item.id_evento)}</strong> • Placa: <strong>${escapeHtml(item.placa || '-')}</strong></div>
+      const title = isEdit ? 'Editar compra' : 'Criar solicitação de compra';
+      const eventContext = selectedEventId && evento
+        ? `<div class="lookup-note full">Evento: <strong>${escapeHtml(evento.numero_evento || evento.id_evento)}</strong> • Placa: <strong>${escapeHtml(evento.placa || '-')}</strong></div>${hiddenField('id_evento', selectedEventId)}`
+        : eventSelectField(selectedEventId);
+
+      openModal(title, `
+        ${eventContext}
         <div class="form-grid">
-          ${field('item', 'Item / peça', 'Ex.: para-choque dianteiro')}${field('fornecedor', 'Fornecedor', 'Nome do fornecedor')}
-          ${field('valor_cotado', 'Valor cotado', '0')}${field('valor_aprovado', 'Valor aprovado', '0')}
-          ${selectField('status_compra', 'Status da compra', statusCompra, 'Solicitado')}${field('responsavel', 'Responsável', 'Nome do responsável', '', item.responsavel || '')}
-          ${textareaField('observacoes', 'Observações', 'Detalhes da cotação ou compra', 'full')}
-        </div>`, 'Criar compra', async (data) => {
+          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || evento?.placa || '')}${field('item', 'Item / peça', 'Ex.: para-choque dianteiro', '', item?.item || '')}
+          ${field('fornecedor', 'Fornecedor', 'Nome do fornecedor', '', item?.fornecedor || '')}${field('valor_cotado', 'Valor cotado', '0', '', item?.valor_cotado || '')}
+          ${field('valor_aprovado', 'Valor aprovado', '0', '', item?.valor_aprovado || '')}${selectField('status_compra', 'Status da compra', statusCompra, item?.status_compra || 'Solicitado')}
+          ${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || evento?.responsavel || state.user?.nome || '')}${field('data_entrega', 'Data de entrega', 'YYYY-MM-DD', '', item?.data_entrega || '')}
+          ${textareaField('observacoes', 'Observações', 'Detalhes da cotação ou compra', 'full', item?.observacoes || '')}
+        </div>`, isEdit ? 'Salvar compra' : 'Criar compra', async (data) => {
           if (!String(data.item || '').trim()) throw new Error('Informe o item/peça.');
-          await apiPost({
-            action: 'criar',
-            tabela: 'Compras',
-            dados: {
-              ...data,
-              id_evento: id,
-              placa: item.placa || '',
-              data_solicitacao: new Date().toISOString()
-            }
-          });
+          const ev = data.id_evento ? findEventById(data.id_evento) : null;
+          const dados = {
+            ...data,
+            placa: data.placa || ev?.placa || '',
+            data_solicitacao: item?.data_solicitacao || new Date().toISOString()
+          };
+          const payload = isEdit
+            ? { action: 'editar', tabela: 'Compras', id: item.id_compra, dados }
+            : { action: 'criar', tabela: 'Compras', dados };
+          await apiPost(payload);
+          if (!isEdit && dados.id_evento) {
+            await apiPost({ action: 'mover_evento_kanban', id_evento: dados.id_evento, nova_etapa: 'Compras', novo_status: 'Em compras', comentario: `Compra criada: ${dados.item || 'item não informado'}.` });
+          }
           state.cache.compras = [];
-          toast('Solicitação de compra criada.');
-          setTimeout(() => openEventDetails(id), 120);
+          state.cache.eventos = [];
+          state.cache.historico = [];
+          toast(isEdit ? 'Compra atualizada com sucesso.' : 'Solicitação de compra criada.');
+          if (state.view === 'compras') await renderCompras();
+          else if (dados.id_evento) setTimeout(() => openEventDetails(dados.id_evento), 120);
         });
+    }
+
+    function openCompraAvulsaModal() {
+      openCompraModal('', null);
+    }
+
+    async function openCompraModalById(id) {
+      await ensureComprasCache();
+      const item = findCompraById(id);
+      if (!item) return toast('Compra não encontrada.', 'error');
+      openCompraModal(item.id_evento || '', item);
+    }
+
+    async function openCompraDetails(id) {
+      await Promise.all([ensureComprasCache(), ensureEventosCache()]);
+      const item = findCompraById(id);
+      if (!item) return toast('Compra não encontrada.', 'error');
+      const evento = findEventById(item.id_evento);
+      openCustomModal('Detalhes da compra', `
+        <div class="detail-grid">
+          ${detailCard('Evento', eventLabel(item.id_evento))}${detailCard('Placa', item.placa || evento?.placa || '-')}${detailCard('Status', item.status_compra || '-')}
+          ${detailCard('Item / peça', item.item || '-')}${detailCard('Fornecedor', item.fornecedor || '-')}${detailCard('Responsável', item.responsavel || '-')}
+          ${detailCard('Valor cotado', money(item.valor_cotado || 0))}${detailCard('Valor aprovado', money(item.valor_aprovado || 0))}${detailCard('Solicitação', dateBR(item.data_solicitacao))}
+          ${detailCard('Aprovação', dateBR(item.data_aprovacao))}${detailCard('Entrega', dateBR(item.data_entrega))}${detailCard('Associado', evento?.associado || '-')}
+        </div>
+        <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
+        <div class="quick-actions"><button class="btn btn-ghost" onclick="closeModal(); openCompraModalById(${jsArg(item.id_compra)})">Editar compra</button><button class="btn btn-yellow" onclick="closeModal(); marcarCompraEntregue(${jsArg(item.id_compra)})">Marcar como entregue</button>${evento ? `<button class="btn btn-blue" onclick="closeModal(); openEventDetails(${jsArg(evento.id_evento)})">Abrir evento</button>` : ''}</div>
+      `, true);
+    }
+
+    async function marcarCompraEntregue(id) {
+      await ensureComprasCache();
+      const item = findCompraById(id);
+      if (!item) return toast('Compra não encontrada.', 'error');
+      confirmAction('Marcar compra como entregue', `Deseja marcar o item ${item.item || id} como entregue?`, 'Marcar entregue', async () => {
+        await apiPost({ action: 'editar', tabela: 'Compras', id, dados: { status_compra: 'Entregue', data_entrega: new Date().toISOString() } });
+        state.cache.compras = [];
+        toast('Compra marcada como entregue.');
+        if (state.view === 'compras') await renderCompras();
+      });
+    }
+
+    async function cancelarCompra(id) {
+      await ensureComprasCache();
+      const item = findCompraById(id);
+      confirmAction('Cancelar compra', `Deseja cancelar a compra ${item?.item || id}? Ela não será apagada da planilha.`, 'Cancelar compra', async () => {
+        await apiPost({ action: 'editar', tabela: 'Compras', id, dados: { status_compra: 'Cancelado' } });
+        state.cache.compras = [];
+        toast('Compra cancelada com sucesso.');
+        if (state.view === 'compras') await renderCompras();
+      });
     }
 
     function eventSelectField(selected = '') {
@@ -2101,7 +2205,7 @@
 
     function miniComprasTable(items) {
       if (!items.length) return emptyState('Nenhuma compra vinculada.', 'Crie uma solicitação de compra pela Central do Evento quando necessário.');
-      return `<div class="mini-table"><div class="mini-row header"><div>Item</div><div>Fornecedor</div><div>Status</div><div>Valor</div></div>${items.map(c => `<div class="mini-row"><div><strong>${escapeHtml(c.item || '-')}</strong></div><div>${escapeHtml(c.fornecedor || '-')}</div><div>${statusBadge(c.status_compra)}</div><div>${money(c.valor_aprovado || c.valor_cotado || 0)}</div></div>`).join('')}</div>`;
+      return `<div class="mini-table"><div class="mini-row header"><div>Item</div><div>Fornecedor</div><div>Status</div><div>Ação</div></div>${items.map(c => `<div class="mini-row"><div><strong>${escapeHtml(c.item || '-')}</strong><br><small>${money(c.valor_aprovado || c.valor_cotado || 0)}</small></div><div>${escapeHtml(c.fornecedor || '-')}</div><div>${statusBadge(c.status_compra)}</div><div><button class="btn btn-blue btn-small" onclick="closeModal(); openCompraDetails(${jsArg(c.id_compra)})">Abrir</button></div></div>`).join('')}</div>`;
     }
 
     function miniRegulacoesTable(items) {
@@ -2195,6 +2299,7 @@
     window.renderVeiculos = renderVeiculos;
     window.renderEventos = renderEventos;
     window.renderVistorias = renderVistorias;
+    window.renderCompras = renderCompras;
     window.renderKanban = renderKanban;
     window.openAssociadoModal = openAssociadoModal;
     window.openAssociadoModalById = openAssociadoModalById;
@@ -2210,6 +2315,11 @@
     window.openMoveEventModal = openMoveEventModal;
     window.openCommentEventModal = openCommentEventModal;
     window.openCompraModal = openCompraModal;
+    window.openCompraAvulsaModal = openCompraAvulsaModal;
+    window.openCompraModalById = openCompraModalById;
+    window.openCompraDetails = openCompraDetails;
+    window.marcarCompraEntregue = marcarCompraEntregue;
+    window.cancelarCompra = cancelarCompra;
     window.openRegulacaoModal = openRegulacaoModal;
     window.openRegulacaoModalById = openRegulacaoModalById;
     window.openRegulacaoDetails = openRegulacaoDetails;
@@ -2220,6 +2330,7 @@
     window.paintVehicleTable = paintVehicleTable;
     window.paintEventTable = paintEventTable;
     window.paintRegulacaoTable = paintRegulacaoTable;
+    window.paintCompraTable = paintCompraTable;
 
     async function init() {
       const session = getSession();
