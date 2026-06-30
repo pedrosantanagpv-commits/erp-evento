@@ -1,19 +1,19 @@
-# ERP Evento MVP v0.0.7
+# ERP Evento MVP v0.0.9
 
-Versão focada no módulo operacional de **Compras**, conectado à Central de Eventos.
+Versão focada no módulo de **Reclamações / SAC**, adicionando controle de tratativas, responsáveis e prazos de resposta.
 
 ## O que entrou nesta versão
 
-- Novo menu **Compras** no ERP.
-- Tela de controle de compras com resumo de total, pendentes, aguardando aprovação, entregues e valor filtrado.
-- Cadastro de compra avulsa ou vinculada a um evento.
-- Edição de compra, fornecedor, valores, responsável, status e observações.
-- Detalhes da compra com vínculo direto para abrir o evento.
-- Botão para marcar compra como entregue.
-- Cancelamento lógico de compras, sem apagar da planilha.
-- Compras aparecem com botão de abertura dentro da Central do Evento.
-- Ao criar compra vinculada, o evento pode ser movimentado para a etapa **Compras** automaticamente.
-- Integração com a aba `Compras` já criada no Google Sheets.
+- Novo menu **Reclamações** no ERP.
+- Cadastro de reclamação/SAC com associado, telefone, placa, origem, categoria, prioridade, status, responsável, prazo, descrição e tratativa.
+- Listagem com filtros por busca geral, status, prioridade, categoria e situação de prazo.
+- Cards de resumo: total, abertas, atenção, atrasadas e resolvidas/finalizadas.
+- Detalhes da reclamação com vínculo por placa/associado para veículo e eventos relacionados.
+- Edição de reclamação.
+- Marcar reclamação como resolvida.
+- Cancelamento lógico da reclamação.
+- Indicador de prazo: No prazo, Atenção, Atrasada, Sem prazo ou Encerrado.
+- Integração com a aba `Reclamacoes` já criada no Google Sheets.
 
 ## Arquivos principais
 
@@ -48,13 +48,14 @@ Senha: 123456
 ## Teste recomendado
 
 1. Entrar no ERP.
-2. Abrir o menu **Compras**.
-3. Criar uma compra vinculada a um evento.
-4. Conferir se ela aparece na tabela de compras.
-5. Abrir os detalhes da compra.
-6. Editar fornecedor, valores e status.
-7. Marcar a compra como entregue.
-8. Abrir a Central do Evento e conferir se a compra aparece vinculada.
+2. Abrir o menu **Reclamações**.
+3. Clicar em **Nova reclamação**.
+4. Cadastrar uma reclamação vinculando placa e associado.
+5. Conferir o prazo e status na listagem.
+6. Abrir **Detalhes** e conferir veículo/eventos relacionados.
+7. Editar a tratativa.
+8. Marcar como resolvida.
+9. Confirmar se o dashboard atualiza o card de reclamações.
 
 ## Atenção
 
