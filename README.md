@@ -1,26 +1,18 @@
-# ERP Evento MVP v0.0.5
+# ERP Evento MVP v0.0.6
 
-Versão focada na **Central de Eventos**, transformando o módulo de eventos em uma tela operacional para acompanhamento de ocorrências de proteção veicular.
+Versão focada no módulo técnico de **Vistorias e Regulação**, conectado à Central de Eventos.
 
 ## O que entrou nesta versão
 
-- Central do evento com visual mais completo.
-- Linha de fluxo do evento: Aberto, Análise, Vistoria, Regulação, Compras, Reparo, Aguardando Aprovação e Finalizado.
-- Indicador de prazo: Dentro do prazo, Atenção, Atrasado ou Encerrado.
-- Dias em aberto calculados automaticamente.
-- Botões de ação rápida dentro do evento:
-  - Enviar para vistoria
-  - Enviar para regulação
-  - Enviar para compras
-  - Enviar para reparo
-  - Finalizar evento
-  - Recusar evento
-- Comentários internos salvos no histórico do evento.
-- Timeline visual do histórico.
-- Criação de solicitação de compra a partir do evento.
-- Compras vinculadas ao evento aparecem dentro da Central do Evento.
-- Kanban com prazo/dias em aberto nos cards.
-- Botão de “Central” no lugar de apenas “Detalhes” nos eventos.
+- Novo menu **Vistorias** no ERP.
+- Tela de controle técnico com resumo de total, em aberto, finalizados e valor aprovado filtrado.
+- Cadastro de vistoria/regulação vinculado a um evento.
+- Edição e cancelamento de registros técnicos.
+- Detalhes técnicos com parecer, valores, entrada, saída e vínculo com o evento.
+- Botões dentro da Central do Evento para criar **Vistoria** ou **Regulação**.
+- Vistorias/regulações vinculadas aparecem dentro da Central do Evento.
+- Ao criar uma vistoria/regulação, o evento é movimentado automaticamente para a etapa correspondente.
+- Integração com a aba `Vistorias_Regulacao` já criada no Google Sheets.
 
 ## Arquivos principais
 
@@ -55,14 +47,13 @@ Senha: 123456
 ## Teste recomendado
 
 1. Entrar no ERP.
-2. Abrir Eventos.
-3. Clicar em Central no evento teste.
-4. Adicionar comentário interno.
-5. Usar uma ação rápida, como Enviar para vistoria.
-6. Conferir a timeline.
-7. Criar uma solicitação de compra pelo botão Compra.
-8. Conferir se a compra aparece na Central do Evento.
-9. Abrir o Kanban e conferir a etapa atualizada.
+2. Abrir a Central de um evento.
+3. Clicar em **Vistoria** e criar um registro técnico.
+4. Conferir se o evento mudou para a etapa de Vistoria.
+5. Abrir o menu **Vistorias**.
+6. Abrir os detalhes do registro técnico.
+7. Editar o parecer ou valores.
+8. Voltar na Central do Evento e conferir se o registro aparece vinculado.
 
 ## Atenção
 
