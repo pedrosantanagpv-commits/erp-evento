@@ -1,8 +1,8 @@
 {
   "name": "erp-evento-mvp",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "private": true,
-  "description": "MVP de ERP para proteção veicular com relatórios e indicadores avançados, filtros operacionais, compras, vistorias, eventos e Kanban.",
+  "description": "MVP de ERP para proteção veicular com usuários, permissões, token, eventos, vistorias, compras, reclamações e relatórios.",
   "scripts": {
     "dev": "vercel dev",
     "start": "vercel dev"
