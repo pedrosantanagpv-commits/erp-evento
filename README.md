@@ -1,42 +1,35 @@
-# ERP Evento MVP v0.1.2
+# ERP Evento MVP v0.1.3
 
-Versão focada em cadastros gerenciais e organização operacional do ERP de proteção veicular.
+Versão gerencial focada na integração entre cadastros principais do ERP de proteção veicular.
 
-## O que entrou
+## Principais melhorias
 
-- Novo módulo **Consultores e Regionais**.
-- Cadastro, edição, detalhes e inativação de consultores/regionais.
-- Novo módulo **Oficinas**.
-- Cadastro, edição, detalhes e inativação de oficinas credenciadas/prestadores operacionais.
-- Dashboard sem foco em atendimento/SAC, com indicador de vistorias abertas, consultores ativos e oficinas ativas.
-- Menu lateral mais alinhado ao ERP gerencial.
-- Permissões atualizadas para os novos módulos.
-- Mantida a base atual de usuários, eventos, vistorias, compras, kanban e relatórios.
+- Veículos agora podem ser vinculados a consultores/regionais cadastrados.
+- Ao selecionar consultor no veículo, o sistema preenche regional e cooperativa automaticamente.
+- Eventos agora podem selecionar oficina cadastrada.
+- Detalhes do consultor/regional com carteira vinculada, FIPE total e mensalidade prevista.
+- Detalhes da oficina com eventos, registros técnicos, valores orçados e aprovados.
+- Relatórios com novas visões: carteira por consultor/regional e eventos por oficina.
+- Mantém o foco gerencial: sem WhatsApp, atendimento ou templates de comunicação.
 
 ## Arquivos para substituir no GitHub
 
-Substitua estes arquivos:
+- `index.html`
+- `api/erp.js`
+- `package.json`
+- `README.md`
 
-```txt
-index.html
-api/erp.js
-package.json
-README.md
-```
+## Importante
 
-## Apps Script
-
-Não precisa alterar o Apps Script nesta versão.
-
-Não execute `setupBancoERP`.
+Não execute `setupBancoERP`. Esta atualização não altera a estrutura do banco nem exige mudança no Apps Script.
 
 ## Teste recomendado
 
-1. Entrar como Super Admin.
-2. Abrir **Consultores**.
-3. Criar um consultor/regional teste.
-4. Editar e inativar o registro.
-5. Abrir **Oficinas**.
-6. Criar uma oficina teste.
-7. Abrir detalhes e editar.
-8. Voltar ao Dashboard e conferir os novos indicadores.
+1. Abrir Consultores e criar um consultor/regional com regional e cooperativa.
+2. Abrir Veículos, editar um veículo e selecionar o consultor cadastrado.
+3. Confirmar que regional e cooperativa foram preenchidas automaticamente.
+4. Abrir Oficinas e criar uma oficina.
+5. Abrir Eventos, editar/criar evento e selecionar a oficina cadastrada.
+6. Abrir detalhes do consultor e conferir FIPE/mensalidade da carteira.
+7. Abrir detalhes da oficina e conferir eventos vinculados.
+8. Abrir Relatórios e conferir carteira por consultor e eventos por oficina.
