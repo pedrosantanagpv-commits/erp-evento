@@ -985,6 +985,354 @@
       .search { min-width: 100%; }
       .login-card { padding: 24px; }
     }
+  
+
+    /* =========================================================
+       v0.1.1 — Refinamento visual gerencial
+       Ajustes apenas de estética e experiência. Não altera a API.
+    ========================================================= */
+    :root {
+      --bg: #eef1f6;
+      --surface: #ffffff;
+      --surface-2: #f6f7fb;
+      --dark: #0b1018;
+      --dark-2: #161c27;
+      --muted: #667085;
+      --line: #dde3ec;
+      --yellow: #ffd200;
+      --yellow-2: #d7aa00;
+      --radius: 20px;
+      --shadow: 0 18px 46px rgba(15, 23, 42, .075);
+      --shadow-soft: 0 10px 28px rgba(15, 23, 42, .055);
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 88% 4%, rgba(255, 210, 0, .12), transparent 26%),
+        linear-gradient(180deg, #f7f8fb 0%, #eef1f6 44%, #edf0f5 100%);
+      color: #070b12;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    .app { grid-template-columns: 276px 1fr; }
+
+    .sidebar {
+      padding: 24px 18px;
+      background:
+        radial-gradient(circle at 12% 5%, rgba(255, 210, 0, .14), transparent 24%),
+        linear-gradient(180deg, #0b1018 0%, #0e131d 52%, #080b10 100%);
+      border-right: 1px solid rgba(255, 255, 255, .06);
+      box-shadow: 14px 0 42px rgba(5, 7, 12, .10);
+    }
+
+    .side-brand {
+      padding: 4px 4px 18px;
+      margin-bottom: 4px;
+      border-bottom-color: rgba(255, 255, 255, .10);
+    }
+
+    .brand-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 17px;
+      box-shadow: 0 14px 34px rgba(255, 210, 0, .22);
+    }
+
+    .side-brand strong {
+      font-size: 14px;
+      letter-spacing: -.025em;
+    }
+
+    .side-brand small {
+      display: block;
+      margin-top: 2px;
+      color: rgba(255, 255, 255, .58);
+      font-size: 12px;
+    }
+
+    .nav { gap: 6px; }
+
+    .nav button {
+      min-height: 48px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      color: rgba(255, 255, 255, .66);
+      font-weight: 800;
+      letter-spacing: -.015em;
+      transition: background .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+
+    .nav button:hover {
+      background: rgba(255, 255, 255, .075);
+      color: rgba(255, 255, 255, .92);
+      transform: translateX(2px);
+    }
+
+    .nav button.active {
+      background: linear-gradient(90deg, rgba(255, 210, 0, .16), rgba(255, 255, 255, .06));
+      color: white;
+      box-shadow: inset 4px 0 0 var(--yellow), 0 10px 24px rgba(0, 0, 0, .14);
+    }
+
+    .sidebar-footer {
+      border-top-color: rgba(255, 255, 255, .10);
+      padding-top: 16px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      box-shadow: 0 10px 22px rgba(255, 210, 0, .14);
+    }
+
+    .main {
+      padding: 34px 28px 44px;
+      max-width: 1480px;
+      width: 100%;
+    }
+
+    .topbar {
+      align-items: center;
+      margin-bottom: 26px;
+    }
+
+    .topbar h2 {
+      font-size: clamp(32px, 3.6vw, 44px);
+      line-height: .98;
+      letter-spacing: -.07em;
+    }
+
+    .topbar p {
+      color: #697386;
+      font-size: 15px;
+    }
+
+    .btn {
+      min-height: 46px;
+      border-radius: 15px;
+      font-weight: 900;
+      letter-spacing: -.02em;
+    }
+
+    .btn-yellow {
+      background: linear-gradient(180deg, #ffd900 0%, #ffd000 100%);
+      color: #0b1018;
+      box-shadow: 0 14px 26px rgba(255, 210, 0, .22);
+    }
+
+    .btn-yellow:hover { filter: brightness(.985); }
+
+    .btn-ghost {
+      background: #f4f6f9;
+      color: #111827;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .03);
+    }
+
+    .btn-small {
+      min-height: 36px;
+      border-radius: 12px;
+      padding: 0 12px;
+    }
+
+    .grid-cards { gap: 18px; }
+
+    .card,
+    .content-panel,
+    .summary-item,
+    .detail-card,
+    .history-item,
+    .timeline-card,
+    .comment-box,
+    .workflow-step,
+    .kanban-card {
+      border-color: rgba(111, 123, 143, .20);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .metric {
+      min-height: 138px;
+      padding: 22px;
+      background:
+        radial-gradient(circle at 98% 0%, rgba(255, 210, 0, .17), transparent 29%),
+        linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+    }
+
+    .metric::after {
+      right: -32px;
+      top: -34px;
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 210, 0, .16);
+      filter: blur(.2px);
+    }
+
+    .metric span,
+    .summary-item span,
+    .detail-card span {
+      color: #687385;
+      letter-spacing: .075em;
+    }
+
+    .metric strong {
+      margin-top: 10px;
+      font-size: 32px;
+    }
+
+    .content-panel {
+      border-radius: 26px;
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 20px 55px rgba(15, 23, 42, .07);
+    }
+
+    .panel-head {
+      padding: 20px 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(248,250,253,.92));
+    }
+
+    .panel-head h3 {
+      font-size: 19px;
+      letter-spacing: -.045em;
+    }
+
+    .summary-strip {
+      padding: 16px;
+      gap: 12px;
+      background: linear-gradient(180deg, #fbfcff, #f6f8fb);
+    }
+
+    .summary-item {
+      padding: 15px 16px;
+      border-radius: 17px;
+      background: white;
+    }
+
+    .search,
+    .field input,
+    .field select,
+    .field textarea {
+      background: #fbfcff;
+      border-color: #dfe5ee;
+      border-radius: 15px;
+    }
+
+    .field input:hover,
+    .field select:hover,
+    .field textarea:hover,
+    .search:hover {
+      border-color: #cfd7e3;
+    }
+
+    .table-wrap {
+      background: white;
+    }
+
+    th {
+      background: #f7f9fc;
+      color: #485162;
+      font-size: 11px;
+      letter-spacing: .09em;
+      font-weight: 900;
+    }
+
+    td { color: #111827; }
+
+    tr:hover td {
+      background: #fffbea;
+    }
+
+    .badge {
+      padding: 6px 10px;
+      font-weight: 900;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.03);
+    }
+
+    .badge.green { background: #dff8e9; color: #0f6b38; }
+    .badge.red { background: #fde3e3; color: #a21c1c; }
+    .badge.orange { background: #fff0d9; color: #9a4a09; }
+    .badge.dark { background: #e8ebf0; color: #121826; }
+
+    .modal-backdrop {
+      background: rgba(7, 11, 18, .62);
+      backdrop-filter: blur(12px) saturate(115%);
+    }
+
+    .modal {
+      border-radius: 28px;
+      border-color: rgba(255,255,255,.38);
+      box-shadow: 0 36px 110px rgba(0, 0, 0, .34);
+    }
+
+    .modal-head {
+      padding: 22px 26px;
+      background: linear-gradient(180deg, #ffffff 0%, #fafbfe 100%);
+    }
+
+    .modal-head h3 {
+      font-size: 25px;
+      letter-spacing: -.055em;
+    }
+
+    .modal-body { padding: 24px 26px 26px; }
+
+    .detail-grid { gap: 14px; }
+
+    .detail-card {
+      background: linear-gradient(180deg, #fbfcff, #f8fafc);
+      border-radius: 17px;
+      padding: 16px;
+    }
+
+    .kanban-col {
+      background: rgba(246, 248, 252, .95);
+      border-color: #dfe5ee;
+      border-radius: 20px;
+    }
+
+    .kanban-col h4 {
+      font-size: 14px;
+      color: #1f2937;
+      letter-spacing: -.02em;
+    }
+
+    .kanban-card {
+      border-radius: 18px;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, .06);
+    }
+
+    .event-hero {
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at top right, rgba(255, 210, 0, .24), transparent 31%),
+        linear-gradient(135deg, #0b1018 0%, #171e2b 100%);
+      box-shadow: 0 18px 42px rgba(8, 12, 20, .16);
+    }
+
+    .workflow-step.active {
+      background: linear-gradient(180deg, #fff8bf, #fff4a6);
+      border-color: #e8bf00;
+    }
+
+    .empty {
+      padding: 50px 22px;
+    }
+
+    .empty strong {
+      font-size: 19px;
+      letter-spacing: -.03em;
+    }
+
+    .toast {
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.26);
+    }
+
+    ::selection {
+      background: rgba(255, 210, 0, .38);
+      color: #0b1018;
+    }
+
   </style>
 </head>
 <body>
@@ -1073,7 +1421,7 @@
 
   <script>
     const API_BASE = '/api/erp';
-    const APP_VERSION = '0.1.0';
+    const APP_VERSION = '0.1.1';
 
     const state = {
       user: null,
@@ -1406,7 +1754,7 @@
           </div>
           <div class="content-panel">
             <div class="panel-head">
-              <div><h3>v${APP_VERSION} em operação</h3><p>Operação completa com usuários, permissões, eventos, vistorias/regulação, compras, relatórios e SAC.</p></div>
+              <div><h3>v${APP_VERSION} em operação</h3><p>Operação gerencial com usuários, permissões, eventos, vistorias/regulação, compras e relatórios.</p></div>
             </div>
             <div class="empty"><strong>Banco conectado com sucesso.</strong>Use os módulos liberados para seu perfil para acompanhar a operação completa de proteção veicular.</div>
           </div>`;
