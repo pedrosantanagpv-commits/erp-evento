@@ -1389,10 +1389,11 @@
         <button data-view="dashboard" class="active">📊 Dashboard</button>
         <button data-view="associados">👥 Associados</button>
         <button data-view="veiculos">🚗 Veículos</button>
+        <button data-view="consultores">🧑‍💼 Consultores</button>
         <button data-view="eventos">🛠️ Eventos</button>
         <button data-view="vistorias">🔎 Vistorias</button>
         <button data-view="compras">🛒 Compras</button>
-        <button data-view="reclamacoes">📣 Reclamações</button>
+        <button data-view="oficinas">🏭 Oficinas</button>
         <button data-view="kanban">🧩 Kanban</button>
         <button data-view="relatorios">📈 Relatórios</button>
         <button data-view="usuarios">👤 Usuários</button>
@@ -1421,7 +1422,7 @@
 
   <script>
     const API_BASE = '/api/erp';
-    const APP_VERSION = '0.1.1';
+    const APP_VERSION = '0.1.2';
 
     const state = {
       user: null,
@@ -1437,6 +1438,8 @@
         compras: [],
         regulacoes: [],
         reclamacoes: [],
+        consultores: [],
+        oficinas: [],
         usuarios: [],
         kanban: null
       }
@@ -1462,25 +1465,26 @@
       dashboard: 'Dashboard',
       associados: 'Associados',
       veiculos: 'Veículos',
+      consultores: 'Consultores',
       eventos: 'Eventos',
       vistorias: 'Vistorias',
       compras: 'Compras',
-      reclamacoes: 'Reclamações',
+      oficinas: 'Oficinas',
       kanban: 'Kanban',
       relatorios: 'Relatórios',
       usuarios: 'Usuários'
     };
 
     const ROLE_PERMISSIONS = {
-      'super admin': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'compras', 'reclamacoes', 'kanban', 'relatorios', 'usuarios'],
-      'administrativo': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'compras', 'reclamacoes', 'kanban', 'relatorios', 'usuarios'],
-      'cadastro': ['dashboard', 'associados', 'veiculos', 'eventos', 'kanban', 'relatorios'],
-      'eventos': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'compras', 'reclamacoes', 'kanban', 'relatorios'],
-      'regulacao': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'kanban', 'relatorios'],
-      'compras': ['dashboard', 'eventos', 'compras', 'kanban', 'relatorios'],
-      'financeiro': ['dashboard', 'associados', 'veiculos', 'compras', 'reclamacoes', 'relatorios'],
+      'super admin': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'usuarios'],
+      'administrativo': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'usuarios'],
+      'cadastro': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios'],
+      'eventos': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios'],
+      'regulacao': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'oficinas', 'kanban', 'relatorios'],
+      'compras': ['dashboard', 'eventos', 'compras', 'oficinas', 'kanban', 'relatorios'],
+      'financeiro': ['dashboard', 'associados', 'veiculos', 'consultores', 'compras', 'relatorios'],
       'consultor': ['dashboard', 'associados', 'veiculos', 'eventos', 'kanban'],
-      'regional': ['dashboard', 'associados', 'veiculos', 'eventos', 'reclamacoes', 'kanban', 'relatorios'],
+      'regional': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios'],
       'oficina': ['dashboard', 'eventos', 'vistorias', 'compras']
     };
 
@@ -1704,10 +1708,11 @@
       if (view === 'dashboard') return renderDashboard();
       if (view === 'associados') return renderAssociados();
       if (view === 'veiculos') return renderVeiculos();
+      if (view === 'consultores') return renderConsultores();
       if (view === 'eventos') return renderEventos();
       if (view === 'vistorias') return renderVistorias();
       if (view === 'compras') return renderCompras();
-      if (view === 'reclamacoes') return renderReclamacoes();
+      if (view === 'oficinas') return renderOficinas();
       if (view === 'kanban') return renderKanban();
       if (view === 'relatorios') return renderRelatorios();
       if (view === 'usuarios') return renderUsuarios();
@@ -1737,8 +1742,16 @@
     async function renderDashboard() {
       els.viewRoot.innerHTML = topbar('Dashboard Geral', 'Visão rápida da operação e dos principais indicadores.') + skeletonDashboard();
       try {
-        const result = await apiGet('dashboard');
+        const [result] = await Promise.all([
+          apiGet('dashboard'),
+          ensureRegulacoesCache(true),
+          ensureConsultoresCache(true),
+          ensureOficinasCache(true)
+        ]);
         const d = result.data || {};
+        const vistoriasAbertas = state.cache.regulacoes.filter(item => !['finalizado', 'concluido', 'concluído', 'cancelado'].includes(normalizeText(item.status))).length;
+        const consultoresAtivos = state.cache.consultores.filter(item => normalizeText(item.status) === 'ativo').length;
+        const oficinasAtivas = state.cache.oficinas.filter(item => normalizeText(item.status) === 'ativo').length;
         state.cache.dashboard = d;
         els.viewRoot.innerHTML = `
           ${topbar('Dashboard Geral', 'Visão rápida da operação e dos principais indicadores.', '<button class="btn btn-yellow" onclick="renderDashboard()">Atualizar</button>')}
@@ -1746,17 +1759,19 @@
             ${metric('Associados', d.total_associados, 'Base cadastrada')}
             ${metric('Veículos', d.total_veiculos, `${d.veiculos_ativos || 0} ativos`)}
             ${metric('Eventos abertos', d.eventos_abertos, `${d.total_eventos || 0} eventos no total`)}
-            ${metric('Reclamações', d.reclamacoes_abertas, 'Abertas ou em andamento')}
+            ${metric('Vistorias abertas', vistoriasAbertas, `${state.cache.regulacoes.length} registro(s) técnico(s)`)}
             ${metric('Compras pendentes', d.compras_pendentes, 'Ainda não entregues')}
+            ${metric('Consultores ativos', consultoresAtivos, `${state.cache.consultores.length} cadastro(s)`)}
+            ${metric('Oficinas ativas', oficinasAtivas, `${state.cache.oficinas.length} cadastro(s)`)}
             ${metric('FIPE total', money(d.valor_fipe_total), 'Soma dos veículos')}
             ${metric('Mensalidade prevista', money(d.mensalidade_total_prevista), 'Receita bruta estimada')}
             ${metric('Status da API', 'Online', 'Apps Script conectado')}
           </div>
           <div class="content-panel">
             <div class="panel-head">
-              <div><h3>v${APP_VERSION} em operação</h3><p>Operação gerencial com usuários, permissões, eventos, vistorias/regulação, compras e relatórios.</p></div>
+              <div><h3>v${APP_VERSION} em operação</h3><p>ERP gerencial com base, eventos, vistoria/regulação, compras, consultores, oficinas, usuários e relatórios.</p></div>
             </div>
-            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use os módulos liberados para seu perfil para acompanhar a operação completa de proteção veicular.</div>
+            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use os módulos gerenciais para acompanhar a operação completa de proteção veicular.</div>
           </div>`;
       } catch (error) { renderError(error.message); }
     }
@@ -1810,6 +1825,20 @@
       return state.cache.reclamacoes;
     }
 
+    async function ensureConsultoresCache(force = false) {
+      if (!force && state.cache.consultores.length) return state.cache.consultores;
+      const result = await apiGet('listar', { tabela: 'Consultores_Regionais' });
+      state.cache.consultores = result.data || [];
+      return state.cache.consultores;
+    }
+
+    async function ensureOficinasCache(force = false) {
+      if (!force && state.cache.oficinas.length) return state.cache.oficinas;
+      const result = await apiGet('listar', { tabela: 'Oficinas' });
+      state.cache.oficinas = result.data || [];
+      return state.cache.oficinas;
+    }
+
 
     async function ensureUsuariosCache(force = false) {
       if (!force && state.cache.usuarios.length) return state.cache.usuarios;
@@ -1849,11 +1878,197 @@
       return state.cache.compras.find(c => String(c.id_compra) === String(id));
     }
 
+    function findConsultorById(id) {
+      return state.cache.consultores.find(c => String(c.id_consultor) === String(id));
+    }
+
+    function findOficinaById(id) {
+      return state.cache.oficinas.find(o => String(o.id_oficina) === String(id));
+    }
+
 
     function findUsuarioById(id) {
       return state.cache.usuarios.find(u => String(u.id_usuario) === String(id));
     }
 
+
+
+    async function renderConsultores(filter = '') {
+      if (!hasPermission('consultores')) return renderBlocked('consultores');
+      els.viewRoot.innerHTML = topbar('Consultores e Regionais', 'Controle gerencial de consultores, regionais e cooperativas.', '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo consultor</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>') + loadingPanel('Carregando consultores...');
+      try {
+        await ensureConsultoresCache(true);
+        paintConsultorTable(filter);
+      } catch (error) { renderError(error.message); }
+    }
+
+    function paintConsultorTable(filter = '') {
+      const termo = String(filter || '').toLowerCase();
+      const data = state.cache.consultores.filter(item => `${item.nome} ${item.cpf_cnpj} ${item.telefone} ${item.email} ${item.regional} ${item.cooperativa} ${item.tipo} ${item.status}`.toLowerCase().includes(termo));
+      const ativos = state.cache.consultores.filter(item => normalizeText(item.status) === 'ativo').length;
+      const inativos = state.cache.consultores.filter(item => normalizeText(item.status) === 'inativo').length;
+      const regionais = uniqueValues(state.cache.consultores.map(item => item.regional)).length;
+      els.viewRoot.innerHTML = `
+        ${topbar('Consultores e Regionais', 'Controle gerencial de consultores, regionais e cooperativas.', '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo consultor</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="summary-strip">${summaryItem('Total', state.cache.consultores.length)}${summaryItem('Ativos', ativos)}${summaryItem('Inativos', inativos)}${summaryItem('Regionais', regionais)}${summaryItem('Filtrados', data.length)}</div>
+          <div class="panel-head"><div><h3>Base comercial</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por nome, regional, cooperativa..." value="${escapeHtml(filter)}" oninput="paintConsultorTable(this.value)" /></div></div>
+          ${data.length ? consultorTable(data) : emptyState('Nenhum consultor cadastrado.', 'Clique em “Novo consultor” para criar o primeiro registro.')}
+        </div>`;
+    }
+
+    function consultorTable(data) {
+      return `<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Contato</th><th>Regional</th><th>Cooperativa</th><th>Tipo</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>
+        ${data.map(item => `<tr>
+          <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.cpf_cnpj || '')}</small></td><td>${escapeHtml(item.telefone || '-')}<br><small>${escapeHtml(item.email || '')}</small></td><td>${escapeHtml(item.regional || '-')}</td><td>${escapeHtml(item.cooperativa || '-')}</td><td>${escapeHtml(item.tipo || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_cadastro)}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openConsultorDetails(${jsArg(item.id_consultor)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openConsultorModalById(${jsArg(item.id_consultor)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarConsultor(${jsArg(item.id_consultor)})">Inativar</button></div></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
+    }
+
+    function openConsultorModalById(id) {
+      const item = findConsultorById(id);
+      if (!item) return toast('Consultor não encontrado na tela atual.', 'error');
+      openConsultorModal(item);
+    }
+
+    function openConsultorModal(item = null) {
+      const isEdit = !!item;
+      const tipos = ['Consultor', 'Regional', 'Líder', 'Cooperativa', 'Parceiro'];
+      const statuses = ['Ativo', 'Inativo', 'Pendente'];
+      openModal(isEdit ? 'Editar consultor/regional' : 'Novo consultor/regional', `
+        <div class="form-grid">
+          ${field('nome', 'Nome', 'Nome completo', '', item?.nome || '')}
+          ${field('cpf_cnpj', 'CPF/CNPJ', '000.000.000-00', '', item?.cpf_cnpj || '')}
+          ${field('telefone', 'Telefone', '81999999999', '', item?.telefone || '')}
+          ${field('email', 'E-mail', 'email@dominio.com', '', item?.email || '')}
+          ${field('regional', 'Regional', 'Caruaru', '', item?.regional || '')}
+          ${field('cooperativa', 'Cooperativa', 'GPV', '', item?.cooperativa || '')}
+          ${selectField('tipo', 'Tipo', tipos, item?.tipo || 'Consultor')}
+          ${selectField('status', 'Status', statuses, item?.status || 'Ativo')}
+          ${textareaField('observacoes', 'Observações', 'Observações internas...', 'span-2', item?.observacoes || '')}
+        </div>`, isEdit ? 'Salvar alterações' : 'Cadastrar', async data => {
+          const payload = isEdit ? { action: 'editar', tabela: 'Consultores_Regionais', id: item.id_consultor, dados: data } : { action: 'criar', tabela: 'Consultores_Regionais', dados: data };
+          await apiPost(payload);
+          toast(isEdit ? 'Consultor atualizado com sucesso.' : 'Consultor cadastrado com sucesso.');
+          await renderConsultores();
+        });
+    }
+
+    async function openConsultorDetails(id) {
+      try {
+        await Promise.all([ensureConsultoresCache(), ensureVeiculosCache(), ensureEventosCache()]);
+        const item = findConsultorById(id);
+        if (!item) return toast('Consultor não encontrado.', 'error');
+        const veiculos = state.cache.veiculos.filter(v => normalizeText(v.consultor) === normalizeText(item.nome) || normalizeText(v.regional) === normalizeText(item.regional));
+        const eventos = state.cache.eventos.filter(e => normalizeText(e.responsavel) === normalizeText(item.nome) || normalizeText(e.associado).includes(normalizeText(item.nome)));
+        openCustomModal('Detalhes do consultor/regional', `
+          <div class="detail-grid">
+            ${detailCard('Nome', item.nome)}${detailCard('Tipo', item.tipo)}${detailCard('Status', item.status)}
+            ${detailCard('CPF/CNPJ', item.cpf_cnpj)}${detailCard('Telefone', item.telefone)}${detailCard('E-mail', item.email)}
+            ${detailCard('Regional', item.regional)}${detailCard('Cooperativa', item.cooperativa)}${detailCard('Cadastro', dateBR(item.data_cadastro))}
+          </div>
+          <div class="detail-section"><h4>Veículos relacionados</h4>${miniVeiculosTable(veiculos)}</div>
+          <div class="detail-section"><h4>Eventos relacionados</h4>${miniEventosTable(eventos)}</div>
+          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>`, true);
+      } catch (error) { toast(error.message, 'error'); }
+    }
+
+    async function inativarConsultor(id) {
+      const item = findConsultorById(id);
+      confirmAction('Inativar consultor/regional', `Deseja inativar ${item?.nome || 'este registro'}?`, 'Inativar', async () => {
+        await apiPost({ action: 'editar', tabela: 'Consultores_Regionais', id, dados: { status: 'Inativo' } });
+        toast('Consultor/regional inativado com sucesso.');
+        await renderConsultores();
+      });
+    }
+
+    async function renderOficinas(filter = '') {
+      if (!hasPermission('oficinas')) return renderBlocked('oficinas');
+      els.viewRoot.innerHTML = topbar('Oficinas', 'Cadastro gerencial de oficinas credenciadas e prestadores operacionais.', '<button class="btn btn-yellow" onclick="openOficinaModal()">+ Nova oficina</button><button class="btn btn-ghost" onclick="renderOficinas()">Atualizar</button>') + loadingPanel('Carregando oficinas...');
+      try {
+        await ensureOficinasCache(true);
+        paintOficinaTable(filter);
+      } catch (error) { renderError(error.message); }
+    }
+
+    function paintOficinaTable(filter = '') {
+      const termo = String(filter || '').toLowerCase();
+      const data = state.cache.oficinas.filter(item => `${item.nome} ${item.cnpj} ${item.telefone} ${item.email} ${item.cidade} ${item.estado} ${item.responsavel} ${item.status}`.toLowerCase().includes(termo));
+      const ativos = state.cache.oficinas.filter(item => normalizeText(item.status) === 'ativo').length;
+      const inativos = state.cache.oficinas.filter(item => normalizeText(item.status) === 'inativo').length;
+      const cidades = uniqueValues(state.cache.oficinas.map(item => [item.cidade, item.estado].filter(Boolean).join('/'))).length;
+      els.viewRoot.innerHTML = `
+        ${topbar('Oficinas', 'Cadastro gerencial de oficinas credenciadas e prestadores operacionais.', '<button class="btn btn-yellow" onclick="openOficinaModal()">+ Nova oficina</button><button class="btn btn-ghost" onclick="renderOficinas()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="summary-strip">${summaryItem('Total', state.cache.oficinas.length)}${summaryItem('Ativas', ativos)}${summaryItem('Inativas', inativos)}${summaryItem('Cidades/UF', cidades)}${summaryItem('Filtradas', data.length)}</div>
+          <div class="panel-head"><div><h3>Base de oficinas</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por oficina, cidade, responsável..." value="${escapeHtml(filter)}" oninput="paintOficinaTable(this.value)" /></div></div>
+          ${data.length ? oficinaTable(data) : emptyState('Nenhuma oficina cadastrada.', 'Clique em “Nova oficina” para criar o primeiro registro.')}
+        </div>`;
+    }
+
+    function oficinaTable(data) {
+      return `<div class="table-wrap"><table><thead><tr><th>Oficina</th><th>CNPJ</th><th>Contato</th><th>Cidade/UF</th><th>Responsável</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+        ${data.map(item => `<tr>
+          <td><strong>${escapeHtml(item.nome || '-')}</strong></td><td>${escapeHtml(item.cnpj || '-')}</td><td>${escapeHtml(item.telefone || '-')}<br><small>${escapeHtml(item.email || '')}</small></td><td>${escapeHtml([item.cidade, item.estado].filter(Boolean).join('/') || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.status)}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openOficinaDetails(${jsArg(item.id_oficina)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openOficinaModalById(${jsArg(item.id_oficina)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarOficina(${jsArg(item.id_oficina)})">Inativar</button></div></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
+    }
+
+    function openOficinaModalById(id) {
+      const item = findOficinaById(id);
+      if (!item) return toast('Oficina não encontrada na tela atual.', 'error');
+      openOficinaModal(item);
+    }
+
+    function openOficinaModal(item = null) {
+      const isEdit = !!item;
+      const statuses = ['Ativo', 'Inativo', 'Pendente'];
+      openModal(isEdit ? 'Editar oficina' : 'Nova oficina', `
+        <div class="form-grid">
+          ${field('nome', 'Nome da oficina', 'Oficina credenciada', '', item?.nome || '')}
+          ${field('cnpj', 'CNPJ', '00.000.000/0000-00', '', item?.cnpj || '')}
+          ${field('telefone', 'Telefone', '81999999999', '', item?.telefone || '')}
+          ${field('email', 'E-mail', 'oficina@dominio.com', '', item?.email || '')}
+          ${field('cidade', 'Cidade', 'Caruaru', '', item?.cidade || '')}
+          ${field('estado', 'Estado', 'PE', '', item?.estado || '')}
+          ${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || '')}
+          ${selectField('status', 'Status', statuses, item?.status || 'Ativo')}
+          ${textareaField('observacoes', 'Observações', 'Especialidade, endereço, condições e observações internas...', 'span-2', item?.observacoes || '')}
+        </div>`, isEdit ? 'Salvar alterações' : 'Cadastrar', async data => {
+          const payload = isEdit ? { action: 'editar', tabela: 'Oficinas', id: item.id_oficina, dados: data } : { action: 'criar', tabela: 'Oficinas', dados: data };
+          await apiPost(payload);
+          toast(isEdit ? 'Oficina atualizada com sucesso.' : 'Oficina cadastrada com sucesso.');
+          await renderOficinas();
+        });
+    }
+
+    async function openOficinaDetails(id) {
+      try {
+        await Promise.all([ensureOficinasCache(), ensureEventosCache()]);
+        const item = findOficinaById(id);
+        if (!item) return toast('Oficina não encontrada.', 'error');
+        const eventos = state.cache.eventos.filter(e => normalizeText(e.oficina) === normalizeText(item.nome));
+        openCustomModal('Detalhes da oficina', `
+          <div class="detail-grid">
+            ${detailCard('Oficina', item.nome)}${detailCard('Status', item.status)}${detailCard('Responsável', item.responsavel)}
+            ${detailCard('CNPJ', item.cnpj)}${detailCard('Telefone', item.telefone)}${detailCard('E-mail', item.email)}
+            ${detailCard('Cidade', item.cidade)}${detailCard('Estado', item.estado)}${detailCard('Eventos vinculados', eventos.length)}
+          </div>
+          <div class="detail-section"><h4>Eventos vinculados</h4>${miniEventosTable(eventos)}</div>
+          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>`, true);
+      } catch (error) { toast(error.message, 'error'); }
+    }
+
+    async function inativarOficina(id) {
+      const item = findOficinaById(id);
+      confirmAction('Inativar oficina', `Deseja inativar ${item?.nome || 'esta oficina'}?`, 'Inativar', async () => {
+        await apiPost({ action: 'editar', tabela: 'Oficinas', id, dados: { status: 'Inativo' } });
+        toast('Oficina inativada com sucesso.');
+        await renderOficinas();
+      });
+    }
 
     async function renderUsuarios(filter = '') {
       if (!hasPermission('usuarios')) return renderBlocked('usuarios');
@@ -1898,7 +2113,7 @@
       if (!hasPermission('usuarios')) return renderBlocked('usuarios');
       const isEdit = Boolean(item?.id_usuario);
       const perfis = parseOptions('perfis_usuario', ['Super Admin', 'Administrativo', 'Cadastro', 'Eventos', 'Regulação', 'Compras', 'Financeiro', 'Consultor', 'Regional', 'Oficina']);
-      const setores = ['Administração', 'Cadastro', 'Eventos', 'Regulação', 'Compras', 'Financeiro', 'Comercial', 'SAC', 'Oficina', 'Regional'];
+      const setores = ['Administração', 'Cadastro', 'Eventos', 'Regulação', 'Compras', 'Financeiro', 'Comercial', 'Oficina', 'Regional'];
       const status = ['Ativo', 'Inativo'];
       openModal(isEdit ? 'Editar usuário' : 'Novo usuário', `
         <div class="form-grid">
@@ -3294,9 +3509,11 @@
     window.renderDashboard = renderDashboard;
     window.renderAssociados = renderAssociados;
     window.renderVeiculos = renderVeiculos;
+    window.renderConsultores = renderConsultores;
     window.renderEventos = renderEventos;
     window.renderVistorias = renderVistorias;
     window.renderCompras = renderCompras;
+    window.renderOficinas = renderOficinas;
     window.renderReclamacoes = renderReclamacoes;
     window.renderKanban = renderKanban;
     window.renderRelatorios = renderRelatorios;
@@ -3319,6 +3536,11 @@
     window.openVehicleModalById = openVehicleModalById;
     window.openVehicleDetails = openVehicleDetails;
     window.inativarVeiculo = inativarVeiculo;
+    window.openConsultorModal = openConsultorModal;
+    window.openConsultorModalById = openConsultorModalById;
+    window.openConsultorDetails = openConsultorDetails;
+    window.inativarConsultor = inativarConsultor;
+    window.paintConsultorTable = paintConsultorTable;
     window.openEventModal = openEventModal;
     window.openEventModalById = openEventModalById;
     window.openEventDetails = openEventDetails;
@@ -3330,6 +3552,11 @@
     window.openCompraDetails = openCompraDetails;
     window.marcarCompraEntregue = marcarCompraEntregue;
     window.cancelarCompra = cancelarCompra;
+    window.openOficinaModal = openOficinaModal;
+    window.openOficinaModalById = openOficinaModalById;
+    window.openOficinaDetails = openOficinaDetails;
+    window.inativarOficina = inativarOficina;
+    window.paintOficinaTable = paintOficinaTable;
     window.openReclamacaoModal = openReclamacaoModal;
     window.openReclamacaoModalById = openReclamacaoModalById;
     window.openReclamacaoDetails = openReclamacaoDetails;
