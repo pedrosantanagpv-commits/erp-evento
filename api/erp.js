@@ -1,5 +1,4 @@
 const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbzdCI-7c_60QLAd4oRvPli65t4ITKx82l51M6hMEi0y-saGrNEYR0Se4ZHO3bHMkrh33g/exec';
-const ENFORCE_PROXY_TOKEN = String(process.env.ENFORCE_PROXY_TOKEN || 'true').toLowerCase() !== 'false';
 
 function sendJson(res, status, data) {
   res.statusCode = status;
@@ -12,48 +11,6 @@ function sendJson(res, status, data) {
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function parseBody(req) {
-  if (!req.body) return {};
-  if (typeof req.body === 'object') return req.body;
-  try { return JSON.parse(req.body); }
-  catch (error) { return {}; }
-}
-
-function sanitizeRecord(record, isTopLevel = false) {
-  if (Array.isArray(record)) return record.map(item => sanitizeRecord(item, false));
-  if (!record || typeof record !== 'object') return record;
-
-  const clean = {};
-  Object.keys(record).forEach(key => {
-    if (key === 'senha_hash') return;
-    if (!isTopLevel && (key === 'token' || key === 'token_expira_em')) return;
-    clean[key] = sanitizeRecord(record[key], false);
-  });
-
-  return clean;
-}
-
-function sanitizeResponse(data) {
-  // Mantém o token de login no topo da resposta, mas remove senha_hash/tokens de registros de usuário.
-  return sanitizeRecord(data, true);
-}
-
-function shouldRequireToken(method, queryParams, body) {
-  if (!ENFORCE_PROXY_TOKEN) return false;
-
-  if (method === 'GET') {
-    const action = queryParams.get('action') || 'ping';
-    return action !== 'ping';
-  }
-
-  if (method === 'POST') {
-    const action = body?.action || '';
-    return action !== 'login';
-  }
-
-  return false;
 }
 
 async function callAppsScript(targetUrl, options = {}, attempts = 3) {
@@ -81,7 +38,7 @@ async function callAppsScript(targetUrl, options = {}, attempts = 3) {
         const data = JSON.parse(lastRaw);
         return {
           status: response.ok ? 200 : response.status,
-          data: sanitizeResponse(data)
+          data
         };
       } catch (parseError) {
         lastError = parseError;
@@ -123,15 +80,6 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       const query = req.url.includes('?') ? req.url.split('?')[1] : '';
-      const queryParams = new URLSearchParams(query);
-
-      if (shouldRequireToken('GET', queryParams, null) && !queryParams.get('token')) {
-        return sendJson(res, 401, {
-          success: false,
-          message: 'Token não informado. Faça login novamente.'
-        });
-      }
-
       const separator = GOOGLE_SCRIPT_URL.includes('?') ? '&' : '?';
       const targetUrl = query
         ? `${GOOGLE_SCRIPT_URL}${separator}${query}`
@@ -142,15 +90,6 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const bodyObject = parseBody(req);
-
-      if (shouldRequireToken('POST', null, bodyObject) && !bodyObject.token) {
-        return sendJson(res, 401, {
-          success: false,
-          message: 'Token não informado. Faça login novamente.'
-        });
-      }
-
       const body = typeof req.body === 'string'
         ? req.body
         : JSON.stringify(req.body || {});
