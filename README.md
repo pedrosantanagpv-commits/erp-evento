@@ -1,20 +1,21 @@
-# ERP Evento MVP v0.1.1 — Refinamento Visual Gerencial
+# ERP Evento MVP v0.1.2
 
-Versão focada em acabamento visual e experiência de uso, sem alterar o banco, o Apps Script ou a lógica principal já validada.
+Versão focada em cadastros gerenciais e organização operacional do ERP de proteção veicular.
 
-## O que mudou
+## O que entrou
 
-- Visual mais profissional e gerencial;
-- Sidebar refinada com melhor contraste;
-- Cards e painéis com sombras mais suaves;
-- Tabelas, badges, botões e modais com acabamento mais premium;
-- Melhor leitura visual para dashboard, usuários, eventos, veículos e demais módulos;
-- Texto do dashboard ajustado para foco gerencial;
-- Mantida a estrutura funcional da v0.1.0.
+- Novo módulo **Consultores e Regionais**.
+- Cadastro, edição, detalhes e inativação de consultores/regionais.
+- Novo módulo **Oficinas**.
+- Cadastro, edição, detalhes e inativação de oficinas credenciadas/prestadores operacionais.
+- Dashboard sem foco em atendimento/SAC, com indicador de vistorias abertas, consultores ativos e oficinas ativas.
+- Menu lateral mais alinhado ao ERP gerencial.
+- Permissões atualizadas para os novos módulos.
+- Mantida a base atual de usuários, eventos, vistorias, compras, kanban e relatórios.
 
-## Como atualizar
+## Arquivos para substituir no GitHub
 
-Substitua no GitHub:
+Substitua estes arquivos:
 
 ```txt
 index.html
@@ -23,8 +24,19 @@ package.json
 README.md
 ```
 
-Não precisa mexer no Google Sheets nem no Apps Script.
+## Apps Script
 
-## Observação
+Não precisa alterar o Apps Script nesta versão.
 
-Não rode `setupBancoERP`. Essa atualização é apenas visual/front-end.
+Não execute `setupBancoERP`.
+
+## Teste recomendado
+
+1. Entrar como Super Admin.
+2. Abrir **Consultores**.
+3. Criar um consultor/regional teste.
+4. Editar e inativar o registro.
+5. Abrir **Oficinas**.
+6. Criar uma oficina teste.
+7. Abrir detalhes e editar.
+8. Voltar ao Dashboard e conferir os novos indicadores.
