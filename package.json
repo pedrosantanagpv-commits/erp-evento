@@ -1,1 +1,13 @@
-{"name":"erp-evento-mvp","version":"0.1.3","private":true,"type":"module","scripts":{"start":"vercel dev","dev":"vercel dev"},"dependencies":{},"devDependencies":{}}
+{
+  "name": "erp-evento-mvp",
+  "version": "0.0.4",
+  "private": true,
+  "description": "MVP de ERP para proteção veicular com detalhes operacionais, histórico, Kanban, Vercel e Google Apps Script.",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
