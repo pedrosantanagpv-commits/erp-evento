@@ -1422,7 +1422,7 @@
 
   <script>
     const API_BASE = '/api/erp';
-    const APP_VERSION = '0.1.2';
+    const APP_VERSION = '0.1.3';
 
     const state = {
       user: null,
@@ -1961,12 +1961,16 @@
         const item = findConsultorById(id);
         if (!item) return toast('Consultor não encontrado.', 'error');
         const veiculos = state.cache.veiculos.filter(v => normalizeText(v.consultor) === normalizeText(item.nome) || normalizeText(v.regional) === normalizeText(item.regional));
-        const eventos = state.cache.eventos.filter(e => normalizeText(e.responsavel) === normalizeText(item.nome) || normalizeText(e.associado).includes(normalizeText(item.nome)));
+        const placas = new Set(veiculos.map(v => normalizePlate(v.placa)));
+        const eventos = state.cache.eventos.filter(e => placas.has(normalizePlate(e.placa)) || normalizeText(e.responsavel) === normalizeText(item.nome));
+        const fipeCarteira = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.valor_fipe), 0);
+        const mensalidadeCarteira = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.mensalidade), 0);
         openCustomModal('Detalhes do consultor/regional', `
           <div class="detail-grid">
             ${detailCard('Nome', item.nome)}${detailCard('Tipo', item.tipo)}${detailCard('Status', item.status)}
             ${detailCard('CPF/CNPJ', item.cpf_cnpj)}${detailCard('Telefone', item.telefone)}${detailCard('E-mail', item.email)}
             ${detailCard('Regional', item.regional)}${detailCard('Cooperativa', item.cooperativa)}${detailCard('Cadastro', dateBR(item.data_cadastro))}
+            ${detailCard('Veículos na carteira', veiculos.length)}${detailCard('FIPE da carteira', money(fipeCarteira))}${detailCard('Mensalidade prevista', money(mensalidadeCarteira))}
           </div>
           <div class="detail-section"><h4>Veículos relacionados</h4>${miniVeiculosTable(veiculos)}</div>
           <div class="detail-section"><h4>Eventos relacionados</h4>${miniEventosTable(eventos)}</div>
@@ -2046,17 +2050,23 @@
 
     async function openOficinaDetails(id) {
       try {
-        await Promise.all([ensureOficinasCache(), ensureEventosCache()]);
+        await Promise.all([ensureOficinasCache(), ensureEventosCache(), ensureRegulacoesCache()]);
         const item = findOficinaById(id);
         if (!item) return toast('Oficina não encontrada.', 'error');
         const eventos = state.cache.eventos.filter(e => normalizeText(e.oficina) === normalizeText(item.nome));
+        const eventIds = new Set(eventos.map(e => String(e.id_evento || '')));
+        const regulacoes = state.cache.regulacoes.filter(r => eventIds.has(String(r.id_evento || '')));
+        const valorOrcado = regulacoes.reduce((sum, r) => sum + parseMoneyBR(r.valor_orcado), 0);
+        const valorAprovado = regulacoes.reduce((sum, r) => sum + parseMoneyBR(r.valor_aprovado), 0);
         openCustomModal('Detalhes da oficina', `
           <div class="detail-grid">
             ${detailCard('Oficina', item.nome)}${detailCard('Status', item.status)}${detailCard('Responsável', item.responsavel)}
             ${detailCard('CNPJ', item.cnpj)}${detailCard('Telefone', item.telefone)}${detailCard('E-mail', item.email)}
             ${detailCard('Cidade', item.cidade)}${detailCard('Estado', item.estado)}${detailCard('Eventos vinculados', eventos.length)}
+            ${detailCard('Registros técnicos', regulacoes.length)}${detailCard('Valor orçado', money(valorOrcado))}${detailCard('Valor aprovado', money(valorAprovado))}
           </div>
           <div class="detail-section"><h4>Eventos vinculados</h4>${miniEventosTable(eventos)}</div>
+          <div class="detail-section"><h4>Vistorias/Regulações vinculadas</h4>${miniRegulacaoTable(regulacoes)}</div>
           <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>`, true);
       } catch (error) { toast(error.message, 'error'); }
     }
@@ -2314,17 +2324,19 @@
       const isEdit = Boolean(item?.id_veiculo);
       const combustiveis = ['Gasolina', 'Etanol', 'Flex', 'Diesel', 'GNV', 'Elétrico', 'Híbrido'];
       const status = parseOptions('status_veiculo', ['Ativo', 'Inativo', 'Pendente', 'Cancelado']);
-      try { await ensureAssociadosCache(); } catch (error) { console.warn('Associados não carregados:', error.message); }
+      try { await Promise.all([ensureAssociadosCache(), ensureConsultoresCache()]); } catch (error) { console.warn('Cadastros auxiliares não carregados:', error.message); }
       const associadosAtivos = state.cache.associados.filter(a => normalizeText(a.status || 'Ativo') === 'ativo');
+      const consultoresAtivos = state.cache.consultores.filter(c => normalizeText(c.status || 'Ativo') === 'ativo');
       const associadoHtml = associadosAtivos.length ? `${selectAssociadoField(item?.id_associado || '')}${field('associado', 'Associado manual', 'Use apenas se não estiver cadastrado', '', item?.associado || '')}` : field('associado', 'Associado', 'Nome do associado', '', item?.associado || '');
+      const consultorHtml = consultoresAtivos.length ? selectConsultorField(item?.consultor || '') : field('consultor', 'Consultor', 'Nome do consultor', '', item?.consultor || '');
       openModal(isEdit ? 'Editar veículo' : 'Novo veículo', `
         <div class="form-grid">
           ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || '')}${associadoHtml}
           ${field('marca', 'Marca', 'Fiat, Chevrolet, Honda...', '', item?.marca || '')}${field('modelo', 'Modelo', 'Onix, Kwid, HB20...', '', item?.modelo || '')}
           ${field('ano_modelo', 'Ano/modelo', '2024', '', item?.ano_modelo || '')}${selectField('tipo_combustivel', 'Combustível', combustiveis, item?.tipo_combustivel || 'Flex')}
           ${field('valor_fipe', 'Valor FIPE', '65000', '', item?.valor_fipe || '')}${field('mensalidade', 'Mensalidade', '189.90', '', item?.mensalidade || '')}
-          ${field('consultor', 'Consultor', 'Nome do consultor', '', item?.consultor || '')}${field('regional', 'Regional', 'Caruaru', '', item?.regional || '')}
-          ${field('cooperativa', 'Cooperativa', 'PE.001', '', item?.cooperativa || '')}${selectField('status', 'Status', status, item?.status || 'Ativo')}
+          ${consultorHtml}${field('regional', 'Regional', 'Preenchida pelo consultor/regional', '', item?.regional || '')}
+          ${field('cooperativa', 'Cooperativa', 'Preenchida pelo consultor/regional', '', item?.cooperativa || '')}${selectField('status', 'Status', status, item?.status || 'Ativo')}
           ${field('rastreador', 'Rastreador', 'Sim/Não', '', item?.rastreador || '')}${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
         </div>`, isEdit ? 'Salvar alterações' : 'Salvar veículo', async (data) => {
           data.placa = String(data.placa || '').toUpperCase().trim();
@@ -2332,6 +2344,15 @@
             const associadoSelecionado = findAssociadoById(data.id_associado);
             if (associadoSelecionado) data.associado = associadoSelecionado.nome || data.associado;
           }
+          if (data._consultor_ref) {
+            const consultorSelecionado = findConsultorById(data._consultor_ref);
+            if (consultorSelecionado) {
+              data.consultor = consultorSelecionado.nome || data.consultor;
+              data.regional = consultorSelecionado.regional || data.regional;
+              data.cooperativa = consultorSelecionado.cooperativa || data.cooperativa;
+            }
+          }
+          delete data._consultor_ref;
           const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Veiculos', dados: data };
           if (isEdit) payload.id = item.id_veiculo;
           await apiPost(payload);
@@ -2339,11 +2360,36 @@
           toast(isEdit ? 'Veículo atualizado com sucesso.' : 'Veículo cadastrado com sucesso.');
           await renderVeiculos();
         });
+      attachVehicleConsultorSelect();
     }
 
     function selectAssociadoField(selected = '') {
       const options = ['<option value="">Selecionar associado cadastrado...</option>'].concat(state.cache.associados.map(item => `<option value="${escapeHtml(item.id_associado)}" ${String(item.id_associado) === String(selected) ? 'selected' : ''}>${escapeHtml(item.nome || 'Sem nome')} ${item.cpf_cnpj ? '— ' + escapeHtml(item.cpf_cnpj) : ''}</option>`)).join('');
       return `<div class="field"><label>Associado cadastrado</label><select name="id_associado">${options}</select></div>`;
+    }
+
+    function selectConsultorField(selectedName = '') {
+      const consultores = state.cache.consultores.filter(item => normalizeText(item.status || 'Ativo') === 'ativo');
+      const options = ['<option value="">Selecionar consultor/regional...</option>'].concat(consultores.map(item => {
+        const selected = normalizeText(item.nome) === normalizeText(selectedName) ? 'selected' : '';
+        const label = [item.nome || 'Sem nome', item.regional, item.cooperativa].filter(Boolean).join(' — ');
+        return `<option value="${escapeHtml(item.id_consultor)}" data-nome="${escapeHtml(item.nome || '')}" data-regional="${escapeHtml(item.regional || '')}" data-cooperativa="${escapeHtml(item.cooperativa || '')}" ${selected}>${escapeHtml(label)}</option>`;
+      })).join('');
+      return `<div class="field"><label>Consultor/Regional cadastrado</label><select name="_consultor_ref" id="vehicleConsultorSelect">${options}</select><input type="hidden" name="consultor" value="${escapeHtml(selectedName || '')}" /></div>`;
+    }
+
+    function attachVehicleConsultorSelect() {
+      const select = els.modalRoot.querySelector('#vehicleConsultorSelect');
+      if (!select) return;
+      const fill = () => {
+        const opt = select.options[select.selectedIndex];
+        if (!opt) return;
+        setFormValue('consultor', opt.dataset.nome || '');
+        setFormValue('regional', opt.dataset.regional || '');
+        setFormValue('cooperativa', opt.dataset.cooperativa || '');
+      };
+      select.addEventListener('change', fill);
+      if (select.value) fill();
     }
 
     async function inativarVeiculo(id) {
@@ -2676,7 +2722,9 @@
           ensureVeiculosCache(true),
           ensureEventosCache(true),
           ensureComprasCache(true),
-          ensureRegulacoesCache(true)
+          ensureRegulacoesCache(true),
+          ensureConsultoresCache(true),
+          ensureOficinasCache(true)
         ]);
 
         const regionais = uniqueValues(state.cache.veiculos.map(v => v.regional).concat(state.cache.eventos.map(e => e.regional || '')));
@@ -2849,6 +2897,16 @@
         </div>
 
         <div class="content-panel">
+          <div class="panel-head"><div><h3>Carteira por consultor/regional</h3><p>Visão gerencial cruzando consultores, veículos, FIPE e mensalidade prevista.</p></div></div>
+          ${reportConsultorCarteiraTable(veiculos)}
+        </div>
+
+        <div class="content-panel">
+          <div class="panel-head"><div><h3>Eventos por oficina</h3><p>Acompanhamento de eventos vinculados às oficinas cadastradas.</p></div></div>
+          ${reportOficinaEventosTable(eventos)}
+        </div>
+
+        <div class="content-panel">
           <div class="panel-head"><div><h3>Eventos que exigem atenção</h3><p>Eventos filtrados em atenção ou atraso, com acesso rápido à Central.</p></div></div>
           ${reportAttentionTable(eventos)}
         </div>
@@ -2892,6 +2950,43 @@
     function reportBar(label, value, max, suffix) {
       const width = Math.max(6, Math.round((value / max) * 100));
       return `<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)} ${escapeHtml(suffix)}</span></div><div style="height:10px;background:#eef0f5;border-radius:999px;overflow:hidden;margin-top:6px"><div style="height:100%;width:${width}%;background:linear-gradient(90deg,#111318,#ffd400);border-radius:999px"></div></div></div>`;
+    }
+
+    function reportConsultorCarteiraTable(veiculos) {
+      const map = new Map();
+      (veiculos || []).forEach(v => {
+        const key = v.consultor || 'Sem consultor';
+        if (!map.has(key)) map.set(key, { consultor: key, regional: v.regional || '-', total: 0, ativos: 0, fipe: 0, mensalidade: 0 });
+        const row = map.get(key);
+        row.total += 1;
+        if (normalizeText(v.status) === 'ativo') row.ativos += 1;
+        row.fipe += parseMoneyBR(v.valor_fipe);
+        row.mensalidade += parseMoneyBR(v.mensalidade);
+        if (!row.regional || row.regional === '-') row.regional = v.regional || '-';
+      });
+      const rows = Array.from(map.values()).sort((a, b) => b.total - a.total || b.fipe - a.fipe).slice(0, 20);
+      if (!rows.length) return emptyState('Nenhuma carteira encontrada.', 'Cadastre veículos vinculados a consultores para gerar este relatório.');
+      return `<div class="table-wrap"><table><thead><tr><th>Consultor</th><th>Regional</th><th>Veículos</th><th>Ativos</th><th>FIPE</th><th>Mensalidade</th></tr></thead><tbody>
+        ${rows.map(row => `<tr><td><strong>${escapeHtml(row.consultor)}</strong></td><td>${escapeHtml(row.regional || '-')}</td><td>${row.total}</td><td>${row.ativos}</td><td>${money(row.fipe)}</td><td>${money(row.mensalidade)}</td></tr>`).join('')}
+      </tbody></table></div>`;
+    }
+
+    function reportOficinaEventosTable(eventos) {
+      const map = new Map();
+      (eventos || []).filter(e => String(e.oficina || '').trim()).forEach(e => {
+        const key = e.oficina || 'Sem oficina';
+        if (!map.has(key)) map.set(key, { oficina: key, eventos: 0, abertos: 0, atrasados: 0, valor: 0 });
+        const row = map.get(key);
+        row.eventos += 1;
+        if (isEventoAberto(e)) row.abertos += 1;
+        if (getPrazoEvento(e).label === 'Atrasado') row.atrasados += 1;
+        row.valor += parseMoneyBR(e.valor_aprovado || e.valor_estimado);
+      });
+      const rows = Array.from(map.values()).sort((a, b) => b.abertos - a.abertos || b.eventos - a.eventos).slice(0, 20);
+      if (!rows.length) return emptyState('Nenhum evento vinculado a oficina.', 'Selecione uma oficina cadastrada nos eventos para gerar este acompanhamento.');
+      return `<div class="table-wrap"><table><thead><tr><th>Oficina</th><th>Eventos</th><th>Em aberto</th><th>Atrasados</th><th>Valor estimado/aprovado</th></tr></thead><tbody>
+        ${rows.map(row => `<tr><td><strong>${escapeHtml(row.oficina)}</strong></td><td>${row.eventos}</td><td>${row.abertos}</td><td>${row.atrasados}</td><td>${money(row.valor)}</td></tr>`).join('')}
+      </tbody></table></div>`;
     }
 
     function reportAttentionTable(eventos) {
@@ -2958,7 +3053,9 @@
       const isEdit = Boolean(item?.id_evento);
       const tipos = parseOptions('tipo_evento', ['Roubo', 'Furto', 'Colisão', 'Pane', 'Assistência', 'Terceiro', 'Outro']);
       const prioridades = parseOptions('prioridades', ['Baixa', 'Média', 'Alta', 'Urgente']);
-      try { await Promise.all([ensureVeiculosCache(), ensureAssociadosCache()]); } catch (error) { console.warn(error.message); }
+      try { await Promise.all([ensureVeiculosCache(), ensureAssociadosCache(), ensureOficinasCache()]); } catch (error) { console.warn(error.message); }
+      const oficinasAtivas = state.cache.oficinas.filter(o => normalizeText(o.status || 'Ativo') === 'ativo');
+      const oficinaHtml = oficinasAtivas.length ? selectOficinaField(item?.oficina || '') : field('oficina', 'Oficina', 'Oficina parceira', '', item?.oficina || '');
       openModal(isEdit ? 'Editar evento' : 'Novo evento', `
         <div class="form-grid">
           ${selectField('tipo_evento', 'Tipo de evento', tipos, item?.tipo_evento || '')}${selectField('prioridade', 'Prioridade', prioridades, item?.prioridade || 'Média')}
@@ -2966,7 +3063,7 @@
           ${field('associado', 'Associado', 'Nome do associado', '', item?.associado || '')}${field('telefone', 'Telefone', '(81) 99999-9999', '', item?.telefone || '')}
           ${field('cidade', 'Cidade', 'Caruaru', '', item?.cidade || '')}${field('estado', 'Estado', 'PE', '', item?.estado || '')}
           ${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || '')}${field('setor_atual', 'Setor atual', 'Eventos', '', item?.setor_atual || 'Eventos')}
-          ${field('oficina', 'Oficina', 'Oficina parceira', '', item?.oficina || '')}${field('valor_estimado', 'Valor estimado', '0', '', item?.valor_estimado || '')}
+          ${oficinaHtml}${field('valor_estimado', 'Valor estimado', '0', '', item?.valor_estimado || '')}
           ${field('valor_aprovado', 'Valor aprovado', '0', '', item?.valor_aprovado || '')}${textareaField('descricao', 'Descrição do evento', 'Descreva o ocorrido', 'full', item?.descricao || '')}
           ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
           <div id="vehicleLookupNote" class="lookup-note full hidden"></div>
@@ -2980,6 +3077,15 @@
           if (state.view === 'kanban') await renderKanban(); else await renderEventos();
         });
       attachEventVehicleLookup();
+    }
+
+    function selectOficinaField(selectedName = '') {
+      const options = ['<option value="">Selecionar oficina cadastrada...</option>'].concat(state.cache.oficinas.map(item => {
+        const selected = normalizeText(item.nome) === normalizeText(selectedName) ? 'selected' : '';
+        const label = [item.nome || 'Sem nome', item.cidade, item.estado].filter(Boolean).join(' — ');
+        return `<option value="${escapeHtml(item.nome || '')}" ${selected}>${escapeHtml(label)}</option>`;
+      })).join('');
+      return `<div class="field"><label>Oficina cadastrada</label><select name="oficina">${options}</select></div>`;
     }
 
     function plateLookupField(value = '') {
@@ -3035,7 +3141,9 @@
           ensureAssociadosCache(true),
           ensureHistoricoCache(true),
           ensureComprasCache(true),
-          ensureRegulacoesCache(true)
+          ensureRegulacoesCache(true),
+          ensureConsultoresCache(true),
+          ensureOficinasCache(true)
         ]);
 
         const item = findEventById(id);
