@@ -1,13 +1,1 @@
-{
-  "name": "erp-evento-mvp",
-  "version": "0.1.2",
-  "private": true,
-  "description": "ERP Evento MVP v0.1.2 - cadastros gerenciais de consultores e oficinas",
-  "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev"
-  },
-  "engines": {
-    "node": ">=18"
-  }
-}
+{"name":"erp-evento-mvp","version":"0.1.3","private":true,"type":"module","scripts":{"start":"vercel dev","dev":"vercel dev"},"dependencies":{},"devDependencies":{}}
