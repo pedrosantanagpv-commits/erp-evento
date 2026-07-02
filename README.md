@@ -1,69 +1,42 @@
-# ERP Evento MVP v0.0.4.1
+# ERP Evento MVP v0.1.4
 
-Versão operacional do MVP do ERP para proteção veicular.
+Versão gerencial com novo módulo **Financeiro Gerencial Básico**.
 
-## O que entrou nesta versão
+## Principais melhorias
 
-- Tela de detalhes do associado.
-- Veículos vinculados ao associado.
-- Eventos relacionados ao associado.
-- Tela de detalhes do veículo.
-- Eventos vinculados ao veículo pela placa.
-- Abertura/edição de evento com busca automática pela placa.
-- Preenchimento automático de associado, telefone, cidade, estado e vínculo interno ao encontrar a placa.
-- Tela de detalhes do evento.
-- Histórico do evento alimentado ao mover no Kanban.
-- Kanban com botão de mover etapa/status.
-- Confirmações internas para inativar/cancelar, sem depender do alerta padrão do navegador.
-- Botões de detalhes, edição, movimentação e cancelamento nas tabelas.
-- Mantém a correção de valores no formato brasileiro, como `65.000,00`.
-- Mantém proxy `/api/erp` na Vercel com novas tentativas automáticas quando o Apps Script oscila.
+- Novo menu **Financeiro**.
+- Cadastro de lançamentos financeiros vinculados a veículos.
+- Controle de competência, vencimento, valor mensalidade, valor pago, status e forma de pagamento.
+- Status: Aberto, Pago, Atrasado e Cancelado.
+- Cálculo gerencial de receita prevista, recebida, aberta e atrasada.
+- Exportação CSV do financeiro.
+- Detalhes financeiros vinculados ao veículo.
+- Dashboard com indicadores financeiros.
 
-## Arquivos principais
+## Arquivos para substituir no GitHub
 
-```txt
-index.html
-api/erp.js
-package.json
-README.md
-```
+- `index.html`
+- `api/erp.js`
+- `package.json`
+- `README.md`
 
-## URL do Apps Script
+## Apps Script
 
-A API usada por padrão é:
+Esta versão precisa de uma migração segura no Apps Script para criar a aba `Financeiro` e liberar a tabela na API.
 
-```txt
-https://script.google.com/macros/s/AKfycbzdCI-7c_60QLAd4oRvPli65t4ITKx82l51M6hMEi0y-saGrNEYR0Se4ZHO3bHMkrh33g/exec
-```
+Leia o arquivo:
 
-Na Vercel, você pode configurar a variável:
+- `APPS_SCRIPT_V014.md`
 
-```txt
-GOOGLE_SCRIPT_URL
-```
-
-## Login inicial
-
-```txt
-E-mail: admin@gpv.com
-Senha: 123456
-```
+Não execute `setupBancoERP`.
 
 ## Teste recomendado
 
-1. Entrar no ERP.
-2. Abrir Associados e clicar em Detalhes.
-3. Abrir Veículos e clicar em Detalhes.
-4. Abrir Eventos e criar um evento digitando uma placa já cadastrada.
-5. Usar o botão Buscar placa para puxar os dados automaticamente.
-6. Abrir o Kanban e mover o evento de etapa.
-7. Abrir Detalhes do evento e conferir o histórico.
-
-## Atenção
-
-Não execute `setupBancoERP` depois que começar a cadastrar dados reais, porque essa função recria/limpa as abas iniciais do banco.
-
-
-## Correção 0.0.4.1
-- Corrigido o escape dos IDs usados nos botões Detalhes, Editar, Inativar, Mover e Cancelar.
-- Antes, os IDs eram inseridos no onclick com aspas duplas sem entidade HTML, o que quebrava o clique dos botões de ação.
+1. Aplicar o ajuste do `APPS_SCRIPT_V014.md` no Apps Script.
+2. Fazer novo deploy do Apps Script.
+3. Subir esta versão no GitHub e aguardar a Vercel.
+4. Abrir o menu **Financeiro**.
+5. Criar um lançamento vinculado a um veículo.
+6. Marcar como pago.
+7. Conferir o Dashboard e os detalhes do veículo.
+8. Exportar CSV.
