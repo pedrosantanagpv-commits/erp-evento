@@ -1,35 +1,69 @@
-# ERP Evento MVP v0.1.3
+# ERP Evento MVP v0.0.4.1
 
-Versão gerencial focada na integração entre cadastros principais do ERP de proteção veicular.
+Versão operacional do MVP do ERP para proteção veicular.
 
-## Principais melhorias
+## O que entrou nesta versão
 
-- Veículos agora podem ser vinculados a consultores/regionais cadastrados.
-- Ao selecionar consultor no veículo, o sistema preenche regional e cooperativa automaticamente.
-- Eventos agora podem selecionar oficina cadastrada.
-- Detalhes do consultor/regional com carteira vinculada, FIPE total e mensalidade prevista.
-- Detalhes da oficina com eventos, registros técnicos, valores orçados e aprovados.
-- Relatórios com novas visões: carteira por consultor/regional e eventos por oficina.
-- Mantém o foco gerencial: sem WhatsApp, atendimento ou templates de comunicação.
+- Tela de detalhes do associado.
+- Veículos vinculados ao associado.
+- Eventos relacionados ao associado.
+- Tela de detalhes do veículo.
+- Eventos vinculados ao veículo pela placa.
+- Abertura/edição de evento com busca automática pela placa.
+- Preenchimento automático de associado, telefone, cidade, estado e vínculo interno ao encontrar a placa.
+- Tela de detalhes do evento.
+- Histórico do evento alimentado ao mover no Kanban.
+- Kanban com botão de mover etapa/status.
+- Confirmações internas para inativar/cancelar, sem depender do alerta padrão do navegador.
+- Botões de detalhes, edição, movimentação e cancelamento nas tabelas.
+- Mantém a correção de valores no formato brasileiro, como `65.000,00`.
+- Mantém proxy `/api/erp` na Vercel com novas tentativas automáticas quando o Apps Script oscila.
 
-## Arquivos para substituir no GitHub
+## Arquivos principais
 
-- `index.html`
-- `api/erp.js`
-- `package.json`
-- `README.md`
+```txt
+index.html
+api/erp.js
+package.json
+README.md
+```
 
-## Importante
+## URL do Apps Script
 
-Não execute `setupBancoERP`. Esta atualização não altera a estrutura do banco nem exige mudança no Apps Script.
+A API usada por padrão é:
+
+```txt
+https://script.google.com/macros/s/AKfycbzdCI-7c_60QLAd4oRvPli65t4ITKx82l51M6hMEi0y-saGrNEYR0Se4ZHO3bHMkrh33g/exec
+```
+
+Na Vercel, você pode configurar a variável:
+
+```txt
+GOOGLE_SCRIPT_URL
+```
+
+## Login inicial
+
+```txt
+E-mail: admin@gpv.com
+Senha: 123456
+```
 
 ## Teste recomendado
 
-1. Abrir Consultores e criar um consultor/regional com regional e cooperativa.
-2. Abrir Veículos, editar um veículo e selecionar o consultor cadastrado.
-3. Confirmar que regional e cooperativa foram preenchidas automaticamente.
-4. Abrir Oficinas e criar uma oficina.
-5. Abrir Eventos, editar/criar evento e selecionar a oficina cadastrada.
-6. Abrir detalhes do consultor e conferir FIPE/mensalidade da carteira.
-7. Abrir detalhes da oficina e conferir eventos vinculados.
-8. Abrir Relatórios e conferir carteira por consultor e eventos por oficina.
+1. Entrar no ERP.
+2. Abrir Associados e clicar em Detalhes.
+3. Abrir Veículos e clicar em Detalhes.
+4. Abrir Eventos e criar um evento digitando uma placa já cadastrada.
+5. Usar o botão Buscar placa para puxar os dados automaticamente.
+6. Abrir o Kanban e mover o evento de etapa.
+7. Abrir Detalhes do evento e conferir o histórico.
+
+## Atenção
+
+Não execute `setupBancoERP` depois que começar a cadastrar dados reais, porque essa função recria/limpa as abas iniciais do banco.
+
+
+## Correção 0.0.4.1
+- Corrigido o escape dos IDs usados nos botões Detalhes, Editar, Inativar, Mover e Cancelar.
+- Antes, os IDs eram inseridos no onclick com aspas duplas sem entidade HTML, o que quebrava o clique dos botões de ação.
