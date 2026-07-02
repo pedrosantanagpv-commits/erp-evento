@@ -807,156 +807,6 @@
       line-height: 1.35;
     }
 
-
-
-    .event-hero {
-      border: 1px solid var(--line);
-      background:
-        radial-gradient(circle at top right, rgba(255, 212, 0, .20), transparent 30%),
-        linear-gradient(135deg, #111318 0%, #1b1f27 100%);
-      color: white;
-      border-radius: 22px;
-      padding: 22px;
-      margin-bottom: 18px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .event-hero small {
-      display: block;
-      color: rgba(255,255,255,.62);
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      margin-bottom: 7px;
-    }
-
-    .event-hero h4 {
-      margin: 0 0 8px;
-      font-size: 28px;
-      letter-spacing: -.05em;
-    }
-
-    .event-hero p {
-      margin: 0;
-      color: rgba(255,255,255,.72);
-      line-height: 1.45;
-    }
-
-    .event-hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-
-    .workflow {
-      display: grid;
-      grid-template-columns: repeat(8, minmax(120px, 1fr));
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      margin: 10px 0 18px;
-    }
-
-    .workflow-step {
-      border: 1px solid var(--line);
-      background: #fbfcff;
-      border-radius: 14px;
-      padding: 10px;
-      min-height: 72px;
-    }
-
-    .workflow-step span {
-      display: block;
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      font-weight: 850;
-      margin-bottom: 5px;
-    }
-
-    .workflow-step strong {
-      font-size: 13px;
-      line-height: 1.25;
-    }
-
-    .workflow-step.done {
-      background: #f0fdf4;
-      border-color: #bbf7d0;
-      color: #166534;
-    }
-
-    .workflow-step.active {
-      background: #fff8c9;
-      border-color: #f4d000;
-      box-shadow: 0 12px 28px rgba(255, 212, 0, .14);
-    }
-
-    .quick-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 12px 0 0;
-    }
-
-    .timeline {
-      position: relative;
-      display: grid;
-      gap: 12px;
-      margin-top: 4px;
-    }
-
-    .timeline-item {
-      position: relative;
-      display: grid;
-      grid-template-columns: 20px 1fr;
-      gap: 12px;
-      align-items: start;
-    }
-
-    .timeline-dot {
-      width: 14px;
-      height: 14px;
-      margin-top: 4px;
-      border-radius: 999px;
-      background: var(--yellow);
-      box-shadow: 0 0 0 5px rgba(255, 212, 0, .17);
-    }
-
-    .timeline-card {
-      border: 1px solid var(--line);
-      background: #fbfcff;
-      border-radius: 16px;
-      padding: 13px;
-    }
-
-    .timeline-card strong { display: block; margin-bottom: 4px; }
-    .timeline-card small { color: var(--muted); }
-    .timeline-card p { margin: 8px 0 0; color: #4b5563; line-height: 1.45; }
-
-    .comment-box {
-      border: 1px solid var(--line);
-      background: #fbfcff;
-      border-radius: 16px;
-      padding: 14px;
-    }
-
-    .comment-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: end;
-    }
-
-    .btn-orange {
-      background: #ffedd5;
-      color: #9a3412;
-    }
-
     .modal.wide { width: min(1080px, 100%); }
 
     .btn-blue {
@@ -985,354 +835,6 @@
       .search { min-width: 100%; }
       .login-card { padding: 24px; }
     }
-  
-
-    /* =========================================================
-       v0.1.1 — Refinamento visual gerencial
-       Ajustes apenas de estética e experiência. Não altera a API.
-    ========================================================= */
-    :root {
-      --bg: #eef1f6;
-      --surface: #ffffff;
-      --surface-2: #f6f7fb;
-      --dark: #0b1018;
-      --dark-2: #161c27;
-      --muted: #667085;
-      --line: #dde3ec;
-      --yellow: #ffd200;
-      --yellow-2: #d7aa00;
-      --radius: 20px;
-      --shadow: 0 18px 46px rgba(15, 23, 42, .075);
-      --shadow-soft: 0 10px 28px rgba(15, 23, 42, .055);
-    }
-
-    body {
-      background:
-        radial-gradient(circle at 88% 4%, rgba(255, 210, 0, .12), transparent 26%),
-        linear-gradient(180deg, #f7f8fb 0%, #eef1f6 44%, #edf0f5 100%);
-      color: #070b12;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: geometricPrecision;
-    }
-
-    .app { grid-template-columns: 276px 1fr; }
-
-    .sidebar {
-      padding: 24px 18px;
-      background:
-        radial-gradient(circle at 12% 5%, rgba(255, 210, 0, .14), transparent 24%),
-        linear-gradient(180deg, #0b1018 0%, #0e131d 52%, #080b10 100%);
-      border-right: 1px solid rgba(255, 255, 255, .06);
-      box-shadow: 14px 0 42px rgba(5, 7, 12, .10);
-    }
-
-    .side-brand {
-      padding: 4px 4px 18px;
-      margin-bottom: 4px;
-      border-bottom-color: rgba(255, 255, 255, .10);
-    }
-
-    .brand-mark {
-      width: 52px;
-      height: 52px;
-      border-radius: 17px;
-      box-shadow: 0 14px 34px rgba(255, 210, 0, .22);
-    }
-
-    .side-brand strong {
-      font-size: 14px;
-      letter-spacing: -.025em;
-    }
-
-    .side-brand small {
-      display: block;
-      margin-top: 2px;
-      color: rgba(255, 255, 255, .58);
-      font-size: 12px;
-    }
-
-    .nav { gap: 6px; }
-
-    .nav button {
-      min-height: 48px;
-      padding: 12px 14px;
-      border-radius: 16px;
-      color: rgba(255, 255, 255, .66);
-      font-weight: 800;
-      letter-spacing: -.015em;
-      transition: background .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
-    }
-
-    .nav button:hover {
-      background: rgba(255, 255, 255, .075);
-      color: rgba(255, 255, 255, .92);
-      transform: translateX(2px);
-    }
-
-    .nav button.active {
-      background: linear-gradient(90deg, rgba(255, 210, 0, .16), rgba(255, 255, 255, .06));
-      color: white;
-      box-shadow: inset 4px 0 0 var(--yellow), 0 10px 24px rgba(0, 0, 0, .14);
-    }
-
-    .sidebar-footer {
-      border-top-color: rgba(255, 255, 255, .10);
-      padding-top: 16px;
-    }
-
-    .avatar {
-      width: 42px;
-      height: 42px;
-      box-shadow: 0 10px 22px rgba(255, 210, 0, .14);
-    }
-
-    .main {
-      padding: 34px 28px 44px;
-      max-width: 1480px;
-      width: 100%;
-    }
-
-    .topbar {
-      align-items: center;
-      margin-bottom: 26px;
-    }
-
-    .topbar h2 {
-      font-size: clamp(32px, 3.6vw, 44px);
-      line-height: .98;
-      letter-spacing: -.07em;
-    }
-
-    .topbar p {
-      color: #697386;
-      font-size: 15px;
-    }
-
-    .btn {
-      min-height: 46px;
-      border-radius: 15px;
-      font-weight: 900;
-      letter-spacing: -.02em;
-    }
-
-    .btn-yellow {
-      background: linear-gradient(180deg, #ffd900 0%, #ffd000 100%);
-      color: #0b1018;
-      box-shadow: 0 14px 26px rgba(255, 210, 0, .22);
-    }
-
-    .btn-yellow:hover { filter: brightness(.985); }
-
-    .btn-ghost {
-      background: #f4f6f9;
-      color: #111827;
-      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .03);
-    }
-
-    .btn-small {
-      min-height: 36px;
-      border-radius: 12px;
-      padding: 0 12px;
-    }
-
-    .grid-cards { gap: 18px; }
-
-    .card,
-    .content-panel,
-    .summary-item,
-    .detail-card,
-    .history-item,
-    .timeline-card,
-    .comment-box,
-    .workflow-step,
-    .kanban-card {
-      border-color: rgba(111, 123, 143, .20);
-      box-shadow: var(--shadow-soft);
-    }
-
-    .metric {
-      min-height: 138px;
-      padding: 22px;
-      background:
-        radial-gradient(circle at 98% 0%, rgba(255, 210, 0, .17), transparent 29%),
-        linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
-    }
-
-    .metric::after {
-      right: -32px;
-      top: -34px;
-      width: 100px;
-      height: 100px;
-      background: rgba(255, 210, 0, .16);
-      filter: blur(.2px);
-    }
-
-    .metric span,
-    .summary-item span,
-    .detail-card span {
-      color: #687385;
-      letter-spacing: .075em;
-    }
-
-    .metric strong {
-      margin-top: 10px;
-      font-size: 32px;
-    }
-
-    .content-panel {
-      border-radius: 26px;
-      background: rgba(255, 255, 255, .92);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 20px 55px rgba(15, 23, 42, .07);
-    }
-
-    .panel-head {
-      padding: 20px 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(248,250,253,.92));
-    }
-
-    .panel-head h3 {
-      font-size: 19px;
-      letter-spacing: -.045em;
-    }
-
-    .summary-strip {
-      padding: 16px;
-      gap: 12px;
-      background: linear-gradient(180deg, #fbfcff, #f6f8fb);
-    }
-
-    .summary-item {
-      padding: 15px 16px;
-      border-radius: 17px;
-      background: white;
-    }
-
-    .search,
-    .field input,
-    .field select,
-    .field textarea {
-      background: #fbfcff;
-      border-color: #dfe5ee;
-      border-radius: 15px;
-    }
-
-    .field input:hover,
-    .field select:hover,
-    .field textarea:hover,
-    .search:hover {
-      border-color: #cfd7e3;
-    }
-
-    .table-wrap {
-      background: white;
-    }
-
-    th {
-      background: #f7f9fc;
-      color: #485162;
-      font-size: 11px;
-      letter-spacing: .09em;
-      font-weight: 900;
-    }
-
-    td { color: #111827; }
-
-    tr:hover td {
-      background: #fffbea;
-    }
-
-    .badge {
-      padding: 6px 10px;
-      font-weight: 900;
-      box-shadow: inset 0 -1px 0 rgba(0,0,0,.03);
-    }
-
-    .badge.green { background: #dff8e9; color: #0f6b38; }
-    .badge.red { background: #fde3e3; color: #a21c1c; }
-    .badge.orange { background: #fff0d9; color: #9a4a09; }
-    .badge.dark { background: #e8ebf0; color: #121826; }
-
-    .modal-backdrop {
-      background: rgba(7, 11, 18, .62);
-      backdrop-filter: blur(12px) saturate(115%);
-    }
-
-    .modal {
-      border-radius: 28px;
-      border-color: rgba(255,255,255,.38);
-      box-shadow: 0 36px 110px rgba(0, 0, 0, .34);
-    }
-
-    .modal-head {
-      padding: 22px 26px;
-      background: linear-gradient(180deg, #ffffff 0%, #fafbfe 100%);
-    }
-
-    .modal-head h3 {
-      font-size: 25px;
-      letter-spacing: -.055em;
-    }
-
-    .modal-body { padding: 24px 26px 26px; }
-
-    .detail-grid { gap: 14px; }
-
-    .detail-card {
-      background: linear-gradient(180deg, #fbfcff, #f8fafc);
-      border-radius: 17px;
-      padding: 16px;
-    }
-
-    .kanban-col {
-      background: rgba(246, 248, 252, .95);
-      border-color: #dfe5ee;
-      border-radius: 20px;
-    }
-
-    .kanban-col h4 {
-      font-size: 14px;
-      color: #1f2937;
-      letter-spacing: -.02em;
-    }
-
-    .kanban-card {
-      border-radius: 18px;
-      box-shadow: 0 14px 30px rgba(15, 23, 42, .06);
-    }
-
-    .event-hero {
-      border-radius: 24px;
-      background:
-        radial-gradient(circle at top right, rgba(255, 210, 0, .24), transparent 31%),
-        linear-gradient(135deg, #0b1018 0%, #171e2b 100%);
-      box-shadow: 0 18px 42px rgba(8, 12, 20, .16);
-    }
-
-    .workflow-step.active {
-      background: linear-gradient(180deg, #fff8bf, #fff4a6);
-      border-color: #e8bf00;
-    }
-
-    .empty {
-      padding: 50px 22px;
-    }
-
-    .empty strong {
-      font-size: 19px;
-      letter-spacing: -.03em;
-    }
-
-    .toast {
-      border-radius: 18px;
-      box-shadow: 0 24px 60px rgba(0,0,0,.26);
-    }
-
-    ::selection {
-      background: rgba(255, 210, 0, .38);
-      color: #0b1018;
-    }
-
   </style>
 </head>
 <body>
@@ -1389,14 +891,9 @@
         <button data-view="dashboard" class="active">📊 Dashboard</button>
         <button data-view="associados">👥 Associados</button>
         <button data-view="veiculos">🚗 Veículos</button>
-        <button data-view="consultores">🧑‍💼 Consultores</button>
         <button data-view="eventos">🛠️ Eventos</button>
-        <button data-view="vistorias">🔎 Vistorias</button>
-        <button data-view="compras">🛒 Compras</button>
-        <button data-view="oficinas">🏭 Oficinas</button>
         <button data-view="kanban">🧩 Kanban</button>
         <button data-view="relatorios">📈 Relatórios</button>
-        <button data-view="usuarios">👤 Usuários</button>
       </nav>
 
       <div class="sidebar-footer">
@@ -1422,7 +919,7 @@
 
   <script>
     const API_BASE = '/api/erp';
-    const APP_VERSION = '0.1.3';
+    const APP_VERSION = '0.0.4.1';
 
     const state = {
       user: null,
@@ -1435,12 +932,6 @@
         veiculos: [],
         eventos: [],
         historico: [],
-        compras: [],
-        regulacoes: [],
-        reclamacoes: [],
-        consultores: [],
-        oficinas: [],
-        usuarios: [],
         kanban: null
       }
     };
@@ -1459,52 +950,6 @@
       userRole: document.getElementById('userRole'),
       userAvatar: document.getElementById('userAvatar')
     };
-
-
-    const MODULE_LABELS = {
-      dashboard: 'Dashboard',
-      associados: 'Associados',
-      veiculos: 'Veículos',
-      consultores: 'Consultores',
-      eventos: 'Eventos',
-      vistorias: 'Vistorias',
-      compras: 'Compras',
-      oficinas: 'Oficinas',
-      kanban: 'Kanban',
-      relatorios: 'Relatórios',
-      usuarios: 'Usuários'
-    };
-
-    const ROLE_PERMISSIONS = {
-      'super admin': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'usuarios'],
-      'administrativo': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'usuarios'],
-      'cadastro': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios'],
-      'eventos': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios'],
-      'regulacao': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'oficinas', 'kanban', 'relatorios'],
-      'compras': ['dashboard', 'eventos', 'compras', 'oficinas', 'kanban', 'relatorios'],
-      'financeiro': ['dashboard', 'associados', 'veiculos', 'consultores', 'compras', 'relatorios'],
-      'consultor': ['dashboard', 'associados', 'veiculos', 'eventos', 'kanban'],
-      'regional': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios'],
-      'oficina': ['dashboard', 'eventos', 'vistorias', 'compras']
-    };
-
-    function roleKey() {
-      return normalizeText(state.user?.perfil || '');
-    }
-
-    function hasPermission(view) {
-      if (!state.user) return view === 'dashboard';
-      const key = roleKey();
-      if (key === 'super admin') return true;
-      const allowed = ROLE_PERMISSIONS[key] || ['dashboard'];
-      return allowed.includes(view);
-    }
-
-    function updateNavVisibility() {
-      document.querySelectorAll('.nav button').forEach(button => {
-        button.classList.toggle('hidden', !hasPermission(button.dataset.view));
-      });
-    }
 
     function parseMoneyBR(value) {
       if (typeof value === 'number') return value;
@@ -1627,7 +1072,6 @@
       els.userName.textContent = state.user?.nome || 'Usuário';
       els.userRole.textContent = state.user?.perfil || 'Perfil';
       els.userAvatar.textContent = (state.user?.nome || 'A').slice(0, 1).toUpperCase();
-      updateNavVisibility();
       renderView('dashboard');
     }
 
@@ -1698,24 +1142,14 @@
     }
 
     async function renderView(view) {
-      if (!hasPermission(view)) {
-        state.view = 'dashboard';
-        setActiveNav('dashboard');
-        return renderBlocked(view);
-      }
       state.view = view;
       setActiveNav(view);
       if (view === 'dashboard') return renderDashboard();
       if (view === 'associados') return renderAssociados();
       if (view === 'veiculos') return renderVeiculos();
-      if (view === 'consultores') return renderConsultores();
       if (view === 'eventos') return renderEventos();
-      if (view === 'vistorias') return renderVistorias();
-      if (view === 'compras') return renderCompras();
-      if (view === 'oficinas') return renderOficinas();
       if (view === 'kanban') return renderKanban();
       if (view === 'relatorios') return renderRelatorios();
-      if (view === 'usuarios') return renderUsuarios();
     }
 
     function topbar(title, subtitle, actions = '') {
@@ -1742,16 +1176,8 @@
     async function renderDashboard() {
       els.viewRoot.innerHTML = topbar('Dashboard Geral', 'Visão rápida da operação e dos principais indicadores.') + skeletonDashboard();
       try {
-        const [result] = await Promise.all([
-          apiGet('dashboard'),
-          ensureRegulacoesCache(true),
-          ensureConsultoresCache(true),
-          ensureOficinasCache(true)
-        ]);
+        const result = await apiGet('dashboard');
         const d = result.data || {};
-        const vistoriasAbertas = state.cache.regulacoes.filter(item => !['finalizado', 'concluido', 'concluído', 'cancelado'].includes(normalizeText(item.status))).length;
-        const consultoresAtivos = state.cache.consultores.filter(item => normalizeText(item.status) === 'ativo').length;
-        const oficinasAtivas = state.cache.oficinas.filter(item => normalizeText(item.status) === 'ativo').length;
         state.cache.dashboard = d;
         els.viewRoot.innerHTML = `
           ${topbar('Dashboard Geral', 'Visão rápida da operação e dos principais indicadores.', '<button class="btn btn-yellow" onclick="renderDashboard()">Atualizar</button>')}
@@ -1759,19 +1185,17 @@
             ${metric('Associados', d.total_associados, 'Base cadastrada')}
             ${metric('Veículos', d.total_veiculos, `${d.veiculos_ativos || 0} ativos`)}
             ${metric('Eventos abertos', d.eventos_abertos, `${d.total_eventos || 0} eventos no total`)}
-            ${metric('Vistorias abertas', vistoriasAbertas, `${state.cache.regulacoes.length} registro(s) técnico(s)`)}
+            ${metric('Reclamações', d.reclamacoes_abertas, 'Abertas ou em andamento')}
             ${metric('Compras pendentes', d.compras_pendentes, 'Ainda não entregues')}
-            ${metric('Consultores ativos', consultoresAtivos, `${state.cache.consultores.length} cadastro(s)`)}
-            ${metric('Oficinas ativas', oficinasAtivas, `${state.cache.oficinas.length} cadastro(s)`)}
             ${metric('FIPE total', money(d.valor_fipe_total), 'Soma dos veículos')}
             ${metric('Mensalidade prevista', money(d.mensalidade_total_prevista), 'Receita bruta estimada')}
             ${metric('Status da API', 'Online', 'Apps Script conectado')}
           </div>
           <div class="content-panel">
             <div class="panel-head">
-              <div><h3>v${APP_VERSION} em operação</h3><p>ERP gerencial com base, eventos, vistoria/regulação, compras, consultores, oficinas, usuários e relatórios.</p></div>
+              <div><h3>v${APP_VERSION} em operação</h3><p>Agora o ERP já relaciona associado, veículo, evento, detalhes e histórico.</p></div>
             </div>
-            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use os módulos gerenciais para acompanhar a operação completa de proteção veicular.</div>
+            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use os módulos laterais para consultar detalhes, editar registros e mover eventos no Kanban.</div>
           </div>`;
       } catch (error) { renderError(error.message); }
     }
@@ -1804,55 +1228,6 @@
       return state.cache.historico;
     }
 
-    async function ensureComprasCache(force = false) {
-      if (!force && state.cache.compras.length) return state.cache.compras;
-      const result = await apiGet('listar', { tabela: 'Compras' });
-      state.cache.compras = result.data || [];
-      return state.cache.compras;
-    }
-
-    async function ensureRegulacoesCache(force = false) {
-      if (!force && state.cache.regulacoes.length) return state.cache.regulacoes;
-      const result = await apiGet('listar', { tabela: 'Vistorias_Regulacao' });
-      state.cache.regulacoes = result.data || [];
-      return state.cache.regulacoes;
-    }
-
-    async function ensureReclamacoesCache(force = false) {
-      if (!force && state.cache.reclamacoes.length) return state.cache.reclamacoes;
-      const result = await apiGet('listar', { tabela: 'Reclamacoes' });
-      state.cache.reclamacoes = result.data || [];
-      return state.cache.reclamacoes;
-    }
-
-    async function ensureConsultoresCache(force = false) {
-      if (!force && state.cache.consultores.length) return state.cache.consultores;
-      const result = await apiGet('listar', { tabela: 'Consultores_Regionais' });
-      state.cache.consultores = result.data || [];
-      return state.cache.consultores;
-    }
-
-    async function ensureOficinasCache(force = false) {
-      if (!force && state.cache.oficinas.length) return state.cache.oficinas;
-      const result = await apiGet('listar', { tabela: 'Oficinas' });
-      state.cache.oficinas = result.data || [];
-      return state.cache.oficinas;
-    }
-
-
-    async function ensureUsuariosCache(force = false) {
-      if (!force && state.cache.usuarios.length) return state.cache.usuarios;
-      const result = await apiGet('listar', { tabela: 'Usuarios' });
-      state.cache.usuarios = (result.data || []).map(user => {
-        const clean = { ...user };
-        delete clean.senha_hash;
-        delete clean.token;
-        delete clean.token_expira_em;
-        return clean;
-      });
-      return state.cache.usuarios;
-    }
-
     function findAssociadoById(id) {
       return state.cache.associados.find(a => String(a.id_associado) === String(id));
     }
@@ -1868,330 +1243,6 @@
 
     function findEventById(id) {
       return state.cache.eventos.find(e => String(e.id_evento) === String(id));
-    }
-
-    function findRegulacaoById(id) {
-      return state.cache.regulacoes.find(r => String(r.id_regulacao) === String(id));
-    }
-
-    function findCompraById(id) {
-      return state.cache.compras.find(c => String(c.id_compra) === String(id));
-    }
-
-    function findConsultorById(id) {
-      return state.cache.consultores.find(c => String(c.id_consultor) === String(id));
-    }
-
-    function findOficinaById(id) {
-      return state.cache.oficinas.find(o => String(o.id_oficina) === String(id));
-    }
-
-
-    function findUsuarioById(id) {
-      return state.cache.usuarios.find(u => String(u.id_usuario) === String(id));
-    }
-
-
-
-    async function renderConsultores(filter = '') {
-      if (!hasPermission('consultores')) return renderBlocked('consultores');
-      els.viewRoot.innerHTML = topbar('Consultores e Regionais', 'Controle gerencial de consultores, regionais e cooperativas.', '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo consultor</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>') + loadingPanel('Carregando consultores...');
-      try {
-        await ensureConsultoresCache(true);
-        paintConsultorTable(filter);
-      } catch (error) { renderError(error.message); }
-    }
-
-    function paintConsultorTable(filter = '') {
-      const termo = String(filter || '').toLowerCase();
-      const data = state.cache.consultores.filter(item => `${item.nome} ${item.cpf_cnpj} ${item.telefone} ${item.email} ${item.regional} ${item.cooperativa} ${item.tipo} ${item.status}`.toLowerCase().includes(termo));
-      const ativos = state.cache.consultores.filter(item => normalizeText(item.status) === 'ativo').length;
-      const inativos = state.cache.consultores.filter(item => normalizeText(item.status) === 'inativo').length;
-      const regionais = uniqueValues(state.cache.consultores.map(item => item.regional)).length;
-      els.viewRoot.innerHTML = `
-        ${topbar('Consultores e Regionais', 'Controle gerencial de consultores, regionais e cooperativas.', '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo consultor</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>')}
-        <div class="content-panel">
-          <div class="summary-strip">${summaryItem('Total', state.cache.consultores.length)}${summaryItem('Ativos', ativos)}${summaryItem('Inativos', inativos)}${summaryItem('Regionais', regionais)}${summaryItem('Filtrados', data.length)}</div>
-          <div class="panel-head"><div><h3>Base comercial</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por nome, regional, cooperativa..." value="${escapeHtml(filter)}" oninput="paintConsultorTable(this.value)" /></div></div>
-          ${data.length ? consultorTable(data) : emptyState('Nenhum consultor cadastrado.', 'Clique em “Novo consultor” para criar o primeiro registro.')}
-        </div>`;
-    }
-
-    function consultorTable(data) {
-      return `<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Contato</th><th>Regional</th><th>Cooperativa</th><th>Tipo</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>
-        ${data.map(item => `<tr>
-          <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.cpf_cnpj || '')}</small></td><td>${escapeHtml(item.telefone || '-')}<br><small>${escapeHtml(item.email || '')}</small></td><td>${escapeHtml(item.regional || '-')}</td><td>${escapeHtml(item.cooperativa || '-')}</td><td>${escapeHtml(item.tipo || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_cadastro)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openConsultorDetails(${jsArg(item.id_consultor)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openConsultorModalById(${jsArg(item.id_consultor)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarConsultor(${jsArg(item.id_consultor)})">Inativar</button></div></td>
-        </tr>`).join('')}
-      </tbody></table></div>`;
-    }
-
-    function openConsultorModalById(id) {
-      const item = findConsultorById(id);
-      if (!item) return toast('Consultor não encontrado na tela atual.', 'error');
-      openConsultorModal(item);
-    }
-
-    function openConsultorModal(item = null) {
-      const isEdit = !!item;
-      const tipos = ['Consultor', 'Regional', 'Líder', 'Cooperativa', 'Parceiro'];
-      const statuses = ['Ativo', 'Inativo', 'Pendente'];
-      openModal(isEdit ? 'Editar consultor/regional' : 'Novo consultor/regional', `
-        <div class="form-grid">
-          ${field('nome', 'Nome', 'Nome completo', '', item?.nome || '')}
-          ${field('cpf_cnpj', 'CPF/CNPJ', '000.000.000-00', '', item?.cpf_cnpj || '')}
-          ${field('telefone', 'Telefone', '81999999999', '', item?.telefone || '')}
-          ${field('email', 'E-mail', 'email@dominio.com', '', item?.email || '')}
-          ${field('regional', 'Regional', 'Caruaru', '', item?.regional || '')}
-          ${field('cooperativa', 'Cooperativa', 'GPV', '', item?.cooperativa || '')}
-          ${selectField('tipo', 'Tipo', tipos, item?.tipo || 'Consultor')}
-          ${selectField('status', 'Status', statuses, item?.status || 'Ativo')}
-          ${textareaField('observacoes', 'Observações', 'Observações internas...', 'span-2', item?.observacoes || '')}
-        </div>`, isEdit ? 'Salvar alterações' : 'Cadastrar', async data => {
-          const payload = isEdit ? { action: 'editar', tabela: 'Consultores_Regionais', id: item.id_consultor, dados: data } : { action: 'criar', tabela: 'Consultores_Regionais', dados: data };
-          await apiPost(payload);
-          toast(isEdit ? 'Consultor atualizado com sucesso.' : 'Consultor cadastrado com sucesso.');
-          await renderConsultores();
-        });
-    }
-
-    async function openConsultorDetails(id) {
-      try {
-        await Promise.all([ensureConsultoresCache(), ensureVeiculosCache(), ensureEventosCache()]);
-        const item = findConsultorById(id);
-        if (!item) return toast('Consultor não encontrado.', 'error');
-        const veiculos = state.cache.veiculos.filter(v => normalizeText(v.consultor) === normalizeText(item.nome) || normalizeText(v.regional) === normalizeText(item.regional));
-        const placas = new Set(veiculos.map(v => normalizePlate(v.placa)));
-        const eventos = state.cache.eventos.filter(e => placas.has(normalizePlate(e.placa)) || normalizeText(e.responsavel) === normalizeText(item.nome));
-        const fipeCarteira = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.valor_fipe), 0);
-        const mensalidadeCarteira = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.mensalidade), 0);
-        openCustomModal('Detalhes do consultor/regional', `
-          <div class="detail-grid">
-            ${detailCard('Nome', item.nome)}${detailCard('Tipo', item.tipo)}${detailCard('Status', item.status)}
-            ${detailCard('CPF/CNPJ', item.cpf_cnpj)}${detailCard('Telefone', item.telefone)}${detailCard('E-mail', item.email)}
-            ${detailCard('Regional', item.regional)}${detailCard('Cooperativa', item.cooperativa)}${detailCard('Cadastro', dateBR(item.data_cadastro))}
-            ${detailCard('Veículos na carteira', veiculos.length)}${detailCard('FIPE da carteira', money(fipeCarteira))}${detailCard('Mensalidade prevista', money(mensalidadeCarteira))}
-          </div>
-          <div class="detail-section"><h4>Veículos relacionados</h4>${miniVeiculosTable(veiculos)}</div>
-          <div class="detail-section"><h4>Eventos relacionados</h4>${miniEventosTable(eventos)}</div>
-          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>`, true);
-      } catch (error) { toast(error.message, 'error'); }
-    }
-
-    async function inativarConsultor(id) {
-      const item = findConsultorById(id);
-      confirmAction('Inativar consultor/regional', `Deseja inativar ${item?.nome || 'este registro'}?`, 'Inativar', async () => {
-        await apiPost({ action: 'editar', tabela: 'Consultores_Regionais', id, dados: { status: 'Inativo' } });
-        toast('Consultor/regional inativado com sucesso.');
-        await renderConsultores();
-      });
-    }
-
-    async function renderOficinas(filter = '') {
-      if (!hasPermission('oficinas')) return renderBlocked('oficinas');
-      els.viewRoot.innerHTML = topbar('Oficinas', 'Cadastro gerencial de oficinas credenciadas e prestadores operacionais.', '<button class="btn btn-yellow" onclick="openOficinaModal()">+ Nova oficina</button><button class="btn btn-ghost" onclick="renderOficinas()">Atualizar</button>') + loadingPanel('Carregando oficinas...');
-      try {
-        await ensureOficinasCache(true);
-        paintOficinaTable(filter);
-      } catch (error) { renderError(error.message); }
-    }
-
-    function paintOficinaTable(filter = '') {
-      const termo = String(filter || '').toLowerCase();
-      const data = state.cache.oficinas.filter(item => `${item.nome} ${item.cnpj} ${item.telefone} ${item.email} ${item.cidade} ${item.estado} ${item.responsavel} ${item.status}`.toLowerCase().includes(termo));
-      const ativos = state.cache.oficinas.filter(item => normalizeText(item.status) === 'ativo').length;
-      const inativos = state.cache.oficinas.filter(item => normalizeText(item.status) === 'inativo').length;
-      const cidades = uniqueValues(state.cache.oficinas.map(item => [item.cidade, item.estado].filter(Boolean).join('/'))).length;
-      els.viewRoot.innerHTML = `
-        ${topbar('Oficinas', 'Cadastro gerencial de oficinas credenciadas e prestadores operacionais.', '<button class="btn btn-yellow" onclick="openOficinaModal()">+ Nova oficina</button><button class="btn btn-ghost" onclick="renderOficinas()">Atualizar</button>')}
-        <div class="content-panel">
-          <div class="summary-strip">${summaryItem('Total', state.cache.oficinas.length)}${summaryItem('Ativas', ativos)}${summaryItem('Inativas', inativos)}${summaryItem('Cidades/UF', cidades)}${summaryItem('Filtradas', data.length)}</div>
-          <div class="panel-head"><div><h3>Base de oficinas</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por oficina, cidade, responsável..." value="${escapeHtml(filter)}" oninput="paintOficinaTable(this.value)" /></div></div>
-          ${data.length ? oficinaTable(data) : emptyState('Nenhuma oficina cadastrada.', 'Clique em “Nova oficina” para criar o primeiro registro.')}
-        </div>`;
-    }
-
-    function oficinaTable(data) {
-      return `<div class="table-wrap"><table><thead><tr><th>Oficina</th><th>CNPJ</th><th>Contato</th><th>Cidade/UF</th><th>Responsável</th><th>Status</th><th>Ações</th></tr></thead><tbody>
-        ${data.map(item => `<tr>
-          <td><strong>${escapeHtml(item.nome || '-')}</strong></td><td>${escapeHtml(item.cnpj || '-')}</td><td>${escapeHtml(item.telefone || '-')}<br><small>${escapeHtml(item.email || '')}</small></td><td>${escapeHtml([item.cidade, item.estado].filter(Boolean).join('/') || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.status)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openOficinaDetails(${jsArg(item.id_oficina)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openOficinaModalById(${jsArg(item.id_oficina)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarOficina(${jsArg(item.id_oficina)})">Inativar</button></div></td>
-        </tr>`).join('')}
-      </tbody></table></div>`;
-    }
-
-    function openOficinaModalById(id) {
-      const item = findOficinaById(id);
-      if (!item) return toast('Oficina não encontrada na tela atual.', 'error');
-      openOficinaModal(item);
-    }
-
-    function openOficinaModal(item = null) {
-      const isEdit = !!item;
-      const statuses = ['Ativo', 'Inativo', 'Pendente'];
-      openModal(isEdit ? 'Editar oficina' : 'Nova oficina', `
-        <div class="form-grid">
-          ${field('nome', 'Nome da oficina', 'Oficina credenciada', '', item?.nome || '')}
-          ${field('cnpj', 'CNPJ', '00.000.000/0000-00', '', item?.cnpj || '')}
-          ${field('telefone', 'Telefone', '81999999999', '', item?.telefone || '')}
-          ${field('email', 'E-mail', 'oficina@dominio.com', '', item?.email || '')}
-          ${field('cidade', 'Cidade', 'Caruaru', '', item?.cidade || '')}
-          ${field('estado', 'Estado', 'PE', '', item?.estado || '')}
-          ${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || '')}
-          ${selectField('status', 'Status', statuses, item?.status || 'Ativo')}
-          ${textareaField('observacoes', 'Observações', 'Especialidade, endereço, condições e observações internas...', 'span-2', item?.observacoes || '')}
-        </div>`, isEdit ? 'Salvar alterações' : 'Cadastrar', async data => {
-          const payload = isEdit ? { action: 'editar', tabela: 'Oficinas', id: item.id_oficina, dados: data } : { action: 'criar', tabela: 'Oficinas', dados: data };
-          await apiPost(payload);
-          toast(isEdit ? 'Oficina atualizada com sucesso.' : 'Oficina cadastrada com sucesso.');
-          await renderOficinas();
-        });
-    }
-
-    async function openOficinaDetails(id) {
-      try {
-        await Promise.all([ensureOficinasCache(), ensureEventosCache(), ensureRegulacoesCache()]);
-        const item = findOficinaById(id);
-        if (!item) return toast('Oficina não encontrada.', 'error');
-        const eventos = state.cache.eventos.filter(e => normalizeText(e.oficina) === normalizeText(item.nome));
-        const eventIds = new Set(eventos.map(e => String(e.id_evento || '')));
-        const regulacoes = state.cache.regulacoes.filter(r => eventIds.has(String(r.id_evento || '')));
-        const valorOrcado = regulacoes.reduce((sum, r) => sum + parseMoneyBR(r.valor_orcado), 0);
-        const valorAprovado = regulacoes.reduce((sum, r) => sum + parseMoneyBR(r.valor_aprovado), 0);
-        openCustomModal('Detalhes da oficina', `
-          <div class="detail-grid">
-            ${detailCard('Oficina', item.nome)}${detailCard('Status', item.status)}${detailCard('Responsável', item.responsavel)}
-            ${detailCard('CNPJ', item.cnpj)}${detailCard('Telefone', item.telefone)}${detailCard('E-mail', item.email)}
-            ${detailCard('Cidade', item.cidade)}${detailCard('Estado', item.estado)}${detailCard('Eventos vinculados', eventos.length)}
-            ${detailCard('Registros técnicos', regulacoes.length)}${detailCard('Valor orçado', money(valorOrcado))}${detailCard('Valor aprovado', money(valorAprovado))}
-          </div>
-          <div class="detail-section"><h4>Eventos vinculados</h4>${miniEventosTable(eventos)}</div>
-          <div class="detail-section"><h4>Vistorias/Regulações vinculadas</h4>${miniRegulacaoTable(regulacoes)}</div>
-          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>`, true);
-      } catch (error) { toast(error.message, 'error'); }
-    }
-
-    async function inativarOficina(id) {
-      const item = findOficinaById(id);
-      confirmAction('Inativar oficina', `Deseja inativar ${item?.nome || 'esta oficina'}?`, 'Inativar', async () => {
-        await apiPost({ action: 'editar', tabela: 'Oficinas', id, dados: { status: 'Inativo' } });
-        toast('Oficina inativada com sucesso.');
-        await renderOficinas();
-      });
-    }
-
-    async function renderUsuarios(filter = '') {
-      if (!hasPermission('usuarios')) return renderBlocked('usuarios');
-      els.viewRoot.innerHTML = topbar('Usuários e Permissões', 'Controle de acesso, perfis e status dos usuários do ERP.', '<button class="btn btn-yellow" onclick="openUsuarioModal()">+ Novo usuário</button><button class="btn btn-ghost" onclick="renderUsuarios()">Atualizar</button>') + loadingPanel('Carregando usuários...');
-      try {
-        await ensureUsuariosCache(true);
-        paintUsuarioTable(filter);
-      } catch (error) { renderError(error.message); }
-    }
-
-    function paintUsuarioTable(filter = '') {
-      const termo = String(filter || '').toLowerCase();
-      const data = state.cache.usuarios.filter(item => `${item.nome} ${item.email} ${item.perfil} ${item.setor} ${item.status}`.toLowerCase().includes(termo));
-      const ativos = state.cache.usuarios.filter(item => normalizeText(item.status) === 'ativo').length;
-      const inativos = state.cache.usuarios.filter(item => normalizeText(item.status) === 'inativo').length;
-      const perfis = new Set(state.cache.usuarios.map(item => item.perfil).filter(Boolean)).size;
-      els.viewRoot.innerHTML = `
-        ${topbar('Usuários e Permissões', 'Controle de acesso, perfis e status dos usuários do ERP.', '<button class="btn btn-yellow" onclick="openUsuarioModal()">+ Novo usuário</button><button class="btn btn-ghost" onclick="renderUsuarios()">Atualizar</button>')}
-        <div class="content-panel">
-          <div class="summary-strip">${summaryItem('Total', state.cache.usuarios.length)}${summaryItem('Ativos', ativos)}${summaryItem('Inativos', inativos)}${summaryItem('Perfis em uso', perfis)}${summaryItem('Filtrados', data.length)}</div>
-          <div class="panel-head"><div><h3>Base de usuários</h3><p>${data.length} registro(s) encontrado(s). Senhas e tokens não são exibidos.</p></div><div class="toolbar"><input class="search" placeholder="Buscar por nome, e-mail, perfil, setor..." value="${escapeHtml(filter)}" oninput="paintUsuarioTable(this.value)" /></div></div>
-          ${data.length ? usuarioTable(data) : emptyState('Nenhum usuário cadastrado.', 'Clique em “Novo usuário” para criar o primeiro acesso.')}
-        </div>`;
-    }
-
-    function usuarioTable(data) {
-      return `<div class="table-wrap"><table><thead><tr><th>Usuário</th><th>E-mail</th><th>Perfil</th><th>Setor</th><th>Status</th><th>Último login</th><th>Ações</th></tr></thead><tbody>
-        ${data.map(item => `<tr>
-          <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.id_usuario || '')}</small></td><td>${escapeHtml(item.email || '-')}</td><td>${statusBadge(item.perfil || '-')}</td><td>${escapeHtml(item.setor || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateTimeBR(item.ultimo_login)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openUsuarioDetails(${jsArg(item.id_usuario)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openUsuarioModalById(${jsArg(item.id_usuario)})">Editar</button><button class="btn btn-yellow btn-small" onclick="resetSenhaUsuario(${jsArg(item.id_usuario)})">Senha</button>${normalizeText(item.status) === 'ativo' ? `<button class="btn btn-danger btn-small" onclick="inativarUsuario(${jsArg(item.id_usuario)})">Inativar</button>` : `<button class="btn btn-blue btn-small" onclick="ativarUsuario(${jsArg(item.id_usuario)})">Ativar</button>`}</div></td>
-        </tr>`).join('')}
-      </tbody></table></div>`;
-    }
-
-    function openUsuarioModalById(id) {
-      const item = findUsuarioById(id);
-      if (!item) return toast('Usuário não encontrado na tela atual.', 'error');
-      openUsuarioModal(item);
-    }
-
-    function openUsuarioModal(item = null) {
-      if (!hasPermission('usuarios')) return renderBlocked('usuarios');
-      const isEdit = Boolean(item?.id_usuario);
-      const perfis = parseOptions('perfis_usuario', ['Super Admin', 'Administrativo', 'Cadastro', 'Eventos', 'Regulação', 'Compras', 'Financeiro', 'Consultor', 'Regional', 'Oficina']);
-      const setores = ['Administração', 'Cadastro', 'Eventos', 'Regulação', 'Compras', 'Financeiro', 'Comercial', 'Oficina', 'Regional'];
-      const status = ['Ativo', 'Inativo'];
-      openModal(isEdit ? 'Editar usuário' : 'Novo usuário', `
-        <div class="form-grid">
-          ${field('nome', 'Nome', 'Nome do usuário', '', item?.nome || '')}${field('email', 'E-mail de acesso', 'usuario@empresa.com', '', item?.email || '')}
-          ${selectField('perfil', 'Perfil', perfis, item?.perfil || 'Administrativo')}${selectField('setor', 'Setor', setores, item?.setor || 'Administração')}
-          ${selectField('status', 'Status', status, item?.status || 'Ativo')}${field('senha', isEdit ? 'Nova senha (opcional)' : 'Senha inicial', isEdit ? 'Deixe em branco para manter' : 'Ex.: 123456', '', '')}
-          ${textareaField('observacoes_usuario', 'Observações internas', 'Controle interno de acesso', 'full', '')}
-        </div>`, isEdit ? 'Salvar usuário' : 'Criar usuário', async (data) => {
-          if (!data.nome || !data.email) throw new Error('Informe nome e e-mail.');
-          if (!isEdit && !data.senha) throw new Error('Informe uma senha inicial.');
-          delete data.observacoes_usuario;
-          if (isEdit && !data.senha) delete data.senha;
-          const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Usuarios', dados: data };
-          if (isEdit) payload.id = item.id_usuario;
-          await apiPost(payload);
-          state.cache.usuarios = [];
-          await renderUsuarios();
-          toast(isEdit ? 'Usuário atualizado com sucesso.' : 'Usuário criado com sucesso.');
-        });
-    }
-
-    function openUsuarioDetails(id) {
-      const item = findUsuarioById(id);
-      if (!item) return toast('Usuário não encontrado.', 'error');
-      openCustomModal('Detalhes do usuário', `
-        <div class="detail-grid">
-          ${detailCard('Nome', item.nome)}${detailCard('E-mail', item.email)}${detailCard('Perfil', item.perfil)}
-          ${detailCard('Setor', item.setor)}${detailCard('Status', item.status)}${detailCard('Criado em', dateTimeBR(item.data_criacao))}
-          ${detailCard('Último login', dateTimeBR(item.ultimo_login))}${detailCard('ID', item.id_usuario)}${detailCard('Sessão', String(item.id_usuario) === String(state.user?.id_usuario) ? 'Usuário logado' : 'Outro usuário')}
-        </div>
-        <div class="quick-actions"><button class="btn btn-ghost" onclick="closeModal(); openUsuarioModalById(${jsArg(item.id_usuario)})">Editar</button><button class="btn btn-yellow" onclick="closeModal(); resetSenhaUsuario(${jsArg(item.id_usuario)})">Trocar senha</button>${normalizeText(item.status) === 'ativo' ? `<button class="btn btn-danger" onclick="closeModal(); inativarUsuario(${jsArg(item.id_usuario)})">Inativar</button>` : `<button class="btn btn-blue" onclick="closeModal(); ativarUsuario(${jsArg(item.id_usuario)})">Ativar</button>`}</div>
-        <div class="lookup-note"><strong>Segurança:</strong> hashes de senha e tokens de sessão não são exibidos no painel.</div>
-      `, true);
-    }
-
-    function resetSenhaUsuario(id) {
-      const item = findUsuarioById(id);
-      if (!item) return toast('Usuário não encontrado.', 'error');
-      openModal('Trocar senha', `
-        <div class="form-grid">${field('senha', 'Nova senha', 'Digite a nova senha', 'full', '')}</div>
-      `, 'Atualizar senha', async (data) => {
-        if (!data.senha) throw new Error('Informe a nova senha.');
-        await apiPost({ action: 'editar', tabela: 'Usuarios', id, dados: { senha: data.senha } });
-        state.cache.usuarios = [];
-        await renderUsuarios();
-        toast('Senha atualizada com sucesso.');
-      });
-    }
-
-    async function inativarUsuario(id) {
-      const item = findUsuarioById(id);
-      if (!item) return toast('Usuário não encontrado.', 'error');
-      if (String(item.id_usuario) === String(state.user?.id_usuario)) return toast('Você não pode inativar o próprio usuário logado.', 'error');
-      confirmAction('Inativar usuário', `Deseja inativar o acesso de ${item.nome || item.email}?`, 'Inativar', async () => {
-        await apiPost({ action: 'editar', tabela: 'Usuarios', id, dados: { status: 'Inativo' } });
-        state.cache.usuarios = [];
-        await renderUsuarios();
-        toast('Usuário inativado.');
-      });
-    }
-
-    async function ativarUsuario(id) {
-      const item = findUsuarioById(id);
-      if (!item) return toast('Usuário não encontrado.', 'error');
-      await apiPost({ action: 'editar', tabela: 'Usuarios', id, dados: { status: 'Ativo' } });
-      state.cache.usuarios = [];
-      await renderUsuarios();
-      toast('Usuário ativado.');
     }
 
     async function renderAssociados(filter = '') {
@@ -2324,19 +1375,17 @@
       const isEdit = Boolean(item?.id_veiculo);
       const combustiveis = ['Gasolina', 'Etanol', 'Flex', 'Diesel', 'GNV', 'Elétrico', 'Híbrido'];
       const status = parseOptions('status_veiculo', ['Ativo', 'Inativo', 'Pendente', 'Cancelado']);
-      try { await Promise.all([ensureAssociadosCache(), ensureConsultoresCache()]); } catch (error) { console.warn('Cadastros auxiliares não carregados:', error.message); }
+      try { await ensureAssociadosCache(); } catch (error) { console.warn('Associados não carregados:', error.message); }
       const associadosAtivos = state.cache.associados.filter(a => normalizeText(a.status || 'Ativo') === 'ativo');
-      const consultoresAtivos = state.cache.consultores.filter(c => normalizeText(c.status || 'Ativo') === 'ativo');
       const associadoHtml = associadosAtivos.length ? `${selectAssociadoField(item?.id_associado || '')}${field('associado', 'Associado manual', 'Use apenas se não estiver cadastrado', '', item?.associado || '')}` : field('associado', 'Associado', 'Nome do associado', '', item?.associado || '');
-      const consultorHtml = consultoresAtivos.length ? selectConsultorField(item?.consultor || '') : field('consultor', 'Consultor', 'Nome do consultor', '', item?.consultor || '');
       openModal(isEdit ? 'Editar veículo' : 'Novo veículo', `
         <div class="form-grid">
           ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || '')}${associadoHtml}
           ${field('marca', 'Marca', 'Fiat, Chevrolet, Honda...', '', item?.marca || '')}${field('modelo', 'Modelo', 'Onix, Kwid, HB20...', '', item?.modelo || '')}
           ${field('ano_modelo', 'Ano/modelo', '2024', '', item?.ano_modelo || '')}${selectField('tipo_combustivel', 'Combustível', combustiveis, item?.tipo_combustivel || 'Flex')}
           ${field('valor_fipe', 'Valor FIPE', '65000', '', item?.valor_fipe || '')}${field('mensalidade', 'Mensalidade', '189.90', '', item?.mensalidade || '')}
-          ${consultorHtml}${field('regional', 'Regional', 'Preenchida pelo consultor/regional', '', item?.regional || '')}
-          ${field('cooperativa', 'Cooperativa', 'Preenchida pelo consultor/regional', '', item?.cooperativa || '')}${selectField('status', 'Status', status, item?.status || 'Ativo')}
+          ${field('consultor', 'Consultor', 'Nome do consultor', '', item?.consultor || '')}${field('regional', 'Regional', 'Caruaru', '', item?.regional || '')}
+          ${field('cooperativa', 'Cooperativa', 'PE.001', '', item?.cooperativa || '')}${selectField('status', 'Status', status, item?.status || 'Ativo')}
           ${field('rastreador', 'Rastreador', 'Sim/Não', '', item?.rastreador || '')}${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
         </div>`, isEdit ? 'Salvar alterações' : 'Salvar veículo', async (data) => {
           data.placa = String(data.placa || '').toUpperCase().trim();
@@ -2344,15 +1393,6 @@
             const associadoSelecionado = findAssociadoById(data.id_associado);
             if (associadoSelecionado) data.associado = associadoSelecionado.nome || data.associado;
           }
-          if (data._consultor_ref) {
-            const consultorSelecionado = findConsultorById(data._consultor_ref);
-            if (consultorSelecionado) {
-              data.consultor = consultorSelecionado.nome || data.consultor;
-              data.regional = consultorSelecionado.regional || data.regional;
-              data.cooperativa = consultorSelecionado.cooperativa || data.cooperativa;
-            }
-          }
-          delete data._consultor_ref;
           const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Veiculos', dados: data };
           if (isEdit) payload.id = item.id_veiculo;
           await apiPost(payload);
@@ -2360,36 +1400,11 @@
           toast(isEdit ? 'Veículo atualizado com sucesso.' : 'Veículo cadastrado com sucesso.');
           await renderVeiculos();
         });
-      attachVehicleConsultorSelect();
     }
 
     function selectAssociadoField(selected = '') {
       const options = ['<option value="">Selecionar associado cadastrado...</option>'].concat(state.cache.associados.map(item => `<option value="${escapeHtml(item.id_associado)}" ${String(item.id_associado) === String(selected) ? 'selected' : ''}>${escapeHtml(item.nome || 'Sem nome')} ${item.cpf_cnpj ? '— ' + escapeHtml(item.cpf_cnpj) : ''}</option>`)).join('');
       return `<div class="field"><label>Associado cadastrado</label><select name="id_associado">${options}</select></div>`;
-    }
-
-    function selectConsultorField(selectedName = '') {
-      const consultores = state.cache.consultores.filter(item => normalizeText(item.status || 'Ativo') === 'ativo');
-      const options = ['<option value="">Selecionar consultor/regional...</option>'].concat(consultores.map(item => {
-        const selected = normalizeText(item.nome) === normalizeText(selectedName) ? 'selected' : '';
-        const label = [item.nome || 'Sem nome', item.regional, item.cooperativa].filter(Boolean).join(' — ');
-        return `<option value="${escapeHtml(item.id_consultor)}" data-nome="${escapeHtml(item.nome || '')}" data-regional="${escapeHtml(item.regional || '')}" data-cooperativa="${escapeHtml(item.cooperativa || '')}" ${selected}>${escapeHtml(label)}</option>`;
-      })).join('');
-      return `<div class="field"><label>Consultor/Regional cadastrado</label><select name="_consultor_ref" id="vehicleConsultorSelect">${options}</select><input type="hidden" name="consultor" value="${escapeHtml(selectedName || '')}" /></div>`;
-    }
-
-    function attachVehicleConsultorSelect() {
-      const select = els.modalRoot.querySelector('#vehicleConsultorSelect');
-      if (!select) return;
-      const fill = () => {
-        const opt = select.options[select.selectedIndex];
-        if (!opt) return;
-        setFormValue('consultor', opt.dataset.nome || '');
-        setFormValue('regional', opt.dataset.regional || '');
-        setFormValue('cooperativa', opt.dataset.cooperativa || '');
-      };
-      select.addEventListener('change', fill);
-      if (select.value) fill();
     }
 
     async function inativarVeiculo(id) {
@@ -2422,7 +1437,7 @@
     }
 
     async function renderEventos(filter = '') {
-      els.viewRoot.innerHTML = topbar('Eventos', 'Central de acompanhamento, comentários, prazos e movimentações.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>') + loadingPanel('Carregando eventos...');
+      els.viewRoot.innerHTML = topbar('Eventos', 'Abertura e acompanhamento de ocorrências.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>') + loadingPanel('Carregando eventos...');
       try {
         await ensureEventosCache(true);
         paintEventTable(filter);
@@ -2432,7 +1447,7 @@
     function paintEventTable(filter = '') {
       const data = state.cache.eventos.filter(item => `${item.numero_evento} ${item.placa} ${item.associado} ${item.tipo_evento} ${item.status_evento} ${item.responsavel}`.toLowerCase().includes(String(filter).toLowerCase()));
       els.viewRoot.innerHTML = `
-        ${topbar('Eventos', 'Central de acompanhamento, comentários, prazos e movimentações.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>')}
+        ${topbar('Eventos', 'Abertura e acompanhamento de ocorrências.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>')}
         <div class="content-panel"><div class="panel-head"><div><h3>Eventos cadastrados</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por placa, associado, status..." value="${escapeHtml(filter)}" oninput="paintEventTable(this.value)" /></div></div>
           ${data.length ? eventTable(data) : emptyState('Nenhum evento cadastrado.', 'Clique em “Novo evento” para abrir a primeira ocorrência.')}
         </div>`;
@@ -2442,252 +1457,9 @@
       return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Tipo</th><th>Placa</th><th>Associado</th><th>Responsável</th><th>Etapa</th><th>Status</th><th>Abertura</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.numero_evento || item.id_evento || '-')}</strong></td><td>${escapeHtml(item.tipo_evento || '-')}</td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.etapa_kanban)}</td><td>${statusBadge(item.status_evento)}</td><td>${dateBR(item.data_abertura)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Central</button><button class="btn btn-ghost btn-small" onclick="openEventModalById(${jsArg(item.id_evento)})">Editar</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button><button class="btn btn-danger btn-small" onclick="cancelarEvento(${jsArg(item.id_evento)})">Cancelar</button></div></td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openEventModalById(${jsArg(item.id_evento)})">Editar</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button><button class="btn btn-danger btn-small" onclick="cancelarEvento(${jsArg(item.id_evento)})">Cancelar</button></div></td>
         </tr>`).join('')}
       </tbody></table></div>`;
-    }
-
-    async function renderVistorias(filter = '') {
-      els.viewRoot.innerHTML = topbar('Vistorias e Regulação', 'Controle técnico de vistorias, pareceres e valores aprovados.', '<button class="btn btn-yellow" onclick="openRegulacaoModal()">+ Nova vistoria</button><button class="btn btn-ghost" onclick="renderVistorias()">Atualizar</button>') + loadingPanel('Carregando vistorias e regulações...');
-      try {
-        await Promise.all([ensureRegulacoesCache(true), ensureEventosCache(true)]);
-        paintRegulacaoTable(filter);
-      } catch (error) { renderError(error.message); }
-    }
-
-    function paintRegulacaoTable(filter = '') {
-      const data = state.cache.regulacoes.filter(item => `${item.id_regulacao} ${item.id_evento} ${item.placa} ${item.tipo_vistoria} ${item.status} ${item.responsavel} ${item.parecer}`.toLowerCase().includes(String(filter).toLowerCase()));
-      const abertos = state.cache.regulacoes.filter(item => !['finalizado', 'concluido', 'concluído', 'cancelado'].includes(normalizeText(item.status))).length;
-      const finalizados = state.cache.regulacoes.filter(item => ['finalizado', 'concluido', 'concluído'].includes(normalizeText(item.status))).length;
-      const totalAprovado = data.reduce((sum, item) => sum + parseMoneyBR(item.valor_aprovado), 0);
-      els.viewRoot.innerHTML = `
-        ${topbar('Vistorias e Regulação', 'Controle técnico de vistorias, pareceres e valores aprovados.', '<button class="btn btn-yellow" onclick="openRegulacaoModal()">+ Nova vistoria</button><button class="btn btn-ghost" onclick="renderVistorias()">Atualizar</button>')}
-        <div class="content-panel">
-          <div class="summary-strip">${summaryItem('Total', state.cache.regulacoes.length)}${summaryItem('Em aberto', abertos)}${summaryItem('Finalizados', finalizados)}${summaryItem('Valor aprovado filtrado', money(totalAprovado))}</div>
-          <div class="panel-head"><div><h3>Controle técnico</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por placa, evento, status..." value="${escapeHtml(filter)}" oninput="paintRegulacaoTable(this.value)" /></div></div>
-          ${data.length ? regulacaoTable(data) : emptyState('Nenhuma vistoria ou regulação cadastrada.', 'Clique em “Nova vistoria” ou crie pelo botão dentro da Central do Evento.')}
-        </div>`;
-    }
-
-    function regulacaoTable(data) {
-      return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Tipo</th><th>Responsável</th><th>Status</th><th>Entrada</th><th>Saída</th><th>Valor aprovado</th><th>Ações</th></tr></thead><tbody>
-        ${data.map(item => `<tr>
-          <td><strong>${escapeHtml(eventLabel(item.id_evento))}</strong></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.tipo_vistoria || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_entrada)}</td><td>${dateBR(item.data_saida)}</td><td>${money(item.valor_aprovado || item.valor_orcado || 0)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openRegulacaoDetails(${jsArg(item.id_regulacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openRegulacaoModalById(${jsArg(item.id_regulacao)})">Editar</button><button class="btn btn-danger btn-small" onclick="cancelarRegulacao(${jsArg(item.id_regulacao)})">Cancelar</button></div></td>
-        </tr>`).join('')}
-      </tbody></table></div>`;
-    }
-
-    function eventLabel(id) {
-      const e = findEventById(id);
-      return e ? (e.numero_evento || e.id_evento || id) : (id || '-');
-    }
-
-
-    async function renderCompras(filter = '') {
-      els.viewRoot.innerHTML = topbar('Compras', 'Controle de peças, fornecedores, aprovações e entregas vinculadas aos eventos.', '<button class="btn btn-yellow" onclick="openCompraAvulsaModal()">+ Nova compra</button><button class="btn btn-ghost" onclick="renderCompras()">Atualizar</button>') + loadingPanel('Carregando compras...');
-      try {
-        await Promise.all([ensureComprasCache(true), ensureEventosCache(true)]);
-        paintCompraTable(filter);
-      } catch (error) { renderError(error.message); }
-    }
-
-    function paintCompraTable(filter = '') {
-      const termo = String(filter || '').toLowerCase();
-      const data = state.cache.compras.filter(item => `${item.id_compra} ${item.id_evento} ${item.placa} ${item.item} ${item.fornecedor} ${item.status_compra} ${item.responsavel}`.toLowerCase().includes(termo));
-      const pendentes = state.cache.compras.filter(item => !['entregue', 'cancelado'].includes(normalizeText(item.status_compra))).length;
-      const aguardando = state.cache.compras.filter(item => normalizeText(item.status_compra).includes('aguardando')).length;
-      const entregues = state.cache.compras.filter(item => normalizeText(item.status_compra) === 'entregue').length;
-      const valorAprovado = data.reduce((sum, item) => sum + parseMoneyBR(item.valor_aprovado || item.valor_cotado), 0);
-      els.viewRoot.innerHTML = `
-        ${topbar('Compras', 'Controle de peças, fornecedores, aprovações e entregas vinculadas aos eventos.', '<button class="btn btn-yellow" onclick="openCompraAvulsaModal()">+ Nova compra</button><button class="btn btn-ghost" onclick="renderCompras()">Atualizar</button>')}
-        <div class="content-panel">
-          <div class="summary-strip">${summaryItem('Total', state.cache.compras.length)}${summaryItem('Pendentes', pendentes)}${summaryItem('Aguardando aprovação', aguardando)}${summaryItem('Entregues', entregues)}${summaryItem('Valor filtrado', money(valorAprovado))}</div>
-          <div class="panel-head"><div><h3>Controle de compras</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por peça, fornecedor, placa, status..." value="${escapeHtml(filter)}" oninput="paintCompraTable(this.value)" /></div></div>
-          ${data.length ? compraTable(data) : emptyState('Nenhuma compra cadastrada.', 'Crie uma compra pelo botão “Nova compra” ou pela Central do Evento.')}
-        </div>`;
-    }
-
-    function compraTable(data) {
-      return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Item</th><th>Fornecedor</th><th>Status</th><th>Valor aprovado</th><th>Solicitação</th><th>Ações</th></tr></thead><tbody>
-        ${data.map(item => `<tr>
-          <td><strong>${escapeHtml(eventLabel(item.id_evento))}</strong></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.item || '-')}</td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${statusBadge(item.status_compra)}</td><td>${money(item.valor_aprovado || item.valor_cotado || 0)}</td><td>${dateBR(item.data_solicitacao)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(item.id_compra)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCompraModalById(${jsArg(item.id_compra)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarCompraEntregue(${jsArg(item.id_compra)})">Entregar</button><button class="btn btn-danger btn-small" onclick="cancelarCompra(${jsArg(item.id_compra)})">Cancelar</button></div></td>
-        </tr>`).join('')}
-      </tbody></table></div>`;
-    }
-
-
-    async function renderReclamacoes(filter = '') {
-      els.viewRoot.innerHTML = topbar('Reclamações / SAC', 'Controle de reclamações, tratativas, responsáveis e prazos de resposta.', '<button class="btn btn-yellow" onclick="openReclamacaoModal()">+ Nova reclamação</button><button class="btn btn-ghost" onclick="renderReclamacoes()">Atualizar</button>') + loadingPanel('Carregando reclamações...');
-      try {
-        await Promise.all([ensureReclamacoesCache(true), ensureAssociadosCache(), ensureVeiculosCache(), ensureEventosCache()]);
-        paintReclamacaoTable(filter);
-      } catch (error) { renderError(error.message); }
-    }
-
-    function getPrazoReclamacao(item) {
-      const status = normalizeText(item.status);
-      if (['resolvida', 'finalizada', 'cancelada'].includes(status)) {
-        return { label: 'Encerrado', cls: 'green', dias: 0, text: 'Encerrado' };
-      }
-      if (!item.prazo_resposta) {
-        return { label: 'Sem prazo', cls: 'dark', dias: null, text: 'Sem prazo' };
-      }
-      const prazo = new Date(item.prazo_resposta);
-      if (Number.isNaN(prazo.getTime())) {
-        return { label: 'Prazo inválido', cls: 'orange', dias: null, text: 'Prazo inválido' };
-      }
-      const hoje = new Date();
-      prazo.setHours(23,59,59,999);
-      hoje.setHours(0,0,0,0);
-      const dias = Math.ceil((prazo.getTime() - hoje.getTime()) / 86400000);
-      if (dias < 0) return { label: 'Atrasada', cls: 'red', dias, text: `${Math.abs(dias)} dia(s) atrasada` };
-      if (dias <= 1) return { label: 'Atenção', cls: 'orange', dias, text: dias === 0 ? 'Vence hoje' : 'Vence amanhã' };
-      return { label: 'No prazo', cls: 'green', dias, text: `${dias} dia(s) restantes` };
-    }
-
-    function prazoBadgeReclamacao(item) {
-      const prazo = getPrazoReclamacao(item);
-      return `<span class="badge ${prazo.cls}">${escapeHtml(prazo.label)}</span>`;
-    }
-
-    function paintReclamacaoTable(filter = '') {
-      const termo = String(filter || '').toLowerCase();
-      const statusFiltro = document.getElementById('filtroSacStatus')?.value || '';
-      const prioridadeFiltro = document.getElementById('filtroSacPrioridade')?.value || '';
-      const categoriaFiltro = document.getElementById('filtroSacCategoria')?.value || '';
-      const prazoFiltro = document.getElementById('filtroSacPrazo')?.value || '';
-
-      let data = state.cache.reclamacoes.filter(item => `${item.id_reclamacao} ${item.origem} ${item.categoria} ${item.status} ${item.prioridade} ${item.associado} ${item.telefone} ${item.placa} ${item.responsavel} ${item.descricao}`.toLowerCase().includes(termo));
-      if (statusFiltro) data = data.filter(item => String(item.status) === statusFiltro);
-      if (prioridadeFiltro) data = data.filter(item => String(item.prioridade) === prioridadeFiltro);
-      if (categoriaFiltro) data = data.filter(item => String(item.categoria) === categoriaFiltro);
-      if (prazoFiltro) data = data.filter(item => getPrazoReclamacao(item).label === prazoFiltro);
-
-      const abertas = state.cache.reclamacoes.filter(item => !['resolvida', 'finalizada', 'cancelada'].includes(normalizeText(item.status))).length;
-      const atrasadas = state.cache.reclamacoes.filter(item => getPrazoReclamacao(item).label === 'Atrasada').length;
-      const atencao = state.cache.reclamacoes.filter(item => getPrazoReclamacao(item).label === 'Atenção').length;
-      const resolvidas = state.cache.reclamacoes.filter(item => ['resolvida', 'finalizada'].includes(normalizeText(item.status))).length;
-
-      const statusOptions = uniqueValues(state.cache.reclamacoes.map(r => r.status).concat(parseOptions('status_reclamacao', [])));
-      const prioridadeOptions = uniqueValues(state.cache.reclamacoes.map(r => r.prioridade).concat(parseOptions('prioridades', [])));
-      const categorias = uniqueValues(state.cache.reclamacoes.map(r => r.categoria).concat(['Atendimento', 'Demora no reparo', 'Financeiro', 'Oficina', 'Consultor', 'Rastreamento', 'Evento', 'Outros']));
-
-      els.viewRoot.innerHTML = `
-        ${topbar('Reclamações / SAC', 'Controle de reclamações, tratativas, responsáveis e prazos de resposta.', '<button class="btn btn-yellow" onclick="openReclamacaoModal()">+ Nova reclamação</button><button class="btn btn-ghost" onclick="renderReclamacoes()">Atualizar</button>')}
-        <div class="content-panel">
-          <div class="summary-strip">${summaryItem('Total', state.cache.reclamacoes.length)}${summaryItem('Abertas', abertas)}${summaryItem('Atenção', atencao)}${summaryItem('Atrasadas', atrasadas)}${summaryItem('Resolvidas/finalizadas', resolvidas)}</div>
-          <div class="panel-head"><div><h3>Central de Reclamações</h3><p>${data.length} registro(s) encontrado(s).</p></div></div>
-          <div class="filters-grid">
-            <div class="field"><label>Busca geral</label><input id="filtroSacBusca" placeholder="Associado, placa, telefone, responsável..." value="${escapeHtml(filter)}" oninput="paintReclamacaoTable(this.value)" /></div>
-            <div class="field"><label>Status</label><select id="filtroSacStatus" onchange="paintReclamacaoTable(document.getElementById('filtroSacBusca')?.value || '')"><option value="">Todos</option>${selectOptions(statusOptions, statusFiltro)}</select></div>
-            <div class="field"><label>Prioridade</label><select id="filtroSacPrioridade" onchange="paintReclamacaoTable(document.getElementById('filtroSacBusca')?.value || '')"><option value="">Todas</option>${selectOptions(prioridadeOptions, prioridadeFiltro)}</select></div>
-            <div class="field"><label>Categoria</label><select id="filtroSacCategoria" onchange="paintReclamacaoTable(document.getElementById('filtroSacBusca')?.value || '')"><option value="">Todas</option>${selectOptions(categorias, categoriaFiltro)}</select></div>
-            <div class="field"><label>Prazo</label><select id="filtroSacPrazo" onchange="paintReclamacaoTable(document.getElementById('filtroSacBusca')?.value || '')"><option value="">Todos</option>${selectOptions(['No prazo','Atenção','Atrasada','Sem prazo','Encerrado'], prazoFiltro)}</select></div>
-            <div class="field"><label>&nbsp;</label><button class="btn btn-ghost" type="button" onclick="limparFiltrosSac()">Limpar filtros</button></div>
-          </div>
-          ${data.length ? reclamacaoTable(data) : emptyState('Nenhuma reclamação encontrada.', 'Clique em “Nova reclamação” para registrar a primeira tratativa de SAC.')}
-        </div>`;
-    }
-
-    function limparFiltrosSac() {
-      ['filtroSacBusca','filtroSacStatus','filtroSacPrioridade','filtroSacCategoria','filtroSacPrazo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-      paintReclamacaoTable('');
-    }
-
-    function reclamacaoTable(data) {
-      return `<div class="table-wrap"><table><thead><tr><th>Associado</th><th>Placa</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Prazo</th><th>Responsável</th><th>Abertura</th><th>Ações</th></tr></thead><tbody>
-        ${data.map(item => `<tr>
-          <td><strong>${escapeHtml(item.associado || '-')}</strong><br><small>${escapeHtml(item.telefone || '')}</small></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.categoria || '-')}<br><small>${escapeHtml(item.origem || '')}</small></td><td>${statusBadge(item.prioridade)}</td><td>${statusBadge(item.status)}</td><td>${prazoBadgeReclamacao(item)}<br><small>${escapeHtml(getPrazoReclamacao(item).text)}</small></td><td>${escapeHtml(item.responsavel || '-')}</td><td>${dateBR(item.data_abertura)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openReclamacaoDetails(${jsArg(item.id_reclamacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openReclamacaoModalById(${jsArg(item.id_reclamacao)})">Editar</button><button class="btn btn-yellow btn-small" onclick="resolverReclamacao(${jsArg(item.id_reclamacao)})">Resolver</button><button class="btn btn-danger btn-small" onclick="cancelarReclamacao(${jsArg(item.id_reclamacao)})">Cancelar</button></div></td>
-        </tr>`).join('')}
-      </tbody></table></div>`;
-    }
-
-    function openReclamacaoModalById(id) {
-      const item = findReclamacaoById(id);
-      if (!item) return toast('Reclamação não encontrada na tela atual.', 'error');
-      openReclamacaoModal(item);
-    }
-
-    async function openReclamacaoModal(item = null) {
-      const isEdit = Boolean(item?.id_reclamacao);
-      await Promise.all([ensureAssociadosCache(), ensureVeiculosCache()]);
-      const statusOptions = parseOptions('status_reclamacao', ['Aberta','Em análise','Aguardando resposta','Resolvida','Finalizada','Cancelada']);
-      const prioridades = parseOptions('prioridades', ['Baixa','Média','Alta','Urgente']);
-      const categorias = ['Atendimento', 'Demora no reparo', 'Financeiro', 'Oficina', 'Consultor', 'Rastreamento', 'Evento', 'Outros'];
-      openModal(isEdit ? 'Editar reclamação' : 'Nova reclamação', `
-        <div class="form-grid">
-          ${field('associado', 'Associado', 'Nome do associado', '', item?.associado || '')}${field('telefone', 'Telefone', '(81) 99999-9999', '', item?.telefone || '')}
-          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || '')}${field('origem', 'Origem', 'WhatsApp, telefone, presencial...', '', item?.origem || 'WhatsApp')}
-          ${selectField('categoria', 'Categoria', categorias, item?.categoria || 'Atendimento')}${selectField('prioridade', 'Prioridade', prioridades, item?.prioridade || 'Média')}
-          ${selectField('status', 'Status', statusOptions, item?.status || 'Aberta')}${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || state.user?.nome || '')}
-          ${field('prazo_resposta', 'Prazo de resposta', '2026-07-01', '', item?.prazo_resposta ? String(item.prazo_resposta).slice(0,10) : '')}${field('data_finalizacao', 'Data de finalização', 'Preencher ao finalizar', '', item?.data_finalizacao ? String(item.data_finalizacao).slice(0,10) : '')}
-          ${textareaField('descricao', 'Descrição da reclamação', 'Descreva o problema relatado pelo associado.', 'full', item?.descricao || '')}
-          ${textareaField('observacoes', 'Tratativa / observações', 'Registre a tratativa, orientação ou retorno dado.', 'full', item?.observacoes || '')}
-        </div>`, isEdit ? 'Salvar reclamação' : 'Registrar reclamação', async (data) => {
-          if (['Resolvida', 'Finalizada'].includes(data.status) && !data.data_finalizacao) data.data_finalizacao = new Date().toISOString();
-          const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Reclamacoes', dados: data };
-          if (isEdit) payload.id = item.id_reclamacao;
-          await apiPost(payload);
-          state.cache.reclamacoes = [];
-          toast(isEdit ? 'Reclamação atualizada com sucesso.' : 'Reclamação registrada com sucesso.');
-          await renderReclamacoes();
-        });
-    }
-
-    async function openReclamacaoDetails(id) {
-      try {
-        await Promise.all([ensureReclamacoesCache(), ensureVeiculosCache(), ensureEventosCache()]);
-        const item = findReclamacaoById(id);
-        if (!item) return toast('Reclamação não encontrada.', 'error');
-        const prazo = getPrazoReclamacao(item);
-        const veiculo = findVehicleByPlate(item.placa);
-        const eventos = state.cache.eventos.filter(e => normalizeText(e.placa) === normalizeText(item.placa) || normalizeText(e.associado) === normalizeText(item.associado));
-        openCustomModal('Detalhes da reclamação / SAC', `
-          <div class="detail-grid">
-            ${detailCard('Protocolo', item.id_reclamacao)}${detailCard('Status', item.status)}${detailCard('Prioridade', item.prioridade)}
-            ${detailCard('Associado', item.associado)}${detailCard('Telefone', item.telefone)}${detailCard('Placa', item.placa)}
-            ${detailCard('Categoria', item.categoria)}${detailCard('Origem', item.origem)}${detailCard('Responsável', item.responsavel)}
-            ${detailCard('Data de abertura', dateBR(item.data_abertura))}${detailCard('Prazo de resposta', dateBR(item.prazo_resposta))}${detailCard('Situação do prazo', prazo.text)}
-          </div>
-          <div class="detail-section"><h4>Descrição</h4><p>${escapeHtml(item.descricao || 'Sem descrição.')}</p></div>
-          <div class="detail-section"><h4>Tratativa / observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
-          <div class="detail-section"><h4>Veículo relacionado</h4>${veiculo ? miniVeiculosTable([veiculo]) : emptyState('Nenhum veículo encontrado pela placa.', 'Edite a reclamação e confira se a placa está correta.')}</div>
-          <div class="detail-section"><h4>Eventos relacionados</h4>${miniEventosTable(eventos)}</div>
-          <div class="modal-actions"><button class="btn btn-ghost" type="button" onclick="closeModal(); openReclamacaoModalById(${jsArg(item.id_reclamacao)})">Editar</button><button class="btn btn-yellow" type="button" onclick="closeModal(); resolverReclamacao(${jsArg(item.id_reclamacao)})">Marcar como resolvida</button><button class="btn btn-danger" type="button" onclick="closeModal(); cancelarReclamacao(${jsArg(item.id_reclamacao)})">Cancelar</button></div>
-        `, true);
-      } catch (error) { toast(error.message, 'error'); }
-    }
-
-    async function resolverReclamacao(id) {
-      const item = findReclamacaoById(id);
-      confirmAction('Resolver reclamação', `Deseja marcar esta reclamação como resolvida? ${item?.associado || ''}`, 'Resolver', async () => {
-        const obsAtual = item?.observacoes || '';
-        const linha = `${dateTimeBR(new Date())} - ${state.user?.nome || 'Sistema'} marcou como resolvida.`;
-        await apiPost({ action: 'editar', tabela: 'Reclamacoes', id, dados: { status: 'Resolvida', data_finalizacao: new Date().toISOString(), observacoes: [obsAtual, linha].filter(Boolean).join('\n') } });
-        state.cache.reclamacoes = [];
-        toast('Reclamação resolvida com sucesso.');
-        await renderReclamacoes();
-      });
-    }
-
-    async function finalizarReclamacao(id) {
-      await apiPost({ action: 'editar', tabela: 'Reclamacoes', id, dados: { status: 'Finalizada', data_finalizacao: new Date().toISOString() } });
-      state.cache.reclamacoes = [];
-      toast('Reclamação finalizada com sucesso.');
-      await renderReclamacoes();
-    }
-
-    async function cancelarReclamacao(id) {
-      const item = findReclamacaoById(id);
-      confirmAction('Cancelar reclamação', `Deseja cancelar esta reclamação? ${item?.associado || ''}`, 'Cancelar reclamação', async () => {
-        await apiPost({ action: 'editar', tabela: 'Reclamacoes', id, dados: { status: 'Cancelada', data_finalizacao: new Date().toISOString() } });
-        state.cache.reclamacoes = [];
-        toast('Reclamação cancelada com sucesso.');
-        await renderReclamacoes();
-      });
     }
 
     async function renderKanban() {
@@ -2710,336 +1482,15 @@
     }
 
     function kanbanCard(item) {
-      const prazo = getPrazoEvento(item);
-      return `<div class="kanban-card"><strong>${escapeHtml(item.numero_evento || item.placa || 'Evento')}</strong><p>${escapeHtml(item.associado || 'Associado não informado')}<br>${escapeHtml(item.tipo_evento || '')} • ${escapeHtml(item.responsavel || 'Sem responsável')}<br>${prazo.daysText} em aberto</p><div class="kanban-meta">${statusBadge(item.prioridade)}${statusBadge(item.status_evento)}${statusBadge(prazo.label)}<span class="badge dark">${escapeHtml(item.placa || '-')}</span></div><div class="row-actions" style="margin-top:12px"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Central</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button></div></div>`;
+      return `<div class="kanban-card"><strong>${escapeHtml(item.numero_evento || item.placa || 'Evento')}</strong><p>${escapeHtml(item.associado || 'Associado não informado')}<br>${escapeHtml(item.tipo_evento || '')} • ${escapeHtml(item.responsavel || 'Sem responsável')}</p><div class="kanban-meta">${statusBadge(item.prioridade)}${statusBadge(item.status_evento)}<span class="badge dark">${escapeHtml(item.placa || '-')}</span></div><div class="row-actions" style="margin-top:12px"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Detalhes</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button></div></div>`;
     }
 
-    async function renderRelatorios() {
-      els.viewRoot.innerHTML = topbar('Relatórios e Indicadores', 'Painel gerencial com filtros por regional, consultor, status, etapa, prazo e compras.', '<button class="btn btn-ghost" onclick="renderRelatorios()">Atualizar</button>') + loadingPanel('Carregando relatórios...');
-      try {
-        await Promise.all([
-          ensureAssociadosCache(true),
-          ensureVeiculosCache(true),
-          ensureEventosCache(true),
-          ensureComprasCache(true),
-          ensureRegulacoesCache(true),
-          ensureConsultoresCache(true),
-          ensureOficinasCache(true)
-        ]);
-
-        const regionais = uniqueValues(state.cache.veiculos.map(v => v.regional).concat(state.cache.eventos.map(e => e.regional || '')));
-        const consultores = uniqueValues(state.cache.veiculos.map(v => v.consultor));
-        const statusVeiculos = uniqueValues(state.cache.veiculos.map(v => v.status));
-        const combustiveis = uniqueValues(state.cache.veiculos.map(v => v.tipo_combustivel));
-        const statusEventos = uniqueValues(state.cache.eventos.map(e => e.status_evento));
-        const etapasEventos = uniqueValues(state.cache.eventos.map(e => e.etapa_kanban));
-        const statusCompras = uniqueValues(state.cache.compras.map(c => c.status_compra));
-
-        els.viewRoot.innerHTML = `
-          ${topbar('Relatórios e Indicadores', 'Painel gerencial com filtros por regional, consultor, status, etapa, prazo e compras.', '<button class="btn btn-yellow" onclick="exportRelatorioCSV()">Exportar CSV</button><button class="btn btn-ghost" onclick="renderRelatorios()">Atualizar</button>')}
-          <div class="content-panel">
-            <div class="panel-head">
-              <div><h3>Filtros gerenciais</h3><p>Use os filtros abaixo para cruzar base, eventos, compras e prazos operacionais.</p></div>
-              <div class="toolbar"><button class="btn btn-ghost btn-small" onclick="limparFiltrosRelatorio()">Limpar filtros</button></div>
-            </div>
-            <div class="form-grid">
-              <div class="field"><label>Busca geral</label><input id="reportSearch" placeholder="Placa, associado, evento, fornecedor..." oninput="paintRelatorios()" /></div>
-              <div class="field"><label>Regional</label><select id="reportRegional" onchange="paintRelatorios()"><option value="">Todas</option>${optionList(regionais)}</select></div>
-              <div class="field"><label>Consultor</label><select id="reportConsultor" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(consultores)}</select></div>
-              <div class="field"><label>Status do veículo</label><select id="reportStatusVeiculo" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(statusVeiculos)}</select></div>
-              <div class="field"><label>Combustível</label><select id="reportCombustivel" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(combustiveis)}</select></div>
-              <div class="field"><label>Status do evento</label><select id="reportStatusEvento" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(statusEventos)}</select></div>
-              <div class="field"><label>Etapa do evento</label><select id="reportEtapaEvento" onchange="paintRelatorios()"><option value="">Todas</option>${optionList(etapasEventos)}</select></div>
-              <div class="field"><label>Status da compra</label><select id="reportStatusCompra" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(statusCompras)}</select></div>
-              <div class="field"><label>Prazo do evento</label><select id="reportPrazoEvento" onchange="paintRelatorios()"><option value="">Todos</option><option>Dentro do prazo</option><option>Atenção</option><option>Atrasado</option><option>Encerrado</option></select></div>
-            </div>
-          </div>
-          <div id="reportsContent"></div>
-        `;
-        paintRelatorios();
-      } catch (error) { renderError(error.message); }
-    }
-
-    function optionList(items) {
-      return items.map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join('');
-    }
-
-    function uniqueValues(items) {
-      return Array.from(new Set((items || []).map(item => String(item || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-    }
-
-    function getReportFilters() {
-      const value = id => document.getElementById(id)?.value || '';
-      return {
-        search: normalizeText(value('reportSearch')),
-        regional: value('reportRegional'),
-        consultor: value('reportConsultor'),
-        statusVeiculo: value('reportStatusVeiculo'),
-        combustivel: value('reportCombustivel'),
-        statusEvento: value('reportStatusEvento'),
-        etapaEvento: value('reportEtapaEvento'),
-        statusCompra: value('reportStatusCompra'),
-        prazoEvento: value('reportPrazoEvento')
-      };
-    }
-
-    function limparFiltrosRelatorio() {
-      ['reportSearch', 'reportRegional', 'reportConsultor', 'reportStatusVeiculo', 'reportCombustivel', 'reportStatusEvento', 'reportEtapaEvento', 'reportStatusCompra', 'reportPrazoEvento'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-      paintRelatorios();
-    }
-
-    function buildReportData() {
-      const f = getReportFilters();
-      const matchText = (text) => !f.search || normalizeText(text).includes(f.search);
-      const same = (value, selected) => !selected || String(value || '') === String(selected);
-      const plateSetFromVehicles = new Set();
-
-      let veiculos = state.cache.veiculos.filter(v => {
-        const text = `${v.placa} ${v.associado} ${v.modelo} ${v.marca} ${v.consultor} ${v.regional} ${v.status} ${v.tipo_combustivel}`;
-        const ok = matchText(text)
-          && same(v.regional, f.regional)
-          && same(v.consultor, f.consultor)
-          && same(v.status, f.statusVeiculo)
-          && same(v.tipo_combustivel, f.combustivel);
-        if (ok) plateSetFromVehicles.add(normalizePlate(v.placa));
-        return ok;
-      });
-
-      let eventos = state.cache.eventos.filter(e => {
-        const prazo = getPrazoEvento(e).label;
-        const vehicle = findVehicleByPlate(e.placa);
-        const text = `${e.numero_evento} ${e.placa} ${e.associado} ${e.tipo_evento} ${e.status_evento} ${e.etapa_kanban} ${e.responsavel} ${e.cidade} ${e.estado}`;
-        const okSearch = matchText(text);
-        const okRegional = same(vehicle?.regional || e.regional, f.regional);
-        const okConsultor = same(vehicle?.consultor || e.consultor, f.consultor);
-        const okVehicleStatus = same(vehicle?.status, f.statusVeiculo);
-        const okCombustivel = same(vehicle?.tipo_combustivel, f.combustivel);
-        const okEvento = same(e.status_evento, f.statusEvento) && same(e.etapa_kanban, f.etapaEvento) && same(prazo, f.prazoEvento);
-        return okSearch && okRegional && okConsultor && okVehicleStatus && okCombustivel && okEvento;
-      });
-
-      const eventIds = new Set(eventos.map(e => String(e.id_evento || '')));
-
-      let compras = state.cache.compras.filter(c => {
-        const evento = findEventById(c.id_evento);
-        const vehicle = findVehicleByPlate(c.placa || evento?.placa);
-        const prazo = evento ? getPrazoEvento(evento).label : '';
-        const text = `${c.id_compra} ${c.id_evento} ${c.placa} ${c.item} ${c.fornecedor} ${c.status_compra} ${c.responsavel} ${evento?.associado || ''}`;
-        return matchText(text)
-          && same(c.status_compra, f.statusCompra)
-          && same(vehicle?.regional || evento?.regional, f.regional)
-          && same(vehicle?.consultor || evento?.consultor, f.consultor)
-          && same(vehicle?.status, f.statusVeiculo)
-          && same(vehicle?.tipo_combustivel, f.combustivel)
-          && same(evento?.status_evento, f.statusEvento)
-          && same(evento?.etapa_kanban, f.etapaEvento)
-          && same(prazo, f.prazoEvento);
-      });
-
-      let regulacoes = state.cache.regulacoes.filter(r => {
-        const evento = findEventById(r.id_evento);
-        const vehicle = findVehicleByPlate(r.placa || evento?.placa);
-        const prazo = evento ? getPrazoEvento(evento).label : '';
-        const text = `${r.id_regulacao} ${r.id_evento} ${r.placa} ${r.tipo_vistoria} ${r.status} ${r.responsavel} ${r.parecer} ${evento?.associado || ''}`;
-        return matchText(text)
-          && same(vehicle?.regional || evento?.regional, f.regional)
-          && same(vehicle?.consultor || evento?.consultor, f.consultor)
-          && same(vehicle?.status, f.statusVeiculo)
-          && same(vehicle?.tipo_combustivel, f.combustivel)
-          && same(evento?.status_evento, f.statusEvento)
-          && same(evento?.etapa_kanban, f.etapaEvento)
-          && same(prazo, f.prazoEvento);
-      });
-
-      return { filters: f, veiculos, eventos, compras, regulacoes, eventIds, plateSetFromVehicles };
-    }
-
-    function paintRelatorios() {
-      const root = document.getElementById('reportsContent');
-      if (!root) return;
-      const { veiculos, eventos, compras, regulacoes } = buildReportData();
-      const veiculosAtivos = veiculos.filter(v => normalizeText(v.status) === 'ativo').length;
-      const valorFipe = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.valor_fipe), 0);
-      const mensalidade = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.mensalidade), 0);
-      const eventosAbertos = eventos.filter(e => isEventoAberto(e)).length;
-      const eventosAtrasados = eventos.filter(e => getPrazoEvento(e).label === 'Atrasado').length;
-      const comprasPendentes = compras.filter(c => !['entregue', 'cancelado'].includes(normalizeText(c.status_compra))).length;
-      const valorCompras = compras.reduce((sum, c) => sum + parseMoneyBR(c.valor_aprovado || c.valor_cotado), 0);
-      const regulacoesAbertas = regulacoes.filter(r => !['finalizado', 'cancelado', 'recusado'].includes(normalizeText(r.status))).length;
-
-      root.innerHTML = `
-        <div class="grid-cards">
-          ${metric('Veículos filtrados', veiculos.length, `${veiculosAtivos} ativo(s)`)}
-          ${metric('Eventos filtrados', eventos.length, `${eventosAbertos} em andamento`)}
-          ${metric('Eventos atrasados', eventosAtrasados, '7 dias ou mais em aberto')}
-          ${metric('FIPE filtrada', money(valorFipe), 'Valor protegido filtrado')}
-          ${metric('Mensalidade filtrada', money(mensalidade), 'Receita prevista filtrada')}
-          ${metric('Compras pendentes', comprasPendentes, `${money(valorCompras)} em compras filtradas`)}
-          ${metric('Vistorias abertas', regulacoesAbertas, `${regulacoes.length} registro(s) técnico(s)`)}
-          ${metric('Ticket médio FIPE', money(veiculos.length ? valorFipe / veiculos.length : 0), 'Média por veículo filtrado')}
-        </div>
-
-        <div class="content-panel">
-          <div class="panel-head"><div><h3>Distribuição operacional</h3><p>Ranking por etapa, status, regional, consultor, combustível e compras.</p></div></div>
-          <div class="form-grid">
-            ${reportBlock('Eventos por etapa', groupCount(eventos, e => e.etapa_kanban || 'Sem etapa'), 'eventos')}
-            ${reportBlock('Eventos por status', groupCount(eventos, e => e.status_evento || 'Sem status'), 'eventos')}
-            ${reportBlock('Eventos por prazo', groupCount(eventos, e => getPrazoEvento(e).label), 'eventos')}
-            ${reportBlock('Veículos por regional', groupCount(veiculos, v => v.regional || 'Sem regional'), 'veículos')}
-            ${reportBlock('Veículos por consultor', groupCount(veiculos, v => v.consultor || 'Sem consultor'), 'veículos')}
-            ${reportBlock('Combustível', groupCount(veiculos, v => v.tipo_combustivel || 'Sem combustível'), 'veículos')}
-            ${reportBlock('Compras por status', groupCount(compras, c => c.status_compra || 'Sem status'), 'compras')}
-            ${reportBlock('Regulação por status', groupCount(regulacoes, r => r.status || 'Sem status'), 'registros')}
-          </div>
-        </div>
-
-        <div class="content-panel">
-          <div class="panel-head"><div><h3>Carteira por consultor/regional</h3><p>Visão gerencial cruzando consultores, veículos, FIPE e mensalidade prevista.</p></div></div>
-          ${reportConsultorCarteiraTable(veiculos)}
-        </div>
-
-        <div class="content-panel">
-          <div class="panel-head"><div><h3>Eventos por oficina</h3><p>Acompanhamento de eventos vinculados às oficinas cadastradas.</p></div></div>
-          ${reportOficinaEventosTable(eventos)}
-        </div>
-
-        <div class="content-panel">
-          <div class="panel-head"><div><h3>Eventos que exigem atenção</h3><p>Eventos filtrados em atenção ou atraso, com acesso rápido à Central.</p></div></div>
-          ${reportAttentionTable(eventos)}
-        </div>
-
-        <div class="content-panel">
-          <div class="panel-head"><div><h3>Compras pendentes</h3><p>Itens ainda não entregues ou cancelados.</p></div></div>
-          ${reportCompraPendenteTable(compras)}
-        </div>
-
-        <div class="content-panel">
-          <div class="panel-head"><div><h3>Base de veículos filtrada</h3><p>Resumo para análise de carteira, FIPE, mensalidade, regional e consultor.</p></div></div>
-          ${reportVehicleTable(veiculos)}
-        </div>
-      `;
-    }
-
-    function normalizePlate(value) {
-      return String(value || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    }
-
-    function isEventoAberto(item) {
-      const status = normalizeText(item.status_evento);
-      return !['finalizado', 'recusado', 'cancelado'].includes(status);
-    }
-
-    function groupCount(items, keyFn) {
-      const map = new Map();
-      (items || []).forEach(item => {
-        const key = String(keyFn(item) || 'Não informado');
-        map.set(key, (map.get(key) || 0) + 1);
-      });
-      return Array.from(map.entries()).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value || a.label.localeCompare(b.label, 'pt-BR'));
-    }
-
-    function reportBlock(title, rows, suffix = 'registro(s)') {
-      const max = Math.max(1, ...rows.map(r => r.value));
-      const shown = rows.slice(0, 7);
-      return `<div class="detail-section"><h4>${escapeHtml(title)}</h4>${shown.length ? shown.map(row => reportBar(row.label, row.value, max, suffix)).join('') : '<div class="empty"><strong>Sem dados</strong>Nenhum item encontrado no filtro atual.</div>'}</div>`;
-    }
-
-    function reportBar(label, value, max, suffix) {
-      const width = Math.max(6, Math.round((value / max) * 100));
-      return `<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)} ${escapeHtml(suffix)}</span></div><div style="height:10px;background:#eef0f5;border-radius:999px;overflow:hidden;margin-top:6px"><div style="height:100%;width:${width}%;background:linear-gradient(90deg,#111318,#ffd400);border-radius:999px"></div></div></div>`;
-    }
-
-    function reportConsultorCarteiraTable(veiculos) {
-      const map = new Map();
-      (veiculos || []).forEach(v => {
-        const key = v.consultor || 'Sem consultor';
-        if (!map.has(key)) map.set(key, { consultor: key, regional: v.regional || '-', total: 0, ativos: 0, fipe: 0, mensalidade: 0 });
-        const row = map.get(key);
-        row.total += 1;
-        if (normalizeText(v.status) === 'ativo') row.ativos += 1;
-        row.fipe += parseMoneyBR(v.valor_fipe);
-        row.mensalidade += parseMoneyBR(v.mensalidade);
-        if (!row.regional || row.regional === '-') row.regional = v.regional || '-';
-      });
-      const rows = Array.from(map.values()).sort((a, b) => b.total - a.total || b.fipe - a.fipe).slice(0, 20);
-      if (!rows.length) return emptyState('Nenhuma carteira encontrada.', 'Cadastre veículos vinculados a consultores para gerar este relatório.');
-      return `<div class="table-wrap"><table><thead><tr><th>Consultor</th><th>Regional</th><th>Veículos</th><th>Ativos</th><th>FIPE</th><th>Mensalidade</th></tr></thead><tbody>
-        ${rows.map(row => `<tr><td><strong>${escapeHtml(row.consultor)}</strong></td><td>${escapeHtml(row.regional || '-')}</td><td>${row.total}</td><td>${row.ativos}</td><td>${money(row.fipe)}</td><td>${money(row.mensalidade)}</td></tr>`).join('')}
-      </tbody></table></div>`;
-    }
-
-    function reportOficinaEventosTable(eventos) {
-      const map = new Map();
-      (eventos || []).filter(e => String(e.oficina || '').trim()).forEach(e => {
-        const key = e.oficina || 'Sem oficina';
-        if (!map.has(key)) map.set(key, { oficina: key, eventos: 0, abertos: 0, atrasados: 0, valor: 0 });
-        const row = map.get(key);
-        row.eventos += 1;
-        if (isEventoAberto(e)) row.abertos += 1;
-        if (getPrazoEvento(e).label === 'Atrasado') row.atrasados += 1;
-        row.valor += parseMoneyBR(e.valor_aprovado || e.valor_estimado);
-      });
-      const rows = Array.from(map.values()).sort((a, b) => b.abertos - a.abertos || b.eventos - a.eventos).slice(0, 20);
-      if (!rows.length) return emptyState('Nenhum evento vinculado a oficina.', 'Selecione uma oficina cadastrada nos eventos para gerar este acompanhamento.');
-      return `<div class="table-wrap"><table><thead><tr><th>Oficina</th><th>Eventos</th><th>Em aberto</th><th>Atrasados</th><th>Valor estimado/aprovado</th></tr></thead><tbody>
-        ${rows.map(row => `<tr><td><strong>${escapeHtml(row.oficina)}</strong></td><td>${row.eventos}</td><td>${row.abertos}</td><td>${row.atrasados}</td><td>${money(row.valor)}</td></tr>`).join('')}
-      </tbody></table></div>`;
-    }
-
-    function reportAttentionTable(eventos) {
-      const data = eventos
-        .filter(e => ['Atenção', 'Atrasado'].includes(getPrazoEvento(e).label) && isEventoAberto(e))
-        .sort((a, b) => getPrazoEvento(b).days - getPrazoEvento(a).days)
-        .slice(0, 20);
-      if (!data.length) return emptyState('Nenhum evento em atenção ou atraso.', 'Os eventos filtrados estão dentro do prazo ou encerrados.');
-      return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Associado</th><th>Etapa</th><th>Status</th><th>Prazo</th><th>Responsável</th><th>Ação</th></tr></thead><tbody>
-        ${data.map(item => {
-          const prazo = getPrazoEvento(item);
-          return `<tr><td><strong>${escapeHtml(item.numero_evento || item.id_evento)}</strong></td><td>${escapeHtml(item.placa || '-')}</td><td>${escapeHtml(item.associado || '-')}</td><td>${statusBadge(item.etapa_kanban)}</td><td>${statusBadge(item.status_evento)}</td><td>${statusBadge(`${prazo.label} • ${prazo.daysText}`)}</td><td>${escapeHtml(item.responsavel || '-')}</td><td><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Central</button></td></tr>`;
-        }).join('')}
-      </tbody></table></div>`;
-    }
-
-    function reportCompraPendenteTable(compras) {
-      const data = compras
-        .filter(c => !['entregue', 'cancelado'].includes(normalizeText(c.status_compra)))
-        .slice(0, 20);
-      if (!data.length) return emptyState('Nenhuma compra pendente.', 'Não há compras em aberto dentro do filtro atual.');
-      return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Item</th><th>Fornecedor</th><th>Status</th><th>Valor</th><th>Ação</th></tr></thead><tbody>
-        ${data.map(item => `<tr><td><strong>${escapeHtml(eventLabel(item.id_evento))}</strong></td><td>${escapeHtml(item.placa || '-')}</td><td>${escapeHtml(item.item || '-')}</td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${statusBadge(item.status_compra)}</td><td>${money(item.valor_aprovado || item.valor_cotado || 0)}</td><td><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(item.id_compra)})">Abrir</button></td></tr>`).join('')}
-      </tbody></table></div>`;
-    }
-
-    function reportVehicleTable(veiculos) {
-      const data = veiculos.slice(0, 30);
-      if (!data.length) return emptyState('Nenhum veículo encontrado.', 'Ajuste os filtros para visualizar a base.');
-      return `<div class="table-wrap"><table><thead><tr><th>Placa</th><th>Associado</th><th>Modelo</th><th>Regional</th><th>Consultor</th><th>Status</th><th>FIPE</th><th>Mensalidade</th><th>Ação</th></tr></thead><tbody>
-        ${data.map(item => `<tr><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml(`${item.marca || ''} ${item.modelo || ''}`.trim() || '-')}</td><td>${escapeHtml(item.regional || '-')}</td><td>${escapeHtml(item.consultor || '-')}</td><td>${statusBadge(item.status)}</td><td>${money(item.valor_fipe || 0)}</td><td>${money(item.mensalidade || 0)}</td><td><button class="btn btn-blue btn-small" onclick="openVehicleDetails(${jsArg(item.id_veiculo)})">Abrir</button></td></tr>`).join('')}
-      </tbody></table></div>${veiculos.length > 30 ? `<div class="hint">Mostrando os 30 primeiros de ${veiculos.length} veículo(s) filtrado(s).</div>` : ''}`;
-    }
-
-    function exportRelatorioCSV() {
-      const { veiculos, eventos, compras, regulacoes } = buildReportData();
-      const rows = [];
-      rows.push(['Tipo', 'Identificador', 'Placa', 'Associado/Item', 'Status', 'Etapa/Fornecedor', 'Valor', 'Responsável']);
-      veiculos.forEach(v => rows.push(['Veículo', v.id_veiculo || '', v.placa || '', v.associado || '', v.status || '', `${v.regional || ''} / ${v.consultor || ''}`, parseMoneyBR(v.valor_fipe || 0), v.consultor || '']));
-      eventos.forEach(e => rows.push(['Evento', e.numero_evento || e.id_evento || '', e.placa || '', e.associado || '', e.status_evento || '', e.etapa_kanban || '', parseMoneyBR(e.valor_estimado || e.valor_aprovado || 0), e.responsavel || '']));
-      compras.forEach(c => rows.push(['Compra', c.id_compra || '', c.placa || '', c.item || '', c.status_compra || '', c.fornecedor || '', parseMoneyBR(c.valor_aprovado || c.valor_cotado || 0), c.responsavel || '']));
-      regulacoes.forEach(r => rows.push(['Vistoria/Regulação', r.id_regulacao || '', r.placa || '', r.tipo_vistoria || '', r.status || '', r.parecer || '', parseMoneyBR(r.valor_aprovado || r.valor_orcado || 0), r.responsavel || '']));
-      const csv = rows.map(row => row.map(cell => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(';')).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `relatorio-erp-evento-${new Date().toISOString().slice(0, 10)}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      toast('Relatório CSV gerado.');
+    function renderRelatorios() {
+      const d = state.cache.dashboard || {};
+      els.viewRoot.innerHTML = `
+        ${topbar('Relatórios', 'Resumo inicial com base nos dados já cadastrados.', '<button class="btn btn-yellow" onclick="renderDashboard()">Ver dashboard</button>')}
+        <div class="grid-cards">${metric('Base ativa', d.veiculos_ativos || 0, 'Veículos ativos')}${metric('Eventos em andamento', d.eventos_abertos || 0, 'Não finalizados')}${metric('FIPE total', money(d.valor_fipe_total || 0), 'Valor protegido')}${metric('Mensalidade prevista', money(d.mensalidade_total_prevista || 0), 'Estimativa mensal')}</div>
+        <div class="content-panel"><div class="panel-head"><div><h3>Relatórios avançados</h3><p>Na próxima etapa entram filtros por regional, consultor, modelo, combustível, status e período.</p></div></div><div class="empty"><strong>Módulo em construção.</strong>A estrutura já está pronta para receber os relatórios operacionais.</div></div>`;
     }
 
     async function openEventModalById(id) {
@@ -3053,9 +1504,7 @@
       const isEdit = Boolean(item?.id_evento);
       const tipos = parseOptions('tipo_evento', ['Roubo', 'Furto', 'Colisão', 'Pane', 'Assistência', 'Terceiro', 'Outro']);
       const prioridades = parseOptions('prioridades', ['Baixa', 'Média', 'Alta', 'Urgente']);
-      try { await Promise.all([ensureVeiculosCache(), ensureAssociadosCache(), ensureOficinasCache()]); } catch (error) { console.warn(error.message); }
-      const oficinasAtivas = state.cache.oficinas.filter(o => normalizeText(o.status || 'Ativo') === 'ativo');
-      const oficinaHtml = oficinasAtivas.length ? selectOficinaField(item?.oficina || '') : field('oficina', 'Oficina', 'Oficina parceira', '', item?.oficina || '');
+      try { await Promise.all([ensureVeiculosCache(), ensureAssociadosCache()]); } catch (error) { console.warn(error.message); }
       openModal(isEdit ? 'Editar evento' : 'Novo evento', `
         <div class="form-grid">
           ${selectField('tipo_evento', 'Tipo de evento', tipos, item?.tipo_evento || '')}${selectField('prioridade', 'Prioridade', prioridades, item?.prioridade || 'Média')}
@@ -3063,7 +1512,7 @@
           ${field('associado', 'Associado', 'Nome do associado', '', item?.associado || '')}${field('telefone', 'Telefone', '(81) 99999-9999', '', item?.telefone || '')}
           ${field('cidade', 'Cidade', 'Caruaru', '', item?.cidade || '')}${field('estado', 'Estado', 'PE', '', item?.estado || '')}
           ${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || '')}${field('setor_atual', 'Setor atual', 'Eventos', '', item?.setor_atual || 'Eventos')}
-          ${oficinaHtml}${field('valor_estimado', 'Valor estimado', '0', '', item?.valor_estimado || '')}
+          ${field('oficina', 'Oficina', 'Oficina parceira', '', item?.oficina || '')}${field('valor_estimado', 'Valor estimado', '0', '', item?.valor_estimado || '')}
           ${field('valor_aprovado', 'Valor aprovado', '0', '', item?.valor_aprovado || '')}${textareaField('descricao', 'Descrição do evento', 'Descreva o ocorrido', 'full', item?.descricao || '')}
           ${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
           <div id="vehicleLookupNote" class="lookup-note full hidden"></div>
@@ -3077,15 +1526,6 @@
           if (state.view === 'kanban') await renderKanban(); else await renderEventos();
         });
       attachEventVehicleLookup();
-    }
-
-    function selectOficinaField(selectedName = '') {
-      const options = ['<option value="">Selecionar oficina cadastrada...</option>'].concat(state.cache.oficinas.map(item => {
-        const selected = normalizeText(item.nome) === normalizeText(selectedName) ? 'selected' : '';
-        const label = [item.nome || 'Sem nome', item.cidade, item.estado].filter(Boolean).join(' — ');
-        return `<option value="${escapeHtml(item.nome || '')}" ${selected}>${escapeHtml(label)}</option>`;
-      })).join('');
-      return `<div class="field"><label>Oficina cadastrada</label><select name="oficina">${options}</select></div>`;
     }
 
     function plateLookupField(value = '') {
@@ -3135,345 +1575,24 @@
 
     async function openEventDetails(id) {
       try {
-        await Promise.all([
-          ensureEventosCache(true),
-          ensureVeiculosCache(true),
-          ensureAssociadosCache(true),
-          ensureHistoricoCache(true),
-          ensureComprasCache(true),
-          ensureRegulacoesCache(true),
-          ensureConsultoresCache(true),
-          ensureOficinasCache(true)
-        ]);
-
+        await Promise.all([ensureEventosCache(true), ensureVeiculosCache(true), ensureAssociadosCache(true), ensureHistoricoCache(true)]);
         const item = findEventById(id);
         if (!item) return toast('Evento não encontrado.', 'error');
-
         const veiculo = findVehicleByPlate(item.placa);
         const associado = findAssociadoById(item.id_associado) || state.cache.associados.find(a => normalizeText(a.nome) === normalizeText(item.associado));
         const historico = state.cache.historico.filter(h => String(h.id_evento) === String(item.id_evento));
-        const compras = state.cache.compras.filter(c => String(c.id_evento) === String(item.id_evento));
-        const regulacoes = state.cache.regulacoes.filter(r => String(r.id_evento) === String(item.id_evento));
-        const prazo = getPrazoEvento(item);
-
-        openCustomModal('Central do evento', `
-          <div class="event-hero">
-            <div>
-              <small>Central operacional</small>
-              <h4>${escapeHtml(item.numero_evento || item.id_evento || 'Evento')}</h4>
-              <p>
-                ${escapeHtml(item.tipo_evento || 'Tipo não informado')} • Placa <strong>${escapeHtml(item.placa || '-')}</strong> •
-                ${escapeHtml(item.associado || 'Associado não informado')}
-              </p>
-              <div class="quick-actions">
-                ${statusBadge(item.etapa_kanban)}${statusBadge(item.status_evento)}${statusBadge(item.prioridade)}${statusBadge(prazo.label)}
-              </div>
-            </div>
-            <div class="event-hero-actions">
-              <button class="btn btn-yellow btn-small" onclick="closeModal(); openMoveEventModal(${jsArg(item.id_evento)})">Mover etapa</button>
-              <button class="btn btn-blue btn-small" onclick="openCommentEventModal(${jsArg(item.id_evento)})">Comentário</button>
-              <button class="btn btn-ghost btn-small" onclick="openRegulacaoModal(null, ${jsArg(item.id_evento)}, 'Vistoria')">Vistoria</button>
-              <button class="btn btn-ghost btn-small" onclick="openRegulacaoModal(null, ${jsArg(item.id_evento)}, 'Regulação')">Regulação</button>
-              <button class="btn btn-orange btn-small" onclick="openCompraModal(${jsArg(item.id_evento)})">Compra</button>
-              <button class="btn btn-ghost btn-small" onclick="closeModal(); openEventModalById(${jsArg(item.id_evento)})">Editar</button>
-            </div>
-          </div>
-
-          ${eventWorkflow(item)}
-
+        openCustomModal('Detalhes do evento', `
           <div class="detail-grid">
             ${detailCard('Número', item.numero_evento || item.id_evento)}${detailCard('Tipo', item.tipo_evento)}${detailCard('Prioridade', item.prioridade)}
             ${detailCard('Placa', item.placa)}${detailCard('Associado', item.associado)}${detailCard('Telefone', item.telefone || associado?.telefone)}
-            ${detailCard('Etapa atual', item.etapa_kanban)}${detailCard('Status atual', item.status_evento)}${detailCard('Responsável', item.responsavel)}
-            ${detailCard('Setor', item.setor_atual)}${detailCard('Oficina', item.oficina)}${detailCard('Dias em aberto', prazo.daysText)}
+            ${detailCard('Etapa', item.etapa_kanban)}${detailCard('Status', item.status_evento)}${detailCard('Responsável', item.responsavel)}
+            ${detailCard('Setor', item.setor_atual)}${detailCard('Oficina', item.oficina)}${detailCard('Abertura', dateBR(item.data_abertura))}
             ${detailCard('Valor estimado', money(item.valor_estimado))}${detailCard('Valor aprovado', money(item.valor_aprovado))}${detailCard('Veículo', veiculo ? [veiculo.marca, veiculo.modelo, veiculo.ano_modelo].filter(Boolean).join(' ') : '-')}
           </div>
-
-          <div class="detail-section">
-            <h4>Ações rápidas</h4>
-            <div class="quick-actions">
-              <button class="btn btn-ghost btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Vistoria', 'Em vistoria')">Enviar para vistoria</button>
-              <button class="btn btn-ghost btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Regulação', 'Em regulação')">Enviar para regulação</button>
-              <button class="btn btn-ghost btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Compras', 'Em compras')">Enviar para compras</button>
-              <button class="btn btn-ghost btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Reparo', 'Em reparo')">Enviar para reparo</button>
-              <button class="btn btn-yellow btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Finalizado', 'Finalizado')">Finalizar evento</button>
-              <button class="btn btn-danger btn-small" onclick="quickMoveEvent(${jsArg(item.id_evento)}, 'Finalizado', 'Recusado')">Recusar evento</button>
-            </div>
-          </div>
-
           <div class="detail-section"><h4>Descrição</h4><p>${escapeHtml(item.descricao || 'Sem descrição.')}</p></div>
           <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
-          <div class="detail-section"><h4>Vistorias e regulação</h4>${miniRegulacoesTable(regulacoes)}</div>
-          <div class="detail-section"><h4>Compras do evento</h4>${miniComprasTable(compras)}</div>
-          <div class="detail-section"><h4>Timeline / Histórico</h4>${timelineList(historico)}</div>
-        `, true);
+          <div class="detail-section"><h4>Histórico do evento</h4>${historyList(historico)}</div>`, true);
       } catch (error) { toast(error.message, 'error'); }
-    }
-
-    function getPrazoEvento(item) {
-      const fim = String(item.status_evento || '').toLowerCase().includes('finalizado') || String(item.status_evento || '').toLowerCase().includes('recusado') || String(item.status_evento || '').toLowerCase().includes('cancelado');
-      const abertura = new Date(item.data_abertura || item.data_ultima_atualizacao || new Date());
-      const now = new Date();
-      const diff = Number.isNaN(abertura.getTime()) ? 0 : Math.max(0, Math.floor((now - abertura) / 86400000));
-      let label = 'Dentro do prazo';
-      if (fim) label = 'Encerrado';
-      else if (diff >= 7) label = 'Atrasado';
-      else if (diff >= 4) label = 'Atenção';
-      return { days: diff, daysText: `${diff} dia(s)`, label };
-    }
-
-    function workflowSteps() {
-      return ['Aberto', 'Análise', 'Vistoria', 'Regulação', 'Compras', 'Reparo', 'Aguardando Aprovação', 'Finalizado'];
-    }
-
-    function eventWorkflow(item) {
-      const etapas = parseOptions('etapas_kanban_evento', workflowSteps());
-      const atual = String(item.etapa_kanban || 'Aberto');
-      const currentIndex = Math.max(0, etapas.findIndex(e => normalizeText(e) === normalizeText(atual)));
-      return `<div class="workflow">${etapas.map((etapa, index) => {
-        const cls = index < currentIndex ? 'done' : (index === currentIndex ? 'active' : '');
-        return `<div class="workflow-step ${cls}"><span>Etapa ${index + 1}</span><strong>${escapeHtml(etapa)}</strong></div>`;
-      }).join('')}</div>`;
-    }
-
-    async function quickMoveEvent(id, etapa, status) {
-      const comentario = `Movimentação rápida pela Central do Evento: ${etapa} / ${status}.`;
-      try {
-        await apiPost({ action: 'mover_evento_kanban', id_evento: id, nova_etapa: etapa, novo_status: status, comentario });
-        state.cache.eventos = [];
-        state.cache.historico = [];
-        state.cache.kanban = null;
-        toast('Evento movimentado com sucesso.');
-        closeModal();
-        await openEventDetails(id);
-      } catch (error) { toast(error.message, 'error'); }
-    }
-
-    async function openCommentEventModal(id) {
-      await ensureEventosCache();
-      const item = findEventById(id);
-      if (!item) return toast('Evento não encontrado.', 'error');
-      openModal('Adicionar comentário', `
-        <div class="lookup-note full">Comentário interno no evento <strong>${escapeHtml(item.numero_evento || item.id_evento)}</strong>. Ele ficará salvo no histórico.</div>
-        <div class="form-grid">
-          ${textareaField('comentario', 'Comentário interno', 'Ex.: associado enviou documento, oficina retornou orçamento, tratativa feita por WhatsApp...', 'full')}
-        </div>`, 'Salvar comentário', async (data) => {
-          if (!String(data.comentario || '').trim()) throw new Error('Digite o comentário.');
-          await apiPost({
-            action: 'criar',
-            tabela: 'Historico_Eventos',
-            dados: {
-              id_evento: id,
-              data_hora: new Date().toISOString(),
-              usuario: state.user?.email || state.user?.nome || 'Sistema',
-              acao: 'Comentário interno',
-              status_anterior: item.status_evento || '',
-              status_novo: item.status_evento || '',
-              etapa_anterior: item.etapa_kanban || '',
-              etapa_nova: item.etapa_kanban || '',
-              comentario: data.comentario
-            }
-          });
-          state.cache.historico = [];
-          toast('Comentário registrado com sucesso.');
-          setTimeout(() => openEventDetails(id), 120);
-        });
-    }
-
-    async function openCompraModal(eventId = '', item = null) {
-      await Promise.all([ensureEventosCache(), ensureComprasCache()]);
-      const isEdit = Boolean(item);
-      const selectedEventId = item?.id_evento || eventId || '';
-      const evento = selectedEventId ? findEventById(selectedEventId) : null;
-      const statusCompra = parseOptions('status_compra', ['Solicitado', 'Em cotação', 'Aguardando aprovação', 'Aprovado', 'Comprado', 'Entregue', 'Cancelado']);
-      const title = isEdit ? 'Editar compra' : 'Criar solicitação de compra';
-      const eventContext = selectedEventId && evento
-        ? `<div class="lookup-note full">Evento: <strong>${escapeHtml(evento.numero_evento || evento.id_evento)}</strong> • Placa: <strong>${escapeHtml(evento.placa || '-')}</strong></div>${hiddenField('id_evento', selectedEventId)}`
-        : eventSelectField(selectedEventId);
-
-      openModal(title, `
-        ${eventContext}
-        <div class="form-grid">
-          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || evento?.placa || '')}${field('item', 'Item / peça', 'Ex.: para-choque dianteiro', '', item?.item || '')}
-          ${field('fornecedor', 'Fornecedor', 'Nome do fornecedor', '', item?.fornecedor || '')}${field('valor_cotado', 'Valor cotado', '0', '', item?.valor_cotado || '')}
-          ${field('valor_aprovado', 'Valor aprovado', '0', '', item?.valor_aprovado || '')}${selectField('status_compra', 'Status da compra', statusCompra, item?.status_compra || 'Solicitado')}
-          ${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || evento?.responsavel || state.user?.nome || '')}${field('data_entrega', 'Data de entrega', 'YYYY-MM-DD', '', item?.data_entrega || '')}
-          ${textareaField('observacoes', 'Observações', 'Detalhes da cotação ou compra', 'full', item?.observacoes || '')}
-        </div>`, isEdit ? 'Salvar compra' : 'Criar compra', async (data) => {
-          if (!String(data.item || '').trim()) throw new Error('Informe o item/peça.');
-          const ev = data.id_evento ? findEventById(data.id_evento) : null;
-          const dados = {
-            ...data,
-            placa: data.placa || ev?.placa || '',
-            data_solicitacao: item?.data_solicitacao || new Date().toISOString()
-          };
-          const payload = isEdit
-            ? { action: 'editar', tabela: 'Compras', id: item.id_compra, dados }
-            : { action: 'criar', tabela: 'Compras', dados };
-          await apiPost(payload);
-          if (!isEdit && dados.id_evento) {
-            await apiPost({ action: 'mover_evento_kanban', id_evento: dados.id_evento, nova_etapa: 'Compras', novo_status: 'Em compras', comentario: `Compra criada: ${dados.item || 'item não informado'}.` });
-          }
-          state.cache.compras = [];
-          state.cache.eventos = [];
-          state.cache.historico = [];
-          toast(isEdit ? 'Compra atualizada com sucesso.' : 'Solicitação de compra criada.');
-          if (state.view === 'compras') await renderCompras();
-          else if (dados.id_evento) setTimeout(() => openEventDetails(dados.id_evento), 120);
-        });
-    }
-
-    function openCompraAvulsaModal() {
-      openCompraModal('', null);
-    }
-
-    async function openCompraModalById(id) {
-      await ensureComprasCache();
-      const item = findCompraById(id);
-      if (!item) return toast('Compra não encontrada.', 'error');
-      openCompraModal(item.id_evento || '', item);
-    }
-
-    async function openCompraDetails(id) {
-      await Promise.all([ensureComprasCache(), ensureEventosCache()]);
-      const item = findCompraById(id);
-      if (!item) return toast('Compra não encontrada.', 'error');
-      const evento = findEventById(item.id_evento);
-      openCustomModal('Detalhes da compra', `
-        <div class="detail-grid">
-          ${detailCard('Evento', eventLabel(item.id_evento))}${detailCard('Placa', item.placa || evento?.placa || '-')}${detailCard('Status', item.status_compra || '-')}
-          ${detailCard('Item / peça', item.item || '-')}${detailCard('Fornecedor', item.fornecedor || '-')}${detailCard('Responsável', item.responsavel || '-')}
-          ${detailCard('Valor cotado', money(item.valor_cotado || 0))}${detailCard('Valor aprovado', money(item.valor_aprovado || 0))}${detailCard('Solicitação', dateBR(item.data_solicitacao))}
-          ${detailCard('Aprovação', dateBR(item.data_aprovacao))}${detailCard('Entrega', dateBR(item.data_entrega))}${detailCard('Associado', evento?.associado || '-')}
-        </div>
-        <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
-        <div class="quick-actions"><button class="btn btn-ghost" onclick="closeModal(); openCompraModalById(${jsArg(item.id_compra)})">Editar compra</button><button class="btn btn-yellow" onclick="closeModal(); marcarCompraEntregue(${jsArg(item.id_compra)})">Marcar como entregue</button>${evento ? `<button class="btn btn-blue" onclick="closeModal(); openEventDetails(${jsArg(evento.id_evento)})">Abrir evento</button>` : ''}</div>
-      `, true);
-    }
-
-    async function marcarCompraEntregue(id) {
-      await ensureComprasCache();
-      const item = findCompraById(id);
-      if (!item) return toast('Compra não encontrada.', 'error');
-      confirmAction('Marcar compra como entregue', `Deseja marcar o item ${item.item || id} como entregue?`, 'Marcar entregue', async () => {
-        await apiPost({ action: 'editar', tabela: 'Compras', id, dados: { status_compra: 'Entregue', data_entrega: new Date().toISOString() } });
-        state.cache.compras = [];
-        toast('Compra marcada como entregue.');
-        if (state.view === 'compras') await renderCompras();
-      });
-    }
-
-    async function cancelarCompra(id) {
-      await ensureComprasCache();
-      const item = findCompraById(id);
-      confirmAction('Cancelar compra', `Deseja cancelar a compra ${item?.item || id}? Ela não será apagada da planilha.`, 'Cancelar compra', async () => {
-        await apiPost({ action: 'editar', tabela: 'Compras', id, dados: { status_compra: 'Cancelado' } });
-        state.cache.compras = [];
-        toast('Compra cancelada com sucesso.');
-        if (state.view === 'compras') await renderCompras();
-      });
-    }
-
-    function eventSelectField(selected = '') {
-      const eventos = state.cache.eventos || [];
-      const options = eventos.map(e => {
-        const id = e.id_evento || '';
-        const label = `${e.numero_evento || e.id_evento || 'Evento'} • ${e.placa || '-'} • ${e.associado || '-'}`;
-        return `<option value="${escapeHtml(id)}" ${String(id) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
-      }).join('');
-      return `<div class="field full"><label>Evento vinculado</label><select name="id_evento" id="regEventSelect"><option value="">Selecione um evento</option>${options}</select></div>`;
-    }
-
-    async function openRegulacaoModalById(id) {
-      await ensureRegulacoesCache();
-      const item = findRegulacaoById(id);
-      if (!item) return toast('Registro técnico não encontrado.', 'error');
-      openRegulacaoModal(item);
-    }
-
-    async function openRegulacaoModal(item = null, eventId = '', tipoPadrao = 'Vistoria') {
-      const isEdit = Boolean(item?.id_regulacao);
-      try { await ensureEventosCache(true); } catch (error) { console.warn(error.message); }
-      const evento = findEventById(item?.id_evento || eventId);
-      const statusReg = ['Solicitado', 'Agendado', 'Em vistoria', 'Em análise', 'Aguardando parecer', 'Aguardando aprovação', 'Aprovado', 'Finalizado', 'Cancelado'];
-      const tipos = ['Vistoria', 'Regulação', 'Auditoria', 'Entrada em oficina', 'Parecer técnico'];
-      const eventField = eventId && !isEdit ? hiddenField('id_evento', eventId) + `<div class="lookup-note full">Evento vinculado: <strong>${escapeHtml(evento?.numero_evento || eventId)}</strong> • Placa: <strong>${escapeHtml(evento?.placa || '-')}</strong></div>` : eventSelectField(item?.id_evento || eventId || '');
-      openModal(isEdit ? 'Editar vistoria/regulação' : 'Nova vistoria/regulação', `
-        <div class="form-grid">
-          ${eventField}
-          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || evento?.placa || '')}${selectField('tipo_vistoria', 'Tipo', tipos, item?.tipo_vistoria || tipoPadrao)}
-          ${selectField('status', 'Status', statusReg, item?.status || 'Solicitado')}${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || state.user?.nome || '')}
-          ${field('data_entrada', 'Data de entrada', '30/06/2026', '', item?.data_entrada ? dateBR(item.data_entrada) : dateBR(new Date()))}${field('data_saida', 'Data de saída', 'Preencher ao concluir', '', item?.data_saida || '')}
-          ${field('valor_orcado', 'Valor orçado', '0', '', item?.valor_orcado || '')}${field('valor_aprovado', 'Valor aprovado', '0', '', item?.valor_aprovado || '')}
-          ${textareaField('parecer', 'Parecer técnico', 'Resumo técnico da vistoria/regulação...', 'full', item?.parecer || '')}
-          ${textareaField('observacoes', 'Observações', 'Anotações internas...', 'full', item?.observacoes || '')}
-        </div>`, isEdit ? 'Salvar registro' : 'Criar registro', async (data) => {
-          if (!data.id_evento) throw new Error('Selecione ou vincule um evento.');
-          if (!data.placa && findEventById(data.id_evento)?.placa) data.placa = findEventById(data.id_evento).placa;
-          const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Vistorias_Regulacao', dados: data };
-          if (isEdit) payload.id = item.id_regulacao;
-          await apiPost(payload);
-
-          if (!isEdit) {
-            const movEtapa = normalizeText(data.tipo_vistoria).includes('regulacao') ? 'Regulação' : 'Vistoria';
-            const movStatus = normalizeText(data.tipo_vistoria).includes('regulacao') ? 'Em regulação' : 'Em vistoria';
-            try {
-              await apiPost({ action: 'mover_evento_kanban', id_evento: data.id_evento, nova_etapa: movEtapa, novo_status: movStatus, comentario: `${data.tipo_vistoria || 'Vistoria'} criada pelo módulo técnico.` });
-            } catch (err) { console.warn(err.message); }
-          }
-
-          state.cache.regulacoes = [];
-          state.cache.eventos = [];
-          state.cache.historico = [];
-          toast(isEdit ? 'Registro técnico atualizado.' : 'Registro técnico criado.');
-          if (state.view === 'vistorias') await renderVistorias();
-        });
-      attachRegulacaoEventLookup();
-    }
-
-    function attachRegulacaoEventLookup() {
-      const select = els.modalRoot.querySelector('#regEventSelect');
-      const placa = els.modalRoot.querySelector('[name="placa"]');
-      if (!select || !placa) return;
-      const fill = () => {
-        const evento = findEventById(select.value);
-        if (evento?.placa && !placa.value) placa.value = evento.placa;
-      };
-      select.addEventListener('change', fill);
-      fill();
-    }
-
-    async function openRegulacaoDetails(id) {
-      try {
-        await Promise.all([ensureRegulacoesCache(true), ensureEventosCache(true)]);
-        const item = findRegulacaoById(id);
-        if (!item) return toast('Registro técnico não encontrado.', 'error');
-        const evento = findEventById(item.id_evento);
-        openCustomModal('Detalhes técnicos', `
-          <div class="event-hero">
-            <div><small>Vistoria / Regulação</small><h4>${escapeHtml(item.tipo_vistoria || 'Registro técnico')}</h4><p>${escapeHtml(evento?.numero_evento || item.id_evento || '-')} • Placa <strong>${escapeHtml(item.placa || evento?.placa || '-')}</strong></p><div class="quick-actions">${statusBadge(item.status)}${statusBadge(evento?.status_evento)}${statusBadge(evento?.etapa_kanban)}</div></div>
-            <div class="event-hero-actions"><button class="btn btn-ghost btn-small" onclick="closeModal(); openRegulacaoModalById(${jsArg(item.id_regulacao)})">Editar</button>${evento ? `<button class="btn btn-blue btn-small" onclick="closeModal(); openEventDetails(${jsArg(evento.id_evento)})">Abrir evento</button>` : ''}</div>
-          </div>
-          <div class="detail-grid">
-            ${detailCard('Evento', evento?.numero_evento || item.id_evento)}${detailCard('Placa', item.placa || evento?.placa)}${detailCard('Responsável', item.responsavel)}
-            ${detailCard('Status', item.status)}${detailCard('Entrada', dateBR(item.data_entrada))}${detailCard('Saída', dateBR(item.data_saida))}
-            ${detailCard('Valor orçado', money(item.valor_orcado))}${detailCard('Valor aprovado', money(item.valor_aprovado))}${detailCard('Associado', evento?.associado || '-')}
-          </div>
-          <div class="detail-section"><h4>Parecer técnico</h4><p>${escapeHtml(item.parecer || 'Sem parecer registrado.')}</p></div>
-          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
-        `, true);
-      } catch (error) { toast(error.message, 'error'); }
-    }
-
-    async function cancelarRegulacao(id) {
-      await ensureRegulacoesCache();
-      const item = findRegulacaoById(id);
-      confirmAction('Cancelar registro técnico', `Deseja cancelar ${item?.tipo_vistoria || 'este registro'} da placa ${item?.placa || '-'}?`, 'Cancelar registro', async () => {
-        await apiPost({ action: 'editar', tabela: 'Vistorias_Regulacao', id, dados: { status: 'Cancelado' } });
-        state.cache.regulacoes = [];
-        toast('Registro técnico cancelado.');
-        await renderVistorias();
-      });
     }
 
     async function openMoveEventModal(id) {
@@ -3516,24 +1635,9 @@
       return `<div class="mini-table"><div class="mini-row header"><div>Evento</div><div>Placa/tipo</div><div>Status</div><div>Ação</div></div>${items.map(e => `<div class="mini-row"><div><strong>${escapeHtml(e.numero_evento || e.id_evento || '-')}</strong></div><div>${escapeHtml(e.placa || '-')} • ${escapeHtml(e.tipo_evento || '-')}</div><div>${statusBadge(e.status_evento)}</div><div><button class="btn btn-blue btn-small" onclick="closeModal(); openEventDetails(${jsArg(e.id_evento)})">Abrir</button></div></div>`).join('')}</div>`;
     }
 
-    function miniComprasTable(items) {
-      if (!items.length) return emptyState('Nenhuma compra vinculada.', 'Crie uma solicitação de compra pela Central do Evento quando necessário.');
-      return `<div class="mini-table"><div class="mini-row header"><div>Item</div><div>Fornecedor</div><div>Status</div><div>Ação</div></div>${items.map(c => `<div class="mini-row"><div><strong>${escapeHtml(c.item || '-')}</strong><br><small>${money(c.valor_aprovado || c.valor_cotado || 0)}</small></div><div>${escapeHtml(c.fornecedor || '-')}</div><div>${statusBadge(c.status_compra)}</div><div><button class="btn btn-blue btn-small" onclick="closeModal(); openCompraDetails(${jsArg(c.id_compra)})">Abrir</button></div></div>`).join('')}</div>`;
-    }
-
-    function miniRegulacoesTable(items) {
-      if (!items.length) return emptyState('Nenhuma vistoria/regulação vinculada.', 'Crie uma vistoria ou regulação pela Central do Evento quando necessário.');
-      return `<div class="mini-table"><div class="mini-row header"><div>Tipo</div><div>Responsável</div><div>Status</div><div>Ação</div></div>${items.map(r => `<div class="mini-row"><div><strong>${escapeHtml(r.tipo_vistoria || '-')}</strong><br><small>${dateBR(r.data_entrada)}</small></div><div>${escapeHtml(r.responsavel || '-')}</div><div>${statusBadge(r.status)}</div><div><button class="btn btn-blue btn-small" onclick="closeModal(); openRegulacaoDetails(${jsArg(r.id_regulacao)})">Abrir</button></div></div>`).join('')}</div>`;
-    }
-
     function historyList(items) {
-      if (!items.length) return emptyState('Sem histórico registrado.', 'O histórico será alimentado quando o evento for movimentado ou comentado.');
+      if (!items.length) return emptyState('Sem histórico registrado.', 'O histórico será alimentado quando o evento for movido pelo Kanban.');
       return `<div class="history-list">${items.slice().reverse().map(h => `<div class="history-item"><strong>${escapeHtml(h.acao || 'Movimentação')}</strong><small>${dateTimeBR(h.data_hora)} • ${escapeHtml(h.usuario || 'Sistema')}</small><p>${escapeHtml(h.etapa_anterior || '-')} → ${escapeHtml(h.etapa_nova || '-')}<br>${escapeHtml(h.status_anterior || '-')} → ${escapeHtml(h.status_novo || '-')}</p>${h.comentario ? `<p>${escapeHtml(h.comentario)}</p>` : ''}</div>`).join('')}</div>`;
-    }
-
-    function timelineList(items) {
-      if (!items.length) return emptyState('Sem movimentações ainda.', 'Movimente o evento ou adicione comentários para construir a linha do tempo.');
-      return `<div class="timeline">${items.slice().reverse().map(h => `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-card"><strong>${escapeHtml(h.acao || 'Movimentação')}</strong><small>${dateTimeBR(h.data_hora)} • ${escapeHtml(h.usuario || 'Sistema')}</small><p><strong>${escapeHtml(h.etapa_anterior || '-')} → ${escapeHtml(h.etapa_nova || '-')}</strong><br>${escapeHtml(h.status_anterior || '-')} → ${escapeHtml(h.status_novo || '-')}</p>${h.comentario ? `<p>${escapeHtml(h.comentario)}</p>` : ''}</div></div>`).join('')}</div>`;
     }
 
     function detailCard(label, value) {
@@ -3551,13 +1655,6 @@
     function renderError(message) {
       els.viewRoot.innerHTML = `${topbar('Erro ao carregar', 'A API respondeu com falha ou o proxy não está publicado corretamente.')}<div class="content-panel"><div class="empty"><strong>Não foi possível carregar os dados.</strong>${escapeHtml(message)}</div></div>`;
       toast(message, 'error');
-    }
-
-
-    function renderBlocked(view) {
-      const label = MODULE_LABELS[view] || view;
-      els.viewRoot.innerHTML = `${topbar('Acesso restrito', 'Seu perfil não possui permissão para acessar este módulo.')}<div class="content-panel"><div class="empty"><strong>Módulo bloqueado: ${escapeHtml(label)}</strong>Solicite liberação a um usuário Super Admin ou Administrativo.</div></div>`;
-      toast('Acesso não permitido para este perfil.', 'error');
     }
 
     function openModal(title, bodyHtml, submitText, onSubmit) {
@@ -3617,25 +1714,8 @@
     window.renderDashboard = renderDashboard;
     window.renderAssociados = renderAssociados;
     window.renderVeiculos = renderVeiculos;
-    window.renderConsultores = renderConsultores;
     window.renderEventos = renderEventos;
-    window.renderVistorias = renderVistorias;
-    window.renderCompras = renderCompras;
-    window.renderOficinas = renderOficinas;
-    window.renderReclamacoes = renderReclamacoes;
     window.renderKanban = renderKanban;
-    window.renderRelatorios = renderRelatorios;
-    window.renderUsuarios = renderUsuarios;
-    window.paintRelatorios = paintRelatorios;
-    window.limparFiltrosRelatorio = limparFiltrosRelatorio;
-    window.exportRelatorioCSV = exportRelatorioCSV;
-    window.openUsuarioModal = openUsuarioModal;
-    window.openUsuarioModalById = openUsuarioModalById;
-    window.openUsuarioDetails = openUsuarioDetails;
-    window.inativarUsuario = inativarUsuario;
-    window.ativarUsuario = ativarUsuario;
-    window.resetSenhaUsuario = resetSenhaUsuario;
-    window.paintUsuarioTable = paintUsuarioTable;
     window.openAssociadoModal = openAssociadoModal;
     window.openAssociadoModalById = openAssociadoModalById;
     window.openAssociadoDetails = openAssociadoDetails;
@@ -3644,46 +1724,14 @@
     window.openVehicleModalById = openVehicleModalById;
     window.openVehicleDetails = openVehicleDetails;
     window.inativarVeiculo = inativarVeiculo;
-    window.openConsultorModal = openConsultorModal;
-    window.openConsultorModalById = openConsultorModalById;
-    window.openConsultorDetails = openConsultorDetails;
-    window.inativarConsultor = inativarConsultor;
-    window.paintConsultorTable = paintConsultorTable;
     window.openEventModal = openEventModal;
     window.openEventModalById = openEventModalById;
     window.openEventDetails = openEventDetails;
     window.openMoveEventModal = openMoveEventModal;
-    window.openCommentEventModal = openCommentEventModal;
-    window.openCompraModal = openCompraModal;
-    window.openCompraAvulsaModal = openCompraAvulsaModal;
-    window.openCompraModalById = openCompraModalById;
-    window.openCompraDetails = openCompraDetails;
-    window.marcarCompraEntregue = marcarCompraEntregue;
-    window.cancelarCompra = cancelarCompra;
-    window.openOficinaModal = openOficinaModal;
-    window.openOficinaModalById = openOficinaModalById;
-    window.openOficinaDetails = openOficinaDetails;
-    window.inativarOficina = inativarOficina;
-    window.paintOficinaTable = paintOficinaTable;
-    window.openReclamacaoModal = openReclamacaoModal;
-    window.openReclamacaoModalById = openReclamacaoModalById;
-    window.openReclamacaoDetails = openReclamacaoDetails;
-    window.resolverReclamacao = resolverReclamacao;
-    window.finalizarReclamacao = finalizarReclamacao;
-    window.cancelarReclamacao = cancelarReclamacao;
-    window.paintReclamacaoTable = paintReclamacaoTable;
-    window.limparFiltrosSac = limparFiltrosSac;
-    window.openRegulacaoModal = openRegulacaoModal;
-    window.openRegulacaoModalById = openRegulacaoModalById;
-    window.openRegulacaoDetails = openRegulacaoDetails;
-    window.cancelarRegulacao = cancelarRegulacao;
-    window.quickMoveEvent = quickMoveEvent;
     window.cancelarEvento = cancelarEvento;
     window.paintAssociadoTable = paintAssociadoTable;
     window.paintVehicleTable = paintVehicleTable;
     window.paintEventTable = paintEventTable;
-    window.paintRegulacaoTable = paintRegulacaoTable;
-    window.paintCompraTable = paintCompraTable;
 
     async function init() {
       const session = getSession();
