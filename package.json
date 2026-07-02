@@ -1,8 +1,8 @@
 {
   "name": "erp-evento-mvp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
-  "description": "ERP Evento MVP v0.1.1 - refinamento visual gerencial",
+  "description": "ERP Evento MVP v0.1.2 - cadastros gerenciais de consultores e oficinas",
   "scripts": {
     "dev": "vercel dev",
     "start": "vercel dev"
