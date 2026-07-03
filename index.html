@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ERP Evento | Proteção Veicular</title>
+  <title>Sistema Gerencial</title>
   <style>
     :root {
       --bg: #f5f6fa;
@@ -1333,6 +1333,265 @@
       color: #0b1018;
     }
 
+
+    /* =========================================================
+       v0.1.5 — Tema premium escuro + base white label
+       Ajustes visuais e estruturais sem mudar o banco/API.
+    ========================================================= */
+    :root {
+      --bg: #0b0f14;
+      --surface: #121821;
+      --surface-2: #171f2a;
+      --surface-3: #0f141c;
+      --dark: #05070a;
+      --dark-2: #0b1118;
+      --muted: #94a3b8;
+      --muted-2: #64748b;
+      --line: #263241;
+      --yellow: #8b98a7;
+      --yellow-2: #a6b0bd;
+      --accent: #8b98a7;
+      --accent-strong: #cbd5e1;
+      --green: #22c55e;
+      --red: #ef4444;
+      --orange: #f59e0b;
+      --blue: #60a5fa;
+      --radius: 18px;
+      --shadow: 0 20px 50px rgba(0, 0, 0, .24);
+      --shadow-soft: 0 14px 32px rgba(0, 0, 0, .18);
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 92% 4%, rgba(148, 163, 184, .13), transparent 28%),
+        radial-gradient(circle at 18% 0%, rgba(71, 85, 105, .14), transparent 24%),
+        linear-gradient(180deg, #0b0f14 0%, #0e141d 48%, #0a0e13 100%);
+      color: #eef2f7;
+    }
+
+    .login-page {
+      background:
+        radial-gradient(circle at 18% 12%, rgba(148, 163, 184, .14), transparent 31%),
+        linear-gradient(135deg, #05070a 0%, #111827 48%, #070a0f 100%);
+    }
+
+    .login-panel-wrap {
+      background: linear-gradient(180deg, rgba(8, 12, 18, .92), rgba(13, 18, 26, .96));
+    }
+
+    .login-card,
+    .modal,
+    .content-panel,
+    .card,
+    .summary-item,
+    .detail-card,
+    .timeline-card,
+    .history-item,
+    .comment-box,
+    .workflow-step,
+    .kanban-card,
+    .kanban-col {
+      background: linear-gradient(180deg, rgba(18, 24, 33, .96), rgba(15, 21, 30, .96));
+      border-color: var(--line);
+      color: #eef2f7;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .login-card {
+      background: linear-gradient(180deg, #121821, #0f141c);
+      border-color: #263241;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, .42);
+    }
+
+    .login-card p,
+    .login-title p,
+    .topbar p,
+    .panel-head p,
+    .metric small,
+    .user-mini small,
+    small,
+    .empty,
+    .muted-text {
+      color: var(--muted);
+    }
+
+    .brand-mark,
+    .avatar {
+      background: linear-gradient(180deg, #334155, #1f2937);
+      color: #f8fafc;
+      box-shadow: 0 14px 34px rgba(15, 23, 42, .36);
+      border: 1px solid rgba(226, 232, 240, .10);
+    }
+
+    .eyebrow { color: #cbd5e1; }
+    .eyebrow::before { background: #64748b; }
+
+    .login-badges span,
+    .hint {
+      background: rgba(15, 23, 42, .72);
+      border-color: rgba(148, 163, 184, .20);
+      color: #cbd5e1;
+    }
+
+    .hint strong { color: #f8fafc; }
+
+    .app { grid-template-columns: 282px 1fr; }
+
+    .sidebar {
+      background:
+        radial-gradient(circle at 10% 4%, rgba(148, 163, 184, .10), transparent 28%),
+        linear-gradient(180deg, #05070a 0%, #0a0f16 54%, #05070a 100%);
+      border-right: 1px solid rgba(148, 163, 184, .12);
+      box-shadow: 18px 0 50px rgba(0, 0, 0, .24);
+      height: 100vh;
+      overflow: hidden;
+      gap: 14px;
+    }
+
+    .side-brand {
+      flex-shrink: 0;
+      border-bottom-color: rgba(148, 163, 184, .14);
+    }
+
+    .nav {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 4px 4px 4px 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, .35) transparent;
+    }
+
+    .nav::-webkit-scrollbar { width: 6px; }
+    .nav::-webkit-scrollbar-track { background: transparent; }
+    .nav::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, .35); border-radius: 999px; }
+
+    .nav button {
+      color: rgba(226, 232, 240, .64);
+      background: transparent;
+      border: 1px solid transparent;
+    }
+
+    .nav button:hover {
+      background: rgba(148, 163, 184, .08);
+      border-color: rgba(148, 163, 184, .12);
+      color: #f8fafc;
+    }
+
+    .nav button.active {
+      background: linear-gradient(90deg, rgba(148, 163, 184, .18), rgba(51, 65, 85, .16));
+      box-shadow: inset 3px 0 0 #94a3b8, 0 12px 28px rgba(0, 0, 0, .18);
+      color: #ffffff;
+    }
+
+    .sidebar-footer {
+      flex-shrink: 0;
+      margin-top: 0;
+      border-top-color: rgba(148, 163, 184, .14);
+      background: linear-gradient(180deg, rgba(15, 23, 42, .40), rgba(15, 23, 42, .12));
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .main {
+      min-height: 100vh;
+      max-width: none;
+      background:
+        radial-gradient(circle at 92% 3%, rgba(148, 163, 184, .12), transparent 24%),
+        linear-gradient(180deg, rgba(15, 23, 42, .36), rgba(2, 6, 12, .08));
+    }
+
+    .topbar h2,
+    h1, h2, h3, h4, strong { color: #f8fafc; }
+
+    .metric {
+      background:
+        radial-gradient(circle at 98% 0%, rgba(148, 163, 184, .15), transparent 30%),
+        linear-gradient(180deg, #151d28 0%, #101720 100%);
+      border: 1px solid rgba(148, 163, 184, .16);
+    }
+
+    .metric::after { display: none; }
+    .metric span,
+    .summary-item span,
+    .detail-card span,
+    .field label { color: #94a3b8; }
+    .metric strong { color: #f8fafc; }
+
+    .content-panel { background: rgba(18, 24, 33, .88); backdrop-filter: blur(12px); }
+    .panel-head { background: rgba(15, 23, 42, .48); border-bottom-color: rgba(148, 163, 184, .14); }
+    .summary-strip { background: rgba(15, 23, 42, .36); }
+    .summary-item { background: rgba(17, 24, 39, .72); }
+
+    .field input,
+    .field select,
+    .field textarea,
+    .search {
+      background: #0b1118;
+      color: #e5e7eb;
+      border-color: #273444;
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder,
+    .search::placeholder { color: #64748b; }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus,
+    .search:focus {
+      border-color: #94a3b8;
+      box-shadow: 0 0 0 4px rgba(148, 163, 184, .14);
+      background: #0f172a;
+    }
+
+    .table-wrap { background: transparent; }
+    table { color: #e5e7eb; }
+    th {
+      background: rgba(15, 23, 42, .74);
+      color: #94a3b8;
+      border-bottom-color: #273444;
+    }
+    td {
+      color: #e5e7eb;
+      border-bottom-color: rgba(148, 163, 184, .12);
+    }
+    tr:hover td { background: rgba(148, 163, 184, .07); }
+
+    .btn-primary,
+    .btn-yellow {
+      background: linear-gradient(180deg, #334155, #1f2937);
+      color: #f8fafc;
+      box-shadow: 0 14px 26px rgba(0, 0, 0, .24);
+    }
+    .btn-primary:hover,
+    .btn-yellow:hover { background: linear-gradient(180deg, #475569, #273444); }
+    .btn-ghost { background: #111827; color: #e5e7eb; border: 1px solid rgba(148, 163, 184, .14); }
+    .btn-blue { background: rgba(96, 165, 250, .16); color: #bfdbfe; }
+    .btn-danger { background: rgba(239, 68, 68, .16); color: #fecaca; }
+
+    .badge { border: 1px solid rgba(148, 163, 184, .14); }
+    .badge.green { background: rgba(34, 197, 94, .14); color: #86efac; }
+    .badge.red { background: rgba(239, 68, 68, .14); color: #fecaca; }
+    .badge.orange { background: rgba(245, 158, 11, .14); color: #fde68a; }
+    .badge.blue { background: rgba(96, 165, 250, .14); color: #bfdbfe; }
+
+    .modal-backdrop { background: rgba(0, 0, 0, .72); backdrop-filter: blur(8px); }
+    .modal-head { background: rgba(15, 23, 42, .55); border-bottom-color: rgba(148, 163, 184, .14); }
+    .modal-actions { background: rgba(15, 23, 42, .38); border-top-color: rgba(148, 163, 184, .14); }
+
+    .empty { color: var(--muted); }
+    .event-hero { background: linear-gradient(135deg, #111827 0%, #1e293b 100%); }
+    .workflow-step.active { background: rgba(148, 163, 184, .16); border-color: #94a3b8; }
+
+    ::selection { background: rgba(148, 163, 184, .35); color: #ffffff; }
+
+    @media (max-width: 980px) {
+      .sidebar { width: 292px; }
+      .main { padding: 22px 16px 34px; }
+    }
+
   </style>
 </head>
 <body>
@@ -1340,21 +1599,21 @@
     <div class="login-hero">
       <div class="brand-mark">ERP</div>
       <div class="login-title">
-        <span class="eyebrow">Gestão de proteção veicular</span>
-        <h1>Controle operacional, dados e eventos em uma única tela.</h1>
-        <p>ERP gerencial para organizar associados, veículos, eventos, vistorias, compras, financeiro e relatórios.</p>
+        <span class="eyebrow">Gestão operacional</span>
+        <h1>Controle gerencial em uma única tela.</h1>
+        <p>Estrutura gerencial para organizar base, veículos, eventos, vistorias, compras, financeiro e relatórios.</p>
       </div>
       <div class="login-badges">
-        <span>Google Sheets como banco</span>
-        <span>Apps Script como API</span>
-        <span>Vercel no front-end</span>
+        <span>Base configurável</span>
+        <span>Operação centralizada</span>
+        <span>Pronto para white label</span>
       </div>
     </div>
 
     <div class="login-panel-wrap">
       <form id="loginForm" class="login-card">
-        <h2>Entrar no ERP</h2>
-        <p>Use o usuário administrador inicial para acessar o painel.</p>
+        <h2>Entrar no sistema</h2>
+        <p>Acesse o painel gerencial com seu usuário autorizado.</p>
 
         <div class="field">
           <label for="email">E-mail</label>
@@ -1380,8 +1639,8 @@
       <div class="side-brand">
         <div class="brand-mark">ERP</div>
         <div>
-          <strong>ERP Evento</strong>
-          <small>Proteção Veicular</small>
+          <strong>Sistema Gerencial</strong>
+          <small>Operação Veicular</small>
         </div>
       </div>
 
@@ -1423,7 +1682,57 @@
 
   <script>
     const API_BASE = '/api/erp';
-    const APP_VERSION = '0.1.4';
+
+    /* =========================================================
+       White label — altere apenas este objeto para outro cliente.
+       Não precisa mudar telas, lógica, banco ou API.
+    ========================================================= */
+    const BRAND_CONFIG = {
+      appName: 'Sistema Gerencial',
+      appSubtitle: 'Operação Veicular',
+      logoText: 'SG',
+      documentTitle: 'Sistema Gerencial',
+      loginEyebrow: 'Gestão operacional',
+      loginTitle: 'Controle gerencial em uma única tela.',
+      loginDescription: 'Estrutura white label para organizar base, veículos, eventos, vistorias, compras, financeiro e relatórios.',
+      loginBadges: ['Base configurável', 'Operação centralizada', 'Pronto para white label'],
+      colors: {
+        accent: '#8b98a7',
+        sidebar: '#05070a',
+        background: '#0b0f14'
+      }
+    };
+
+    function applyBrandConfig() {
+      document.title = BRAND_CONFIG.documentTitle || BRAND_CONFIG.appName || 'Sistema Gerencial';
+      document.querySelectorAll('.brand-mark').forEach(el => { el.textContent = BRAND_CONFIG.logoText || 'SG'; });
+      const sideName = document.querySelector('.side-brand strong');
+      const sideSubtitle = document.querySelector('.side-brand small');
+      const eyebrow = document.querySelector('.login-title .eyebrow');
+      const loginTitle = document.querySelector('.login-title h1');
+      const loginDescription = document.querySelector('.login-title p');
+      const badges = document.querySelectorAll('.login-badges span');
+      if (sideName) sideName.textContent = BRAND_CONFIG.appName || 'Sistema Gerencial';
+      if (sideSubtitle) sideSubtitle.textContent = BRAND_CONFIG.appSubtitle || 'Operação Veicular';
+      if (eyebrow) eyebrow.textContent = BRAND_CONFIG.loginEyebrow || 'Gestão operacional';
+      if (loginTitle) loginTitle.textContent = BRAND_CONFIG.loginTitle || 'Controle gerencial em uma única tela.';
+      if (loginDescription) loginDescription.textContent = BRAND_CONFIG.loginDescription || '';
+      if (Array.isArray(BRAND_CONFIG.loginBadges)) {
+        badges.forEach((el, index) => { if (BRAND_CONFIG.loginBadges[index]) el.textContent = BRAND_CONFIG.loginBadges[index]; });
+      }
+      if (BRAND_CONFIG.colors) {
+        const root = document.documentElement;
+        if (BRAND_CONFIG.colors.accent) {
+          root.style.setProperty('--accent', BRAND_CONFIG.colors.accent);
+          root.style.setProperty('--yellow', BRAND_CONFIG.colors.accent);
+        }
+        if (BRAND_CONFIG.colors.background) root.style.setProperty('--bg', BRAND_CONFIG.colors.background);
+      }
+    }
+
+    applyBrandConfig();
+
+    const APP_VERSION = '0.1.5';
 
     const state = {
       user: null,
@@ -1964,7 +2273,7 @@
           ${field('telefone', 'Telefone', '81999999999', '', item?.telefone || '')}
           ${field('email', 'E-mail', 'email@dominio.com', '', item?.email || '')}
           ${field('regional', 'Regional', 'Caruaru', '', item?.regional || '')}
-          ${field('cooperativa', 'Cooperativa', 'GPV', '', item?.cooperativa || '')}
+          ${field('cooperativa', 'Cooperativa', 'Ex.: Regional A', '', item?.cooperativa || '')}
           ${selectField('tipo', 'Tipo', tipos, item?.tipo || 'Consultor')}
           ${selectField('status', 'Status', statuses, item?.status || 'Ativo')}
           ${textareaField('observacoes', 'Observações', 'Observações internas...', 'span-2', item?.observacoes || '')}
@@ -2862,7 +3171,7 @@
       openModal(isEdit ? 'Editar reclamação' : 'Nova reclamação', `
         <div class="form-grid">
           ${field('associado', 'Associado', 'Nome do associado', '', item?.associado || '')}${field('telefone', 'Telefone', '(81) 99999-9999', '', item?.telefone || '')}
-          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || '')}${field('origem', 'Origem', 'WhatsApp, telefone, presencial...', '', item?.origem || 'WhatsApp')}
+          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || '')}${field('origem', 'Origem', 'Telefone, presencial, e-mail...', '', item?.origem || 'WhatsApp')}
           ${selectField('categoria', 'Categoria', categorias, item?.categoria || 'Atendimento')}${selectField('prioridade', 'Prioridade', prioridades, item?.prioridade || 'Média')}
           ${selectField('status', 'Status', statusOptions, item?.status || 'Aberta')}${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || state.user?.nome || '')}
           ${field('prazo_resposta', 'Prazo de resposta', '2026-07-01', '', item?.prazo_resposta ? String(item.prazo_resposta).slice(0,10) : '')}${field('data_finalizacao', 'Data de finalização', 'Preencher ao finalizar', '', item?.data_finalizacao ? String(item.data_finalizacao).slice(0,10) : '')}
@@ -3500,7 +3809,7 @@
       openModal('Adicionar comentário', `
         <div class="lookup-note full">Comentário interno no evento <strong>${escapeHtml(item.numero_evento || item.id_evento)}</strong>. Ele ficará salvo no histórico.</div>
         <div class="form-grid">
-          ${textareaField('comentario', 'Comentário interno', 'Ex.: associado enviou documento, oficina retornou orçamento, tratativa feita por WhatsApp...', 'full')}
+          ${textareaField('comentario', 'Comentário interno', 'Ex.: associado enviou documento, oficina retornou orçamento, tratativa registrada internamente...', 'full')}
         </div>`, 'Salvar comentário', async (data) => {
           if (!String(data.comentario || '').trim()) throw new Error('Digite o comentário.');
           await apiPost({
