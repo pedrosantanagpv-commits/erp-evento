@@ -1,36 +1,42 @@
-# Sistema Gerencial — v0.1.9
+# Sistema Gerencial — v0.2.0 Beta Comercial White Label
 
-Versão focada em **Backup, Exportação Geral e Manutenção Administrativa**.
+Versão beta comercial com foco em organização de produto, implantação e apresentação white label.
 
-## Novidades
+## Principais mudanças
 
-- Novo menu **Manutenção**;
-- Painel de saúde do banco, com contagem por tabela;
-- Status da API direto na tela de manutenção;
-- Backup geral em JSON;
-- Exportação individual por tabela em CSV;
-- Exportação geral dos CSVs principais;
-- Resumo de manutenção em CSV;
-- Últimas ações de auditoria com leitura da aba `Logs_Sistema`;
-- Orientação de segurança antes de migrações, limpezas e importações grandes.
+- Menu lateral reorganizado por grupos: Visão geral, Base, Operação, Gestão e Administração.
+- Novo módulo **Implantação** com checklist para configurar uma nova operação.
+- Painel executivo com nomenclatura mais comercial e genérica.
+- Estrutura white label reforçada via `BRAND_CONFIG` no `index.html`.
+- Mantém os módulos existentes: associados, veículos, consultores, oficinas, eventos, vistorias, compras, financeiro, kanban, relatórios, importação, usuários e manutenção.
+- Não exige alteração no Apps Script se a versão anterior já estiver aplicada.
 
-## Subir no GitHub
+## Arquivos para substituir no GitHub
 
-Substitua no repositório:
+- `index.html`
+- `api/erp.js`
+- `package.json`
+- `README.md`
 
-```txt
-index.html
-api/erp.js
-package.json
-README.md
-```
-
-## Apps Script
-
-Não precisa alterar o Apps Script se você já aplicou a versão anterior com `excluir_definitivo` e a aba `Financeiro`.
-
-## Atenção
+## Observações
 
 Não rode `setupBancoERP`.
 
-A tela de manutenção não executa limpeza automática. Ela foi feita para backup, auditoria, exportação e conferência antes de alterações importantes.
+A atualização é de front-end e organização comercial. O banco atual será mantido.
+
+## Configuração white label
+
+A identidade visual fica centralizada no objeto `BRAND_CONFIG`, dentro do `index.html`.
+
+```js
+const BRAND_CONFIG = {
+  appName: 'Sistema Gerencial',
+  appSubtitle: 'Operação Veicular',
+  companyName: 'Cliente / Operação',
+  logoText: 'SG',
+  logoUrl: '',
+  documentTitle: 'Sistema Gerencial'
+};
+```
+
+Para outro cliente, altere esse bloco e publique novamente na Vercel.
