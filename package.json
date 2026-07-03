@@ -1,1 +1,1 @@
-{"name":"erp-evento-mvp","version":"0.1.4","private":true,"type":"module","scripts":{"start":"vercel dev","dev":"vercel dev"},"dependencies":{},"devDependencies":{}}
+{"name":"sistema-gerencial-mvp","version":"0.1.4","private":true,"type":"module","scripts":{"start":"vercel dev","dev":"vercel dev"},"dependencies":{},"devDependencies":{}}
