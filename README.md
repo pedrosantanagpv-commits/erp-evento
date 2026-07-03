@@ -1,30 +1,18 @@
-# Sistema Gerencial — v0.1.7
+# Sistema Gerencial — v0.1.8.1
 
-Versão focada em **Importação de Dados** para facilitar a alimentação inicial e manutenção da base.
+Versão de ajuste sobre a v0.1.8, com foco em usuários/permissões.
 
-## Novidades da v0.1.7
+## Novidade principal
 
-- Novo menu **Importação**;
-- Importação por arquivo `.csv`, `.tsv` ou `.txt`;
-- Importação por colagem direta de dados;
-- Detecção automática de delimitador: ponto e vírgula, vírgula ou TAB;
-- Pré-visualização antes de importar;
-- Modelos CSV para cada tabela;
-- Reconhecimento de alguns cabeçalhos equivalentes, como `cpf`, `cnpj`, `fipe`, `vencimento`, `combustivel` etc.;
-- Importação segura usando a API existente, sem mexer no banco;
-- Suporte para importar:
-  - Associados;
-  - Veículos;
-  - Eventos;
-  - Financeiro;
-  - Consultores / Regionais;
-  - Oficinas;
-  - Compras;
-  - Vistorias / Regulação.
+- Super Admin agora pode **excluir usuário definitivamente** pelo painel de Usuários.
+- Usuários comuns continuam sem essa permissão.
+- O próprio usuário logado não pode excluir a si mesmo.
+- O sistema impede excluir o último Super Admin ativo.
+- A ação fica registrada em `Logs_Sistema` como `excluir_definitivo`.
 
-## Atualização
+## Subir no GitHub
 
-Substitua no GitHub:
+Substitua no repositório:
 
 ```txt
 index.html
@@ -33,19 +21,18 @@ package.json
 README.md
 ```
 
-Não precisa mexer no Apps Script e **não rode `setupBancoERP`**.
+## Apps Script
 
-## Teste recomendado
+Esta versão também precisa atualizar o Apps Script para reconhecer a ação `excluir_definitivo`.
 
-1. Entre como Super Admin.
-2. Abra o menu **Importação**.
-3. Escolha a tabela **Veículos**.
-4. Clique em **Baixar modelo CSV**.
-5. Edite o modelo com 1 ou 2 linhas de teste.
-6. Volte ao ERP e importe o arquivo.
-7. Confira em **Veículos** se os registros foram criados.
-8. Repita com **Financeiro** ou **Associados**.
+Use o arquivo:
 
-## Observação
+```txt
+APPS_SCRIPT_V0181_COMPLETO.gs
+```
 
-Para importações grandes, prefira lotes menores. Como o back-end atual usa Apps Script + Sheets, o ideal nesta fase é importar em blocos controlados.
+Abra o Apps Script, substitua o conteúdo do `Code.gs`, salve e faça um novo deploy em **Manage deployments > New version > Deploy**.
+
+## Atenção
+
+Não rode `setupBancoERP`.
