@@ -1954,6 +1954,136 @@
     .align-left { text-align: left; align-items: flex-start; }
     code { color: #cbd5e1; background: rgba(148, 163, 184, .10); padding: 2px 6px; border-radius: 7px; }
 
+
+    /* Dashboard avançado v0.1.8 */
+    .dashboard-filter-panel {
+      margin-bottom: 18px;
+    }
+
+    .dashboard-filter-panel .form-grid {
+      padding: 18px 20px 20px;
+    }
+
+    .dashboard-exec-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      min-height: 250px;
+    }
+
+    .chart-card h3,
+    .attention-card h3 {
+      margin: 0 0 6px;
+      letter-spacing: -.035em;
+    }
+
+    .chart-card p,
+    .attention-card p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .chart-bars {
+      display: grid;
+      gap: 12px;
+    }
+
+    .chart-row {
+      display: grid;
+      gap: 6px;
+    }
+
+    .chart-row-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #dbe6f3;
+      font-size: 13px;
+    }
+
+    .chart-row-top strong {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chart-track {
+      height: 11px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, .12);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, .06);
+    }
+
+    .chart-fill {
+      height: 100%;
+      min-width: 7px;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(203, 213, 225, .92), rgba(100, 116, 139, .76));
+    }
+
+    .chart-fill.green { background: linear-gradient(90deg, rgba(34, 197, 94, .90), rgba(21, 128, 61, .70)); }
+    .chart-fill.orange { background: linear-gradient(90deg, rgba(245, 158, 11, .95), rgba(180, 83, 9, .70)); }
+    .chart-fill.red { background: linear-gradient(90deg, rgba(239, 68, 68, .95), rgba(153, 27, 27, .72)); }
+    .chart-fill.blue { background: linear-gradient(90deg, rgba(96, 165, 250, .92), rgba(37, 99, 235, .72)); }
+
+    .dashboard-alert-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .dashboard-alert-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid rgba(148, 163, 184, .12);
+      border-radius: 16px;
+      background: rgba(15, 23, 42, .34);
+    }
+
+    .dashboard-alert-item strong { display: block; color: #f8fafc; }
+    .dashboard-alert-item small { display: block; color: var(--muted); margin-top: 3px; }
+
+    .dashboard-kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .dashboard-kpi-row .summary-item {
+      box-shadow: none;
+    }
+
+    @media (max-width: 1180px) {
+      .dashboard-exec-grid, .chart-grid { grid-template-columns: 1fr; }
+      .dashboard-kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 620px) {
+      .dashboard-kpi-row { grid-template-columns: 1fr; }
+    }
+
     @media (max-width: 1100px) {
       .login-page { grid-template-columns: 1fr; }
       .login-panel-wrap { border-left: 0; }
@@ -2145,7 +2275,7 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.1.7';
+    const APP_VERSION = '0.1.8';
 
     const state = {
       user: null,
@@ -2471,44 +2601,259 @@
     }
 
     async function renderDashboard() {
-      els.viewRoot.innerHTML = topbar('Dashboard Geral', 'Visão rápida da operação e dos principais indicadores.') + skeletonDashboard();
+      els.viewRoot.innerHTML = topbar('Dashboard Executivo', 'Indicadores consolidados, gráficos e alertas operacionais.') + skeletonDashboard();
       try {
-        const [result] = await Promise.all([
-          apiGet('dashboard'),
+        await Promise.all([
+          apiGet('dashboard').then(result => { state.cache.dashboard = result.data || {}; }),
+          ensureAssociadosCache(true),
+          ensureVeiculosCache(true),
+          ensureEventosCache(true),
+          ensureComprasCache(true),
           ensureRegulacoesCache(true),
           ensureFinanceiroCache(true),
           ensureConsultoresCache(true),
           ensureOficinasCache(true)
         ]);
-        const d = result.data || {};
-        const vistoriasAbertas = state.cache.regulacoes.filter(item => !['finalizado', 'concluido', 'concluído', 'cancelado'].includes(normalizeText(item.status))).length;
-        const financeiroResumo = calcularResumoFinanceiro(state.cache.financeiro);
-        const consultoresAtivos = state.cache.consultores.filter(item => normalizeText(item.status) === 'ativo').length;
-        const oficinasAtivas = state.cache.oficinas.filter(item => normalizeText(item.status) === 'ativo').length;
-        state.cache.dashboard = d;
-        els.viewRoot.innerHTML = `
-          ${topbar('Dashboard Geral', 'Visão rápida da operação e dos principais indicadores.', '<button class="btn btn-yellow" onclick="renderDashboard()">Atualizar</button>')}
-          <div class="grid-cards">
-            ${metric('Associados', d.total_associados, 'Base cadastrada')}
-            ${metric('Veículos', d.total_veiculos, `${d.veiculos_ativos || 0} ativos`)}
-            ${metric('Eventos abertos', d.eventos_abertos, `${d.total_eventos || 0} eventos no total`)}
-            ${metric('Vistorias abertas', vistoriasAbertas, `${state.cache.regulacoes.length} registro(s) técnico(s)`)}
-            ${metric('Compras pendentes', d.compras_pendentes, 'Ainda não entregues')}
-            ${metric('Receita prevista', money(financeiroResumo.previsto), `${financeiroResumo.total} lançamento(s)`)}
-            ${metric('Em atraso', money(financeiroResumo.atrasado), `${financeiroResumo.qtdAtrasado} mensalidade(s)`)}
-            ${metric('Consultores ativos', consultoresAtivos, `${state.cache.consultores.length} cadastro(s)`)}
-            ${metric('Oficinas ativas', oficinasAtivas, `${state.cache.oficinas.length} cadastro(s)`)}
-            ${metric('FIPE total', money(d.valor_fipe_total), 'Soma dos veículos')}
-            ${metric('Mensalidade prevista', money(d.mensalidade_total_prevista), 'Receita bruta estimada')}
-            ${metric('Status da API', 'Online', 'Ambiente conectado')}
-          </div>
-          <div class="content-panel">
-            <div class="panel-head">
-              <div><h3>v${APP_VERSION} em operação</h3><p>Sistema gerencial com base, eventos, vistoria/regulação, compras, financeiro, consultores, oficinas, usuários e relatórios.</p></div>
-            </div>
-            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use os módulos gerenciais para acompanhar a operação veicular de ponta a ponta.</div>
-          </div>`;
+
+        paintDashboardAvancado();
       } catch (error) { renderError(error.message); }
+    }
+
+    function getDashboardFilterOptions() {
+      const regionais = uniqueValues(state.cache.veiculos.map(v => v.regional).concat(state.cache.consultores.map(c => c.regional)));
+      const consultores = uniqueValues(state.cache.veiculos.map(v => v.consultor).concat(state.cache.consultores.map(c => c.nome)));
+      const oficinas = uniqueValues(state.cache.eventos.map(e => e.oficina).concat(state.cache.oficinas.map(o => o.nome)));
+      const statusEventos = uniqueValues(state.cache.eventos.map(e => e.status_evento));
+      const tiposEventos = uniqueValues(state.cache.eventos.map(e => e.tipo_evento));
+      return { regionais, consultores, oficinas, statusEventos, tiposEventos };
+    }
+
+    function getDashboardFilters() {
+      const value = id => document.getElementById(id)?.value || '';
+      return {
+        search: normalizeText(value('dashSearch')),
+        regional: value('dashRegional'),
+        consultor: value('dashConsultor'),
+        oficina: value('dashOficina'),
+        statusEvento: value('dashStatusEvento'),
+        tipoEvento: value('dashTipoEvento'),
+        inicio: value('dashInicio'),
+        fim: value('dashFim')
+      };
+    }
+
+    function inDateRange(value, inicio, fim) {
+      if (!inicio && !fim) return true;
+      if (!value) return false;
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return false;
+      d.setHours(0, 0, 0, 0);
+      if (inicio) {
+        const a = new Date(inicio + 'T00:00:00');
+        if (d < a) return false;
+      }
+      if (fim) {
+        const b = new Date(fim + 'T23:59:59');
+        if (d > b) return false;
+      }
+      return true;
+    }
+
+    function buildDashboardData() {
+      const f = getDashboardFilters();
+      const match = text => !f.search || normalizeText(text).includes(f.search);
+      const same = (value, selected) => !selected || String(value || '') === String(selected);
+
+      const veiculos = state.cache.veiculos.filter(v => {
+        const text = `${v.placa} ${v.associado} ${v.marca} ${v.modelo} ${v.consultor} ${v.regional} ${v.status} ${v.tipo_combustivel}`;
+        return match(text)
+          && same(v.regional, f.regional)
+          && same(v.consultor, f.consultor);
+      });
+
+      const placasValidas = new Set(veiculos.map(v => normalizePlate(v.placa)));
+
+      const eventos = state.cache.eventos.filter(e => {
+        const vehicle = findVehicleByPlate(e.placa);
+        const text = `${e.numero_evento} ${e.placa} ${e.associado} ${e.tipo_evento} ${e.status_evento} ${e.etapa_kanban} ${e.responsavel} ${e.oficina}`;
+        return match(text)
+          && same(vehicle?.regional || e.regional, f.regional)
+          && same(vehicle?.consultor || e.consultor, f.consultor)
+          && same(e.oficina, f.oficina)
+          && same(e.status_evento, f.statusEvento)
+          && same(e.tipo_evento, f.tipoEvento)
+          && inDateRange(e.data_abertura || e.data_ultima_atualizacao, f.inicio, f.fim);
+      });
+
+      const idsEventos = new Set(eventos.map(e => String(e.id_evento || '')));
+
+      const compras = state.cache.compras.filter(c => {
+        const evento = findEventById(c.id_evento);
+        const vehicle = findVehicleByPlate(c.placa || evento?.placa);
+        const text = `${c.id_compra} ${c.placa} ${c.item} ${c.fornecedor} ${c.status_compra} ${evento?.associado || ''}`;
+        return match(text)
+          && (!c.id_evento || idsEventos.has(String(c.id_evento)) || same(vehicle?.regional, f.regional))
+          && same(vehicle?.regional || evento?.regional, f.regional)
+          && same(vehicle?.consultor || evento?.consultor, f.consultor)
+          && same(evento?.oficina, f.oficina)
+          && inDateRange(c.data_solicitacao, f.inicio, f.fim);
+      });
+
+      const regulacoes = state.cache.regulacoes.filter(r => {
+        const evento = findEventById(r.id_evento);
+        const vehicle = findVehicleByPlate(r.placa || evento?.placa);
+        const text = `${r.id_regulacao} ${r.placa} ${r.tipo_vistoria} ${r.status} ${r.responsavel} ${r.parecer} ${evento?.associado || ''}`;
+        return match(text)
+          && same(vehicle?.regional || evento?.regional, f.regional)
+          && same(vehicle?.consultor || evento?.consultor, f.consultor)
+          && same(evento?.oficina, f.oficina)
+          && inDateRange(r.data_entrada, f.inicio, f.fim);
+      });
+
+      const financeiro = state.cache.financeiro.filter(fin => {
+        const vehicle = findVehicleByPlate(fin.placa);
+        const text = `${fin.associado} ${fin.placa} ${fin.competencia} ${fin.status_financeiro} ${fin.consultor} ${fin.regional}`;
+        return match(text)
+          && same(fin.regional || vehicle?.regional, f.regional)
+          && same(fin.consultor || vehicle?.consultor, f.consultor)
+          && inDateRange(fin.data_vencimento || fin.data_criacao, f.inicio, f.fim);
+      });
+
+      return { f, veiculos, eventos, compras, regulacoes, financeiro };
+    }
+
+    function limparFiltrosDashboard() {
+      ['dashSearch', 'dashRegional', 'dashConsultor', 'dashOficina', 'dashStatusEvento', 'dashTipoEvento', 'dashInicio', 'dashFim'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      paintDashboardAvancado();
+    }
+
+    function paintDashboardAvancado() {
+      const options = getDashboardFilterOptions();
+      const root = els.viewRoot;
+      const hasFilters = !!document.getElementById('dashSearch');
+      const data = hasFilters ? buildDashboardData() : { veiculos: state.cache.veiculos, eventos: state.cache.eventos, compras: state.cache.compras, regulacoes: state.cache.regulacoes, financeiro: state.cache.financeiro };
+      const { veiculos, eventos, compras, regulacoes, financeiro } = data;
+      const f = data.f || { search: '', regional: '', consultor: '', oficina: '', statusEvento: '', tipoEvento: '', inicio: '', fim: '' };
+      const financeiroResumo = calcularResumoFinanceiro(financeiro);
+      const fipeTotal = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.valor_fipe), 0);
+      const mensalidadeTotal = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.mensalidade), 0);
+      const eventosAbertos = eventos.filter(e => isEventoAberto(e)).length;
+      const eventosAtrasados = eventos.filter(e => getPrazoEvento(e).label === 'Atrasado' && isEventoAberto(e)).length;
+      const eventosAtencao = eventos.filter(e => getPrazoEvento(e).label === 'Atenção' && isEventoAberto(e)).length;
+      const comprasPendentes = compras.filter(c => !['entregue', 'cancelado'].includes(normalizeText(c.status_compra))).length;
+      const vistoriasAbertas = regulacoes.filter(r => !['finalizado', 'concluido', 'concluído', 'cancelado'].includes(normalizeText(r.status))).length;
+      const inadimplencia = financeiroResumo.previsto ? Math.round((financeiroResumo.atrasado / financeiroResumo.previsto) * 100) : 0;
+
+      root.innerHTML = `
+        ${topbar('Dashboard Executivo', 'Painel gerencial com indicadores, gráficos e alertas operacionais.', '<button class="btn btn-ghost" onclick="renderRelatorios()">Abrir relatórios</button><button class="btn btn-yellow" onclick="renderDashboard()">Atualizar</button>')}
+
+        <div class="content-panel dashboard-filter-panel">
+          <div class="panel-head">
+            <div><h3>Filtros do dashboard</h3><p>Analise a operação por período, regional, consultor, oficina e tipo de evento.</p></div>
+            <div class="toolbar"><button class="btn btn-ghost btn-small" onclick="limparFiltrosDashboard()">Limpar filtros</button></div>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>Busca geral</label><input id="dashSearch" value="${escapeHtml(f.search ? document.getElementById('dashSearch')?.value || '' : '')}" placeholder="Placa, associado, evento..." oninput="paintDashboardAvancado()" /></div>
+            <div class="field"><label>Regional</label><select id="dashRegional" onchange="paintDashboardAvancado()"><option value="">Todas</option>${optionListSelected(options.regionais, f.regional)}</select></div>
+            <div class="field"><label>Consultor</label><select id="dashConsultor" onchange="paintDashboardAvancado()"><option value="">Todos</option>${optionListSelected(options.consultores, f.consultor)}</select></div>
+            <div class="field"><label>Oficina</label><select id="dashOficina" onchange="paintDashboardAvancado()"><option value="">Todas</option>${optionListSelected(options.oficinas, f.oficina)}</select></div>
+            <div class="field"><label>Status evento</label><select id="dashStatusEvento" onchange="paintDashboardAvancado()"><option value="">Todos</option>${optionListSelected(options.statusEventos, f.statusEvento)}</select></div>
+            <div class="field"><label>Tipo evento</label><select id="dashTipoEvento" onchange="paintDashboardAvancado()"><option value="">Todos</option>${optionListSelected(options.tiposEventos, f.tipoEvento)}</select></div>
+            <div class="field"><label>Início</label><input id="dashInicio" type="date" value="${escapeHtml(f.inicio)}" onchange="paintDashboardAvancado()" /></div>
+            <div class="field"><label>Fim</label><input id="dashFim" type="date" value="${escapeHtml(f.fim)}" onchange="paintDashboardAvancado()" /></div>
+          </div>
+        </div>
+
+        <div class="grid-cards">
+          ${metric('Veículos ativos', veiculos.filter(v => normalizeText(v.status) === 'ativo').length, `${veiculos.length} veículo(s) filtrado(s)`)}
+          ${metric('FIPE total', money(fipeTotal), 'Valor protegido filtrado')}
+          ${metric('Mensalidade prevista', money(mensalidadeTotal), 'Receita bruta da base')}
+          ${metric('Eventos abertos', eventosAbertos, `${eventos.length} evento(s) no filtro`)}
+          ${metric('Eventos atrasados', eventosAtrasados, `${eventosAtencao} em atenção`)}
+          ${metric('Compras pendentes', comprasPendentes, `${compras.length} compra(s) filtrada(s)`)}
+          ${metric('Receita prevista', money(financeiroResumo.previsto), `${financeiroResumo.total} lançamento(s)`)}
+          ${metric('Receita recebida', money(financeiroResumo.recebido), `${financeiroResumo.qtdPago} pago(s)`)}
+          ${metric('Financeiro em aberto', money(financeiroResumo.aberto), `${financeiroResumo.qtdAberto} lançamento(s)`)}
+          ${metric('Financeiro atrasado', money(financeiroResumo.atrasado), `${financeiroResumo.qtdAtrasado} vencido(s)`)}
+          ${metric('Inadimplência', `${inadimplencia}%`, 'Sobre receita prevista')}
+          ${metric('Vistorias abertas', vistoriasAbertas, `${regulacoes.length} registro(s) técnico(s)`)}
+        </div>
+
+        <div class="dashboard-kpi-row">
+          ${summaryItem('Ticket médio FIPE', money(veiculos.length ? fipeTotal / veiculos.length : 0))}
+          ${summaryItem('Média mensalidade', money(veiculos.length ? mensalidadeTotal / veiculos.length : 0))}
+          ${summaryItem('Eventos por veículo', veiculos.length ? (eventos.length / veiculos.length).toFixed(2) : '0.00')}
+          ${summaryItem('Compras em aberto', comprasPendentes)}
+        </div>
+
+        <div class="dashboard-exec-grid">
+          <div class="chart-grid">
+            ${dashboardChartCard('Veículos por status', 'Distribuição da carteira filtrada.', groupCount(veiculos, v => v.status || 'Sem status'), 'veículos')}
+            ${dashboardChartCard('Eventos por etapa', 'Onde os eventos estão parados.', groupCount(eventos, e => e.etapa_kanban || 'Sem etapa'), 'eventos')}
+            ${dashboardChartCard('Eventos por tipo', 'Natureza das ocorrências cadastradas.', groupCount(eventos, e => e.tipo_evento || 'Sem tipo'), 'eventos')}
+            ${dashboardChartCard('Financeiro por status', 'Situação dos lançamentos financeiros.', groupCount(financeiro, f => statusFinanceiroReal(f) || f.status_financeiro || 'Sem status'), 'lançamentos')}
+          </div>
+
+          <div class="content-panel attention-card">
+            <div class="panel-head"><div><h3>Alertas operacionais</h3><p>Itens que merecem acompanhamento imediato.</p></div></div>
+            <div style="padding:18px 20px">
+              ${dashboardAlerts(eventos, compras, regulacoes, financeiro, veiculos)}
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          ${dashboardChartCard('Receita prevista x recebida', 'Comparação direta da carteira filtrada.', [
+            { label: 'Prevista', value: Math.round(financeiroResumo.previsto) },
+            { label: 'Recebida', value: Math.round(financeiroResumo.recebido) },
+            { label: 'Em aberto', value: Math.round(financeiroResumo.aberto) },
+            { label: 'Atrasada', value: Math.round(financeiroResumo.atrasado) }
+          ], 'R$')}
+          ${dashboardChartCard('Compras por status', 'Andamento de compras e peças.', groupCount(compras, c => c.status_compra || 'Sem status'), 'compras')}
+          ${dashboardChartCard('Vistorias por status', 'Controle técnico operacional.', groupCount(regulacoes, r => r.status || 'Sem status'), 'registros')}
+          ${dashboardChartCard('Top consultores por veículos', 'Carteira operacional por consultor.', groupCount(veiculos, v => v.consultor || 'Sem consultor'), 'veículos')}
+        </div>
+
+        <div class="content-panel" style="margin-top:18px">
+          <div class="panel-head"><div><h3>Eventos em atenção</h3><p>Acesso rápido aos eventos com prazo crítico.</p></div></div>
+          ${reportAttentionTable(eventos)}
+        </div>
+      `;
+    }
+
+    function dashboardChartCard(title, subtitle, rows, suffix = 'registro(s)') {
+      const data = (rows || []).filter(r => Number(r.value) > 0).slice(0, 7);
+      const max = Math.max(1, ...data.map(r => Number(r.value) || 0));
+      return `<div class="chart-card"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(subtitle)}</p>${data.length ? `<div class="chart-bars">${data.map((row, index) => dashboardBar(row.label, row.value, max, suffix, index)).join('')}</div>` : emptyState('Sem dados para exibir.', 'Os filtros atuais não retornaram registros suficientes.')}</div>`;
+    }
+
+    function dashboardBar(label, value, max, suffix, index = 0) {
+      const width = Math.max(4, Math.round((Number(value) / max) * 100));
+      const classes = ['blue', 'green', 'orange', 'red'];
+      const cls = classes[index % classes.length];
+      const valueLabel = suffix === 'R$' ? money(value) : `${escapeHtml(value)} ${escapeHtml(suffix)}`;
+      return `<div class="chart-row"><div class="chart-row-top"><strong title="${escapeHtml(label)}">${escapeHtml(label)}</strong><span>${valueLabel}</span></div><div class="chart-track"><div class="chart-fill ${cls}" style="width:${width}%"></div></div></div>`;
+    }
+
+    function dashboardAlerts(eventos, compras, regulacoes, financeiro, veiculos) {
+      const eventosAtrasados = eventos.filter(e => getPrazoEvento(e).label === 'Atrasado' && isEventoAberto(e));
+      const eventosAtencao = eventos.filter(e => getPrazoEvento(e).label === 'Atenção' && isEventoAberto(e));
+      const comprasPendentes = compras.filter(c => !['entregue', 'cancelado'].includes(normalizeText(c.status_compra)));
+      const vistoriaSemParecer = regulacoes.filter(r => !String(r.parecer || '').trim() && !['finalizado', 'cancelado'].includes(normalizeText(r.status)));
+      const financeiroAtrasado = financeiro.filter(f => normalizeText(statusFinanceiroReal(f)) === 'atrasado');
+      const semAssociado = veiculos.filter(v => !String(v.id_associado || '').trim() && normalizeText(v.status) === 'ativo');
+      const items = [
+        { title: 'Eventos atrasados', note: 'Eventos com 7 dias ou mais em aberto.', value: eventosAtrasados.length, type: 'red' },
+        { title: 'Eventos em atenção', note: 'Eventos entre 4 e 6 dias em aberto.', value: eventosAtencao.length, type: 'orange' },
+        { title: 'Financeiro vencido', note: 'Mensalidades vencidas ou marcadas como atrasadas.', value: financeiroAtrasado.length, type: 'red' },
+        { title: 'Compras pendentes', note: 'Itens ainda não entregues ou cancelados.', value: comprasPendentes.length, type: 'orange' },
+        { title: 'Vistorias sem parecer', note: 'Registros técnicos abertos sem parecer preenchido.', value: vistoriaSemParecer.length, type: 'blue' },
+        { title: 'Veículos sem associado', note: 'Veículos ativos sem vínculo cadastral.', value: semAssociado.length, type: 'orange' }
+      ];
+      return `<div class="dashboard-alert-list">${items.map(item => `<div class="dashboard-alert-item"><div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.note)}</small></div>${statusBadge(item.value)}</div>`).join('')}</div>`;
     }
 
     async function ensureAssociadosCache(force = false) {
@@ -2854,10 +3199,19 @@
 
     function usuarioTable(data) {
       return `<div class="table-wrap"><table><thead><tr><th>Usuário</th><th>E-mail</th><th>Perfil</th><th>Setor</th><th>Status</th><th>Último login</th><th>Ações</th></tr></thead><tbody>
-        ${data.map(item => `<tr>
-          <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.id_usuario || '')}</small></td><td>${escapeHtml(item.email || '-')}</td><td>${statusBadge(item.perfil || '-')}</td><td>${escapeHtml(item.setor || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateTimeBR(item.ultimo_login)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openUsuarioDetails(${jsArg(item.id_usuario)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openUsuarioModalById(${jsArg(item.id_usuario)})">Editar</button><button class="btn btn-yellow btn-small" onclick="resetSenhaUsuario(${jsArg(item.id_usuario)})">Senha</button>${normalizeText(item.status) === 'ativo' ? `<button class="btn btn-danger btn-small" onclick="inativarUsuario(${jsArg(item.id_usuario)})">Inativar</button>` : `<button class="btn btn-blue btn-small" onclick="ativarUsuario(${jsArg(item.id_usuario)})">Ativar</button>`}</div></td>
-        </tr>`).join('')}
+        ${data.map(item => {
+          const podeExcluir = podeExcluirUsuario(item);
+          const botaoStatus = normalizeText(item.status) === 'ativo'
+            ? `<button class="btn btn-danger btn-small" onclick="inativarUsuario(${jsArg(item.id_usuario)})">Inativar</button>`
+            : `<button class="btn btn-blue btn-small" onclick="ativarUsuario(${jsArg(item.id_usuario)})">Ativar</button>`;
+          const botaoExcluir = podeExcluir
+            ? `<button class="btn btn-danger btn-small" onclick="excluirUsuarioDefinitivo(${jsArg(item.id_usuario)})">Excluir</button>`
+            : '';
+          return `<tr>
+            <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.id_usuario || '')}</small></td><td>${escapeHtml(item.email || '-')}</td><td>${statusBadge(item.perfil || '-')}</td><td>${escapeHtml(item.setor || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateTimeBR(item.ultimo_login)}</td>
+            <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openUsuarioDetails(${jsArg(item.id_usuario)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openUsuarioModalById(${jsArg(item.id_usuario)})">Editar</button><button class="btn btn-yellow btn-small" onclick="resetSenhaUsuario(${jsArg(item.id_usuario)})">Senha</button>${botaoStatus}${botaoExcluir}</div></td>
+          </tr>`;
+        }).join('')}
       </tbody></table></div>`;
     }
 
@@ -2902,8 +3256,8 @@
           ${detailCard('Setor', item.setor)}${detailCard('Status', item.status)}${detailCard('Criado em', dateTimeBR(item.data_criacao))}
           ${detailCard('Último login', dateTimeBR(item.ultimo_login))}${detailCard('ID', item.id_usuario)}${detailCard('Sessão', String(item.id_usuario) === String(state.user?.id_usuario) ? 'Usuário logado' : 'Outro usuário')}
         </div>
-        <div class="quick-actions"><button class="btn btn-ghost" onclick="closeModal(); openUsuarioModalById(${jsArg(item.id_usuario)})">Editar</button><button class="btn btn-yellow" onclick="closeModal(); resetSenhaUsuario(${jsArg(item.id_usuario)})">Trocar senha</button>${normalizeText(item.status) === 'ativo' ? `<button class="btn btn-danger" onclick="closeModal(); inativarUsuario(${jsArg(item.id_usuario)})">Inativar</button>` : `<button class="btn btn-blue" onclick="closeModal(); ativarUsuario(${jsArg(item.id_usuario)})">Ativar</button>`}</div>
-        <div class="lookup-note"><strong>Segurança:</strong> hashes de senha e tokens de sessão não são exibidos no painel.</div>
+        <div class="quick-actions"><button class="btn btn-ghost" onclick="closeModal(); openUsuarioModalById(${jsArg(item.id_usuario)})">Editar</button><button class="btn btn-yellow" onclick="closeModal(); resetSenhaUsuario(${jsArg(item.id_usuario)})">Trocar senha</button>${normalizeText(item.status) === 'ativo' ? `<button class="btn btn-danger" onclick="closeModal(); inativarUsuario(${jsArg(item.id_usuario)})">Inativar</button>` : `<button class="btn btn-blue" onclick="closeModal(); ativarUsuario(${jsArg(item.id_usuario)})">Ativar</button>`}${podeExcluirUsuario(item) ? `<button class="btn btn-danger" onclick="closeModal(); excluirUsuarioDefinitivo(${jsArg(item.id_usuario)})">Excluir definitivo</button>` : ''}</div>
+        <div class="lookup-note"><strong>Segurança:</strong> hashes de senha e tokens de sessão não são exibidos no painel. Exclusão definitiva aparece apenas para Super Admin e não pode ser usada no próprio usuário logado.</div>
       `, true);
     }
 
@@ -2940,6 +3294,32 @@
       state.cache.usuarios = [];
       await renderUsuarios();
       toast('Usuário ativado.');
+    }
+
+
+    function podeExcluirUsuario(item) {
+      if (roleKey() !== 'super admin') return false;
+      if (!item?.id_usuario) return false;
+      if (String(item.id_usuario) === String(state.user?.id_usuario)) return false;
+      return true;
+    }
+
+    async function excluirUsuarioDefinitivo(id) {
+      const item = findUsuarioById(id);
+      if (!item) return toast('Usuário não encontrado.', 'error');
+      if (!podeExcluirUsuario(item)) return toast('Apenas Super Admin pode excluir outros usuários em definitivo.', 'error');
+
+      confirmAction(
+        'Excluir usuário definitivamente',
+        `Deseja apagar definitivamente o usuário ${item.nome || item.email}? Esta ação remove a linha da planilha e não poderá ser desfeita.`,
+        'Excluir definitivo',
+        async () => {
+          await apiPost({ action: 'excluir_definitivo', tabela: 'Usuarios', id });
+          state.cache.usuarios = [];
+          await renderUsuarios();
+          toast('Usuário excluído definitivamente.');
+        }
+      );
     }
 
     async function renderAssociados(filter = '') {
@@ -3732,6 +4112,10 @@
 
     function optionList(items) {
       return items.map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join('');
+    }
+
+    function optionListSelected(items, selected = '') {
+      return items.map(item => `<option value="${escapeHtml(item)}" ${String(item) === String(selected) ? 'selected' : ''}>${escapeHtml(item)}</option>`).join('');
     }
 
     function uniqueValues(items) {
@@ -4958,6 +5342,8 @@
 
     window.closeModal = closeModal;
     window.renderDashboard = renderDashboard;
+    window.paintDashboardAvancado = paintDashboardAvancado;
+    window.limparFiltrosDashboard = limparFiltrosDashboard;
     window.renderAssociados = renderAssociados;
     window.renderVeiculos = renderVeiculos;
     window.renderConsultores = renderConsultores;
@@ -4986,6 +5372,7 @@
     window.inativarUsuario = inativarUsuario;
     window.ativarUsuario = ativarUsuario;
     window.resetSenhaUsuario = resetSenhaUsuario;
+    window.excluirUsuarioDefinitivo = excluirUsuarioDefinitivo;
     window.paintUsuarioTable = paintUsuarioTable;
     window.openAssociadoModal = openAssociadoModal;
     window.openAssociadoModalById = openAssociadoModalById;
