@@ -2178,7 +2178,7 @@
 
 
     /* =========================================================
-       v0.2.2 — Polimento operacional e experiência do usuário
+       v0.2.3 — Polimento operacional e experiência do usuário
        Ajustes visuais e de linguagem sem alterar banco ou rotas.
     ========================================================= */
     :root {
@@ -2239,6 +2239,108 @@
     .data-table-wrap table {
       min-width: 860px;
     }
+
+    /* v0.2.3 — tabelas, paginação e responsividade */
+    .table-wrap {
+      border: 1px solid rgba(148, 163, 184, .16);
+      border-radius: 18px;
+      overflow: auto;
+      max-width: 100%;
+      background: rgba(15, 23, 42, .28);
+    }
+
+    .table-wrap table {
+      min-width: 920px;
+    }
+
+    .table-wrap thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      backdrop-filter: blur(14px);
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 16px;
+      border-top: 1px solid rgba(148, 163, 184, .14);
+      color: rgba(203, 213, 225, .76);
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pagination button,
+    .page-size select {
+      min-height: 34px;
+      border-radius: 11px;
+      border: 1px solid rgba(148, 163, 184, .18);
+      background: rgba(15, 23, 42, .72);
+      color: rgba(248, 250, 252, .92);
+      padding: 0 11px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .pagination button:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+    }
+
+    .pagination .page-indicator {
+      color: rgba(203, 213, 225, .72);
+      font-weight: 800;
+      padding: 0 4px;
+    }
+
+    .row-actions {
+      gap: 6px;
+    }
+
+    .row-actions .btn-small {
+      min-height: 32px;
+      padding: 0 10px;
+    }
+
+    .loading-panel {
+      min-height: 220px;
+    }
+
+    @media (max-width: 900px) {
+      .table-footer {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .summary-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .summary-strip {
+        grid-template-columns: 1fr;
+      }
+      .actions, .toolbar {
+        width: 100%;
+      }
+      .actions .btn, .toolbar .btn, .toolbar .search {
+        width: 100%;
+      }
+    }
+
 
     td .btn,
     .actions .btn,
@@ -2512,13 +2614,15 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.2.2';
+    const APP_VERSION = '0.2.3';
 
     const state = {
       user: null,
       token: '',
       view: 'dashboard',
       options: {},
+      tablePageSize: 10,
+      tablePages: {},
       cache: {
         dashboard: null,
         associados: [],
@@ -2839,6 +2943,60 @@
 
     function summaryItem(label, value) {
       return `<div class="summary-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+    }
+
+
+    function getTablePageKey(key) {
+      return `page_${key}`;
+    }
+
+    function paginateData(key, data = []) {
+      const pageSize = Number(state.tablePageSize || 10);
+      const total = data.length;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      const currentRaw = Number(state.tablePages[key] || 1);
+      const current = Math.min(Math.max(currentRaw, 1), totalPages);
+      state.tablePages[key] = current;
+      const start = (current - 1) * pageSize;
+      const end = Math.min(start + pageSize, total);
+      return {
+        items: data.slice(start, end),
+        total,
+        pageSize,
+        page: current,
+        totalPages,
+        start: total ? start + 1 : 0,
+        end
+      };
+    }
+
+    function paginationHtml(key, pager) {
+      if (!pager || pager.total <= 0) return '';
+      return `
+        <div class="table-footer">
+          <div>Mostrando <strong>${pager.start}</strong>–<strong>${pager.end}</strong> de <strong>${pager.total}</strong> registro(s).</div>
+          <div class="pagination">
+            <span class="page-size">
+              <select onchange="setTablePageSize(this.value)">
+                ${[10,25,50].map(size => `<option value="${size}" ${Number(state.tablePageSize) === size ? 'selected' : ''}>${size} por página</option>`).join('')}
+              </select>
+            </span>
+            <button onclick="setTablePage('${key}', ${pager.page - 1})" ${pager.page <= 1 ? 'disabled' : ''}>Anterior</button>
+            <span class="page-indicator">Página ${pager.page} de ${pager.totalPages}</span>
+            <button onclick="setTablePage('${key}', ${pager.page + 1})" ${pager.page >= pager.totalPages ? 'disabled' : ''}>Próxima</button>
+          </div>
+        </div>`;
+    }
+
+    function setTablePage(key, page) {
+      state.tablePages[key] = Number(page || 1);
+      renderView(state.view);
+    }
+
+    function setTablePageSize(size) {
+      state.tablePageSize = Number(size || 10);
+      state.tablePages = {};
+      renderView(state.view);
     }
 
 
@@ -3321,12 +3479,14 @@
     }
 
     function consultorTable(data) {
+      const pager = paginateData('consultores', data);
+      data = pager.items;
       return `<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Contato</th><th>Regional</th><th>Cooperativa</th><th>Tipo</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.cpf_cnpj || '')}</small></td><td>${escapeHtml(item.telefone || '-')}<br><small>${escapeHtml(item.email || '')}</small></td><td>${escapeHtml(item.regional || '-')}</td><td>${escapeHtml(item.cooperativa || '-')}</td><td>${escapeHtml(item.tipo || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_cadastro)}</td>
           <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openConsultorDetails(${jsArg(item.id_consultor)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openConsultorModalById(${jsArg(item.id_consultor)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarConsultor(${jsArg(item.id_consultor)})">Inativar</button></div></td>
         </tr>`).join('')}
-      </tbody></table></div>`;
+      </tbody></table>${paginationHtml('consultores', pager)}</div>`;
     }
 
     function openConsultorModalById(id) {
@@ -3415,12 +3575,14 @@
     }
 
     function oficinaTable(data) {
+      const pager = paginateData('oficinas', data);
+      data = pager.items;
       return `<div class="table-wrap"><table><thead><tr><th>Oficina</th><th>CNPJ</th><th>Contato</th><th>Cidade/UF</th><th>Responsável</th><th>Status</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.nome || '-')}</strong></td><td>${escapeHtml(item.cnpj || '-')}</td><td>${escapeHtml(item.telefone || '-')}<br><small>${escapeHtml(item.email || '')}</small></td><td>${escapeHtml([item.cidade, item.estado].filter(Boolean).join('/') || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.status)}</td>
           <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openOficinaDetails(${jsArg(item.id_oficina)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openOficinaModalById(${jsArg(item.id_oficina)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarOficina(${jsArg(item.id_oficina)})">Inativar</button></div></td>
         </tr>`).join('')}
-      </tbody></table></div>`;
+      </tbody></table>${paginationHtml('oficinas', pager)}</div>`;
     }
 
     function openOficinaModalById(id) {
@@ -3508,6 +3670,8 @@
     }
 
     function usuarioTable(data) {
+      const pager = paginateData('usuarios', data);
+      data = pager.items;
       return `<div class="table-wrap"><table><thead><tr><th>Usuário</th><th>E-mail</th><th>Perfil</th><th>Setor</th><th>Status</th><th>Último login</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => {
           const podeExcluir = podeExcluirUsuario(item);
@@ -3522,7 +3686,7 @@
             <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openUsuarioDetails(${jsArg(item.id_usuario)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openUsuarioModalById(${jsArg(item.id_usuario)})">Editar</button><button class="btn btn-yellow btn-small" onclick="resetSenhaUsuario(${jsArg(item.id_usuario)})">Senha</button>${botaoStatus}${botaoExcluir}</div></td>
           </tr>`;
         }).join('')}
-      </tbody></table></div>`;
+      </tbody></table>${paginationHtml('usuarios', pager)}</div>`;
     }
 
     function openUsuarioModalById(id) {
@@ -3884,7 +4048,7 @@
           <td><strong>${escapeHtml(item.numero_evento || item.id_evento || '-')}</strong></td><td>${escapeHtml(item.tipo_evento || '-')}</td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.etapa_kanban)}</td><td>${statusBadge(item.status_evento)}</td><td>${dateBR(item.data_abertura)}</td>
           <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Central</button><button class="btn btn-ghost btn-small" onclick="openEventModalById(${jsArg(item.id_evento)})">Editar</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button><button class="btn btn-danger btn-small" onclick="cancelarEvento(${jsArg(item.id_evento)})">Cancelar</button></div></td>
         </tr>`).join('')}
-      </tbody></table></div>`;
+      </tbody></table>${paginationHtml('eventos', pager)}</div>`;
     }
 
     async function renderVistorias(filter = '') {
@@ -3949,12 +4113,14 @@
     }
 
     function compraTable(data) {
+      const pager = paginateData('compras', data);
+      data = pager.items;
       return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Item</th><th>Fornecedor</th><th>Status</th><th>Valor aprovado</th><th>Solicitação</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(eventLabel(item.id_evento))}</strong></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.item || '-')}</td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${statusBadge(item.status_compra)}</td><td>${money(item.valor_aprovado || item.valor_cotado || 0)}</td><td>${dateBR(item.data_solicitacao)}</td>
           <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(item.id_compra)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCompraModalById(${jsArg(item.id_compra)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarCompraEntregue(${jsArg(item.id_compra)})">Entregar</button><button class="btn btn-danger btn-small" onclick="cancelarCompra(${jsArg(item.id_compra)})">Cancelar</button></div></td>
         </tr>`).join('')}
-      </tbody></table></div>`;
+      </tbody></table>${paginationHtml('compras', pager)}</div>`;
     }
 
 
@@ -4024,12 +4190,14 @@
     }
 
     function financeiroTable(data) {
+      const pager = paginateData('financeiro', data);
+      data = pager.items;
       return `<div class="table-wrap"><table><thead><tr><th>Competência</th><th>Associado</th><th>Placa</th><th>Vencimento</th><th>Mensalidade</th><th>Pago</th><th>Status</th><th>Consultor/Regional</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.competencia || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${dateBR(item.data_vencimento)}</td><td>${money(item.valor_mensalidade)}</td><td>${money(item.valor_pago)}</td><td>${statusBadge(statusFinanceiroReal(item))}</td><td>${escapeHtml(item.consultor || '-')}<br><small>${escapeHtml(item.regional || '')}</small></td>
           <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openFinanceiroDetails(${jsArg(item.id_financeiro)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openFinanceiroModalById(${jsArg(item.id_financeiro)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarFinanceiroPago(${jsArg(item.id_financeiro)})">Pagar</button><button class="btn btn-danger btn-small" onclick="cancelarFinanceiro(${jsArg(item.id_financeiro)})">Cancelar</button></div></td>
         </tr>`).join('')}
-      </tbody></table></div>`;
+      </tbody></table>${paginationHtml('financeiro', pager)}</div>`;
     }
 
     function financeiroVehicleSelect(selected = '') {
@@ -4256,6 +4424,8 @@
     }
 
     function reclamacaoTable(data) {
+      const pager = paginateData('reclamacoes', data);
+      data = pager.items;
       return `<div class="table-wrap"><table><thead><tr><th>Associado</th><th>Placa</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Prazo</th><th>Responsável</th><th>Abertura</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.associado || '-')}</strong><br><small>${escapeHtml(item.telefone || '')}</small></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.categoria || '-')}<br><small>${escapeHtml(item.origem || '')}</small></td><td>${statusBadge(item.prioridade)}</td><td>${statusBadge(item.status)}</td><td>${prazoBadgeReclamacao(item)}<br><small>${escapeHtml(getPrazoReclamacao(item).text)}</small></td><td>${escapeHtml(item.responsavel || '-')}</td><td>${dateBR(item.data_abertura)}</td>
