@@ -1,4 +1,4 @@
-# Sistema Gerencial — v0.2.3
+# Sistema Gerencial — v0.2.3.1
 
 Versão focada em responsividade, tabelas e performance visual.
 
@@ -22,3 +22,9 @@ Versão focada em responsividade, tabelas e performance visual.
 ## Observações
 
 Não precisa mexer no Apps Script e não rode `setupBancoERP`.
+
+
+## Correção v0.2.3.1
+
+- Corrigido erro `pager is not defined` no módulo Eventos.
+- Paginação do módulo Reclamações também foi padronizada.
