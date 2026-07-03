@@ -1,13 +1,13 @@
-# Sistema Gerencial — v0.2.0 Beta Comercial White Label
+# Sistema Gerencial — v0.2.1 Beta Gerencial
 
-Versão beta comercial com foco em organização de produto, implantação e apresentação white label.
+Versão beta gerencial com foco em organização de produto, implantação e apresentação identidade configurável.
 
 ## Principais mudanças
 
 - Menu lateral reorganizado por grupos: Visão geral, Base, Operação, Gestão e Administração.
 - Novo módulo **Implantação** com checklist para configurar uma nova operação.
-- Painel executivo com nomenclatura mais comercial e genérica.
-- Estrutura white label reforçada via `BRAND_CONFIG` no `index.html`.
+- Painel executivo com nomenclatura mais gerencial e genérica.
+- Estrutura identidade configurável reforçada via `BRAND_CONFIG` no `index.html`.
 - Mantém os módulos existentes: associados, veículos, consultores, oficinas, eventos, vistorias, compras, financeiro, kanban, relatórios, importação, usuários e manutenção.
 - Não exige alteração no Apps Script se a versão anterior já estiver aplicada.
 
@@ -22,9 +22,9 @@ Versão beta comercial com foco em organização de produto, implantação e apr
 
 Não rode `setupBancoERP`.
 
-A atualização é de front-end e organização comercial. O banco atual será mantido.
+A atualização é de front-end e organização gerencial. O banco atual será mantido.
 
-## Configuração white label
+## Configuração identidade configurável
 
 A identidade visual fica centralizada no objeto `BRAND_CONFIG`, dentro do `index.html`.
 
