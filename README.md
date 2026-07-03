@@ -1,17 +1,16 @@
-# Sistema Gerencial — v0.2.2
+# Sistema Gerencial — v0.2.3
 
-Versão focada em polimento operacional, linguagem final e experiência do usuário.
+Versão focada em responsividade, tabelas e performance visual.
 
 ## O que mudou
 
-- Linguagem da interface menos técnica e mais adequada ao usuário final.
-- Termos como API, infraestrutura e nomes internos foram suavizados na tela.
-- Menu mantém a organização comercial por grupos.
-- A tela de Preparação agora parece uma etapa operacional, não uma explicação de produto.
-- A Administração do Ambiente ficou mais clara para backup, auditoria e integridade dos dados.
-- Estados vazios, botões, tabelas e ações receberam refinamentos visuais.
-- Responsividade melhorada para notebook, tablet e telas menores.
-- Mantém a estrutura de configuração por `BRAND_CONFIG`, sem expor estratégia comercial ao usuário final.
+- Paginação nas principais tabelas do sistema.
+- Seleção de quantidade por página: 10, 25 ou 50 registros.
+- Cabeçalhos de tabela mais estáveis durante rolagem horizontal/vertical.
+- Ações de linha mais compactas e organizadas.
+- Melhor responsividade para notebook, tablet e telas menores.
+- Ajuste visual em tabelas, estados vazios e painéis de listagem.
+- Melhor prevenção visual contra telas muito longas quando houver muitos registros importados.
 
 ## Arquivos para substituir no GitHub
 
@@ -20,8 +19,6 @@ Versão focada em polimento operacional, linguagem final e experiência do usuá
 - `package.json`
 - `README.md`
 
-## Importante
+## Observações
 
-Não rode `setupBancoERP`.
-
-Esta versão não exige alteração no Apps Script se você já aplicou as versões anteriores com Financeiro e exclusão definitiva de usuários.
+Não precisa mexer no Apps Script e não rode `setupBancoERP`.
