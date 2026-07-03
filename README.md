@@ -1,4 +1,4 @@
-# Sistema Gerencial — v0.2.4
+# Sistema Gerencial — v0.2.4.1
 
 Versão com módulo de **Cotações** e consulta FIPE gratuita.
 
@@ -41,3 +41,8 @@ Não rode `setupBancoERP`.
 ## Observação
 
 O provedor gratuito pode ter limites e oscilações. Para operação comercial em volume, a estrutura já permite trocar o provedor no Apps Script sem alterar o módulo inteiro.
+
+
+## Correção v0.2.4.1
+
+Incluído `FIPE_CONFIG` no Apps Script para corrigir o erro `FIPE_CONFIG is not defined` ao carregar marcas/modelos da FIPE.
