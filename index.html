@@ -4043,6 +4043,8 @@
     }
 
     function eventTable(data) {
+      const pager = paginateData('eventos', data);
+      data = pager.items;
       return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Tipo</th><th>Placa</th><th>Associado</th><th>Responsável</th><th>Etapa</th><th>Status</th><th>Abertura</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.numero_evento || item.id_evento || '-')}</strong></td><td>${escapeHtml(item.tipo_evento || '-')}</td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.etapa_kanban)}</td><td>${statusBadge(item.status_evento)}</td><td>${dateBR(item.data_abertura)}</td>
@@ -4431,7 +4433,7 @@
           <td><strong>${escapeHtml(item.associado || '-')}</strong><br><small>${escapeHtml(item.telefone || '')}</small></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.categoria || '-')}<br><small>${escapeHtml(item.origem || '')}</small></td><td>${statusBadge(item.prioridade)}</td><td>${statusBadge(item.status)}</td><td>${prazoBadgeReclamacao(item)}<br><small>${escapeHtml(getPrazoReclamacao(item).text)}</small></td><td>${escapeHtml(item.responsavel || '-')}</td><td>${dateBR(item.data_abertura)}</td>
           <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openReclamacaoDetails(${jsArg(item.id_reclamacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openReclamacaoModalById(${jsArg(item.id_reclamacao)})">Editar</button><button class="btn btn-yellow btn-small" onclick="resolverReclamacao(${jsArg(item.id_reclamacao)})">Resolver</button><button class="btn btn-danger btn-small" onclick="cancelarReclamacao(${jsArg(item.id_reclamacao)})">Cancelar</button></div></td>
         </tr>`).join('')}
-      </tbody></table></div>`;
+      </tbody></table>${paginationHtml('reclamacoes', pager)}</div>`;
     }
 
     function openReclamacaoModalById(id) {
