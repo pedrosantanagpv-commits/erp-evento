@@ -1592,12 +1592,324 @@
       .main { padding: 22px 16px 34px; }
     }
 
+
+    /* =========================================================
+       v0.1.6 — Acabamento comercial white label
+       Tema escuro, login premium, sidebar fixa e tela Sobre.
+    ========================================================= */
+    :root {
+      --bg: #0b0f14;
+      --surface: #121821;
+      --surface-2: #171f2a;
+      --surface-3: #0f151e;
+      --dark: #05070a;
+      --dark-2: #0a0f16;
+      --muted: #93a0b2;
+      --line: rgba(148, 163, 184, .16);
+      --accent: #8b98a7;
+      --accent-strong: #cbd5e1;
+      --yellow: #8b98a7;
+      --yellow-2: #64748b;
+      --green: #22c55e;
+      --red: #ef4444;
+      --orange: #f59e0b;
+      --blue: #60a5fa;
+      --radius: 22px;
+      --shadow: 0 24px 80px rgba(0, 0, 0, .30);
+      --shadow-soft: 0 14px 42px rgba(0, 0, 0, .22);
+    }
+
+    html { background: var(--bg); }
+
+    body {
+      background:
+        radial-gradient(circle at 83% 0%, rgba(100, 116, 139, .14), transparent 30%),
+        radial-gradient(circle at 12% 5%, rgba(51, 65, 85, .16), transparent 27%),
+        linear-gradient(180deg, #0b0f14 0%, #0e131b 44%, #080c11 100%);
+      color: #eef2f7;
+    }
+
+    .login-page {
+      grid-template-columns: minmax(0, 1fr) minmax(420px, .72fr);
+      background:
+        radial-gradient(circle at 19% 14%, rgba(148, 163, 184, .18), transparent 30%),
+        radial-gradient(circle at 66% 72%, rgba(51, 65, 85, .20), transparent 35%),
+        linear-gradient(135deg, #05070a 0%, #0f1724 48%, #05070a 100%);
+    }
+
+    .login-hero { padding: clamp(34px, 5vw, 72px); }
+
+    .login-title h1 {
+      max-width: 820px;
+      letter-spacing: -.075em;
+      color: #f8fafc;
+    }
+
+    .login-title p { color: rgba(226, 232, 240, .68); }
+
+    .login-panel-wrap {
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, .76), rgba(2, 6, 12, .88));
+      border-left: 1px solid rgba(148, 163, 184, .14);
+      backdrop-filter: blur(18px);
+    }
+
+    .login-card {
+      background: linear-gradient(180deg, rgba(18, 24, 33, .98), rgba(10, 15, 22, .98));
+      border: 1px solid rgba(148, 163, 184, .18);
+      box-shadow: 0 34px 100px rgba(0, 0, 0, .42);
+    }
+
+    .login-card h2 { color: #f8fafc; }
+
+    .field label { color: #9aa7b8; }
+
+    .field input,
+    .field select,
+    .field textarea {
+      background: rgba(15, 23, 42, .82);
+      color: #eef2f7;
+      border-color: rgba(148, 163, 184, .18);
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder { color: #667085; }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      background: rgba(15, 23, 42, .98);
+      border-color: rgba(203, 213, 225, .52);
+      box-shadow: 0 0 0 4px rgba(148, 163, 184, .12);
+    }
+
+    .hint-compact {
+      margin-top: 16px;
+      background: rgba(15, 23, 42, .55);
+      border-color: rgba(148, 163, 184, .18);
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    .brand-mark.has-logo { padding: 6px; background: rgba(15, 23, 42, .72); }
+    .brand-mark.has-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+    .app { grid-template-columns: 292px minmax(0, 1fr); }
+
+    .sidebar {
+      background:
+        radial-gradient(circle at 18% 0%, rgba(148, 163, 184, .10), transparent 28%),
+        linear-gradient(180deg, #05070a 0%, #080d13 56%, #040609 100%);
+      border-right: 1px solid rgba(148, 163, 184, .14);
+      padding: 22px 18px;
+      overflow: hidden;
+      gap: 14px;
+    }
+
+    .side-brand {
+      min-height: 74px;
+      padding: 4px 4px 16px;
+      flex-shrink: 0;
+      border-bottom-color: rgba(148, 163, 184, .14);
+    }
+
+    .nav {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .nav button {
+      min-height: 46px;
+      border-radius: 16px;
+      color: rgba(226, 232, 240, .62);
+      border: 1px solid transparent;
+    }
+
+    .nav button:hover {
+      background: rgba(148, 163, 184, .08);
+      border-color: rgba(148, 163, 184, .12);
+      color: #f8fafc;
+      transform: translateX(2px);
+    }
+
+    .nav button.active {
+      background: linear-gradient(90deg, rgba(148, 163, 184, .18), rgba(51, 65, 85, .12));
+      box-shadow: inset 3px 0 0 var(--accent-strong), 0 12px 28px rgba(0, 0, 0, .20);
+      color: #ffffff;
+    }
+
+    .sidebar-footer {
+      flex-shrink: 0;
+      margin-top: 0;
+      border: 1px solid rgba(148, 163, 184, .14);
+      background: linear-gradient(180deg, rgba(15, 23, 42, .62), rgba(15, 23, 42, .28));
+      border-radius: 20px;
+      padding: 14px;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, .18);
+    }
+
+    .side-note {
+      display: block;
+      color: rgba(203, 213, 225, .48);
+      font-size: 11px;
+      border-top: 1px solid rgba(148, 163, 184, .10);
+      padding-top: 10px;
+      margin-top: -2px;
+    }
+
+    .btn-logout {
+      width: 100%;
+      background: rgba(148, 163, 184, .10);
+      color: #e2e8f0;
+      border: 1px solid rgba(148, 163, 184, .16);
+    }
+
+    .btn-logout:hover { background: rgba(148, 163, 184, .16); }
+
+    .main {
+      min-width: 0;
+      min-height: 100vh;
+      padding: 34px clamp(18px, 2.4vw, 34px) 44px;
+      background:
+        radial-gradient(circle at 92% 2%, rgba(148, 163, 184, .11), transparent 26%),
+        linear-gradient(180deg, rgba(15, 23, 42, .46), rgba(2, 6, 12, .04));
+    }
+
+    .topbar {
+      padding: 2px 2px 4px;
+      border-bottom: 1px solid rgba(148, 163, 184, .08);
+      padding-bottom: 20px;
+    }
+
+    .content-panel,
+    .card,
+    .summary-item,
+    .modal,
+    .data-table-wrap,
+    .detail-card,
+    .timeline-card,
+    .history-item,
+    .comment-box,
+    .workflow-step,
+    .kanban-card,
+    .kanban-col {
+      background: linear-gradient(180deg, rgba(18, 24, 33, .96), rgba(12, 18, 26, .96));
+      border-color: rgba(148, 163, 184, .15);
+      color: #eef2f7;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .metric {
+      background:
+        radial-gradient(circle at 95% 0%, rgba(148, 163, 184, .13), transparent 32%),
+        linear-gradient(180deg, #151d28 0%, #101720 100%);
+    }
+
+    .metric strong,
+    .summary-item strong { color: #f8fafc; }
+
+    .btn-primary,
+    .btn-yellow {
+      background: linear-gradient(180deg, #e2e8f0 0%, #b8c2cf 100%);
+      color: #0b1018;
+      box-shadow: 0 16px 34px rgba(0, 0, 0, .25);
+    }
+
+    .btn-primary:hover,
+    .btn-yellow:hover { background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%); }
+
+    .btn-ghost {
+      background: rgba(148, 163, 184, .10);
+      color: #e2e8f0;
+      border: 1px solid rgba(148, 163, 184, .15);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, .12);
+      color: #fecaca;
+      border: 1px solid rgba(239, 68, 68, .20);
+    }
+
+    table { color: #e5edf6; }
+    th { color: #94a3b8; background: rgba(15, 23, 42, .50); }
+    td { border-bottom-color: rgba(148, 163, 184, .10); }
+    tr:hover td { background: rgba(148, 163, 184, .045); }
+
+    .badge.dark { background: rgba(148, 163, 184, .13); color: #cbd5e1; }
+    .badge.green { background: rgba(34, 197, 94, .13); color: #bbf7d0; }
+    .badge.orange { background: rgba(245, 158, 11, .14); color: #fde68a; }
+    .badge.red { background: rgba(239, 68, 68, .13); color: #fecaca; }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+      gap: 18px;
+    }
+
+    .about-card-main { grid-column: 1 / -1; }
+
+    .about-brand-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .about-mark { width: 66px; height: 66px; border-radius: 22px; }
+
+    .about-brand-row h3 {
+      margin: 6px 0 2px;
+      font-size: 30px;
+      letter-spacing: -.055em;
+    }
+
+    .about-brand-row p { margin: 0; color: var(--muted); }
+
+    .eyebrow-inline {
+      color: #cbd5e1;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: .14em;
+      font-weight: 900;
+    }
+
+    .compact-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .align-left { text-align: left; align-items: flex-start; }
+    code { color: #cbd5e1; background: rgba(148, 163, 184, .10); padding: 2px 6px; border-radius: 7px; }
+
+    @media (max-width: 1100px) {
+      .login-page { grid-template-columns: 1fr; }
+      .login-panel-wrap { border-left: 0; }
+      .about-grid { grid-template-columns: 1fr; }
+      .compact-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; width: min(312px, 86vw); z-index: 30; transform: translateX(-105%); transition: .22s ease; }
+      .sidebar.open { transform: translateX(0); }
+      .main { padding: 22px 16px 34px; }
+      .mobile-menu { display: inline-flex; margin-bottom: 16px; }
+    }
+
+    @media (max-width: 620px) {
+      .login-hero { padding: 28px 22px; }
+      .login-panel-wrap { padding: 22px; }
+      .login-card { border-radius: 22px; padding: 24px; }
+      .topbar { align-items: flex-start; }
+      .topbar, .actions { flex-direction: column; align-items: stretch; }
+      .actions .btn { width: 100%; }
+      .compact-strip { grid-template-columns: 1fr; }
+    }
+
   </style>
 </head>
 <body>
   <section id="loginPage" class="login-page">
     <div class="login-hero">
-      <div class="brand-mark">ERP</div>
+      <div class="brand-mark">SG</div>
       <div class="login-title">
         <span class="eyebrow">Gestão operacional</span>
         <h1>Controle gerencial em uma única tela.</h1>
@@ -1625,10 +1937,10 @@
           <input id="senha" name="senha" type="password" value="123456" autocomplete="current-password" required />
         </div>
 
-        <button class="btn btn-primary" type="submit">Acessar ERP</button>
+        <button class="btn btn-primary" type="submit">Acessar sistema</button>
 
-        <div class="hint">
-          Login inicial: <strong>admin@gpv.com</strong><br />Senha inicial: <strong>123456</strong>
+        <div class="hint hint-compact">
+          Acesso restrito a usuários autorizados.
         </div>
       </form>
     </div>
@@ -1637,7 +1949,7 @@
   <section id="appPage" class="app hidden">
     <aside id="sidebar" class="sidebar">
       <div class="side-brand">
-        <div class="brand-mark">ERP</div>
+        <div class="brand-mark">SG</div>
         <div>
           <strong>Sistema Gerencial</strong>
           <small>Operação Veicular</small>
@@ -1657,6 +1969,7 @@
         <button data-view="kanban">🧩 Kanban</button>
         <button data-view="relatorios">📈 Relatórios</button>
         <button data-view="usuarios">👤 Usuários</button>
+        <button data-view="sobre">⚙️ Sobre</button>
       </nav>
 
       <div class="sidebar-footer">
@@ -1667,7 +1980,8 @@
             <small id="userRole">Super Admin</small>
           </div>
         </div>
-        <button id="logoutBtn" class="btn btn-ghost">Sair</button>
+        <small class="side-note" data-brand-footer-note>Ambiente gerencial</small>
+        <button id="logoutBtn" class="btn btn-logout">Sair</button>
       </div>
     </aside>
 
@@ -1690,49 +2004,72 @@
     const BRAND_CONFIG = {
       appName: 'Sistema Gerencial',
       appSubtitle: 'Operação Veicular',
+      companyName: 'Cliente / Operação',
       logoText: 'SG',
+      logoUrl: '',
       documentTitle: 'Sistema Gerencial',
-      loginEyebrow: 'Gestão operacional',
-      loginTitle: 'Controle gerencial em uma única tela.',
-      loginDescription: 'Estrutura white label para organizar base, veículos, eventos, vistorias, compras, financeiro e relatórios.',
-      loginBadges: ['Base configurável', 'Operação centralizada', 'Pronto para white label'],
+      loginEyebrow: 'Plataforma gerencial',
+      loginTitle: 'Gestão operacional com visão centralizada.',
+      loginDescription: 'Estrutura white label para organizar base, veículos, eventos, vistorias, compras, financeiro e relatórios sem depender de identidade comercial fixa.',
+      loginBadges: ['White label', 'Gestão integrada', 'Operação escalável'],
+      footerNote: 'Ambiente gerencial',
       colors: {
         accent: '#8b98a7',
+        accentStrong: '#cbd5e1',
         sidebar: '#05070a',
-        background: '#0b0f14'
+        background: '#0b0f14',
+        surface: '#121821'
       }
     };
 
     function applyBrandConfig() {
-      document.title = BRAND_CONFIG.documentTitle || BRAND_CONFIG.appName || 'Sistema Gerencial';
-      document.querySelectorAll('.brand-mark').forEach(el => { el.textContent = BRAND_CONFIG.logoText || 'SG'; });
+      const config = BRAND_CONFIG || {};
+      document.title = config.documentTitle || config.appName || 'Sistema Gerencial';
+
+      document.querySelectorAll('.brand-mark').forEach(el => {
+        if (config.logoUrl) {
+          el.innerHTML = `<img src="${escapeHtml(config.logoUrl)}" alt="Logo" />`;
+          el.classList.add('has-logo');
+        } else {
+          el.textContent = config.logoText || 'SG';
+          el.classList.remove('has-logo');
+        }
+      });
+
       const sideName = document.querySelector('.side-brand strong');
       const sideSubtitle = document.querySelector('.side-brand small');
       const eyebrow = document.querySelector('.login-title .eyebrow');
       const loginTitle = document.querySelector('.login-title h1');
       const loginDescription = document.querySelector('.login-title p');
       const badges = document.querySelectorAll('.login-badges span');
-      if (sideName) sideName.textContent = BRAND_CONFIG.appName || 'Sistema Gerencial';
-      if (sideSubtitle) sideSubtitle.textContent = BRAND_CONFIG.appSubtitle || 'Operação Veicular';
-      if (eyebrow) eyebrow.textContent = BRAND_CONFIG.loginEyebrow || 'Gestão operacional';
-      if (loginTitle) loginTitle.textContent = BRAND_CONFIG.loginTitle || 'Controle gerencial em uma única tela.';
-      if (loginDescription) loginDescription.textContent = BRAND_CONFIG.loginDescription || '';
-      if (Array.isArray(BRAND_CONFIG.loginBadges)) {
-        badges.forEach((el, index) => { if (BRAND_CONFIG.loginBadges[index]) el.textContent = BRAND_CONFIG.loginBadges[index]; });
+      const footerNote = document.querySelector('[data-brand-footer-note]');
+
+      if (sideName) sideName.textContent = config.appName || 'Sistema Gerencial';
+      if (sideSubtitle) sideSubtitle.textContent = config.appSubtitle || 'Operação Veicular';
+      if (eyebrow) eyebrow.textContent = config.loginEyebrow || 'Plataforma gerencial';
+      if (loginTitle) loginTitle.textContent = config.loginTitle || 'Gestão operacional com visão centralizada.';
+      if (loginDescription) loginDescription.textContent = config.loginDescription || '';
+      if (footerNote) footerNote.textContent = config.footerNote || 'Ambiente gerencial';
+
+      if (Array.isArray(config.loginBadges)) {
+        badges.forEach((el, index) => { if (config.loginBadges[index]) el.textContent = config.loginBadges[index]; });
       }
-      if (BRAND_CONFIG.colors) {
+
+      if (config.colors) {
         const root = document.documentElement;
-        if (BRAND_CONFIG.colors.accent) {
-          root.style.setProperty('--accent', BRAND_CONFIG.colors.accent);
-          root.style.setProperty('--yellow', BRAND_CONFIG.colors.accent);
+        if (config.colors.accent) {
+          root.style.setProperty('--accent', config.colors.accent);
+          root.style.setProperty('--yellow', config.colors.accent);
         }
-        if (BRAND_CONFIG.colors.background) root.style.setProperty('--bg', BRAND_CONFIG.colors.background);
+        if (config.colors.accentStrong) root.style.setProperty('--accent-strong', config.colors.accentStrong);
+        if (config.colors.background) root.style.setProperty('--bg', config.colors.background);
+        if (config.colors.surface) root.style.setProperty('--surface', config.colors.surface);
       }
     }
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.1.5';
+    const APP_VERSION = '0.1.6';
 
     const state = {
       user: null,
@@ -1752,7 +2089,8 @@
         consultores: [],
         oficinas: [],
         usuarios: [],
-        kanban: null
+        kanban: null,
+        apiStatus: null
       }
     };
 
@@ -1784,20 +2122,21 @@
       oficinas: 'Oficinas',
       kanban: 'Kanban',
       relatorios: 'Relatórios',
-      usuarios: 'Usuários'
+      usuarios: 'Usuários',
+      sobre: 'Sobre'
     };
 
     const ROLE_PERMISSIONS = {
-      'super admin': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'usuarios'],
-      'administrativo': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'usuarios'],
-      'cadastro': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios'],
-      'eventos': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios'],
-      'regulacao': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'oficinas', 'kanban', 'relatorios'],
-      'compras': ['dashboard', 'eventos', 'compras', 'oficinas', 'kanban', 'relatorios'],
-      'financeiro': ['dashboard', 'associados', 'veiculos', 'consultores', 'financeiro', 'compras', 'relatorios'],
-      'consultor': ['dashboard', 'associados', 'veiculos', 'eventos', 'kanban'],
-      'regional': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'financeiro', 'kanban', 'relatorios'],
-      'oficina': ['dashboard', 'eventos', 'vistorias', 'compras']
+      'super admin': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'usuarios', 'sobre'],
+      'administrativo': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'usuarios', 'sobre'],
+      'cadastro': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios', 'sobre'],
+      'eventos': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
+      'regulacao': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'oficinas', 'kanban', 'relatorios', 'sobre'],
+      'compras': ['dashboard', 'eventos', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
+      'financeiro': ['dashboard', 'associados', 'veiculos', 'consultores', 'financeiro', 'compras', 'relatorios', 'sobre'],
+      'consultor': ['dashboard', 'associados', 'veiculos', 'eventos', 'kanban', 'sobre'],
+      'regional': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'financeiro', 'kanban', 'relatorios', 'sobre'],
+      'oficina': ['dashboard', 'eventos', 'vistorias', 'compras', 'sobre']
     };
 
     function roleKey() {
@@ -1985,7 +2324,7 @@
         toast(error.message, 'error');
       } finally {
         button.classList.remove('loading');
-        button.textContent = 'Acessar ERP';
+        button.textContent = 'Acessar sistema';
       }
     });
 
@@ -2029,6 +2368,7 @@
       if (view === 'kanban') return renderKanban();
       if (view === 'relatorios') return renderRelatorios();
       if (view === 'usuarios') return renderUsuarios();
+      if (view === 'sobre') return renderSobre();
     }
 
     function topbar(title, subtitle, actions = '') {
@@ -2082,13 +2422,13 @@
             ${metric('Oficinas ativas', oficinasAtivas, `${state.cache.oficinas.length} cadastro(s)`)}
             ${metric('FIPE total', money(d.valor_fipe_total), 'Soma dos veículos')}
             ${metric('Mensalidade prevista', money(d.mensalidade_total_prevista), 'Receita bruta estimada')}
-            ${metric('Status da API', 'Online', 'Apps Script conectado')}
+            ${metric('Status da API', 'Online', 'Ambiente conectado')}
           </div>
           <div class="content-panel">
             <div class="panel-head">
-              <div><h3>v${APP_VERSION} em operação</h3><p>ERP gerencial com base, eventos, vistoria/regulação, compras, financeiro, consultores, oficinas, usuários e relatórios.</p></div>
+              <div><h3>v${APP_VERSION} em operação</h3><p>Sistema gerencial com base, eventos, vistoria/regulação, compras, financeiro, consultores, oficinas, usuários e relatórios.</p></div>
             </div>
-            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use os módulos gerenciais para acompanhar a operação completa de proteção veicular.</div>
+            <div class="empty"><strong>Banco conectado com sucesso.</strong>Use os módulos gerenciais para acompanhar a operação veicular de ponta a ponta.</div>
           </div>`;
       } catch (error) { renderError(error.message); }
     }
@@ -2412,7 +2752,7 @@
 
     async function renderUsuarios(filter = '') {
       if (!hasPermission('usuarios')) return renderBlocked('usuarios');
-      els.viewRoot.innerHTML = topbar('Usuários e Permissões', 'Controle de acesso, perfis e status dos usuários do ERP.', '<button class="btn btn-yellow" onclick="openUsuarioModal()">+ Novo usuário</button><button class="btn btn-ghost" onclick="renderUsuarios()">Atualizar</button>') + loadingPanel('Carregando usuários...');
+      els.viewRoot.innerHTML = topbar('Usuários e Permissões', 'Controle de acesso, perfis e status dos usuários do sistema.', '<button class="btn btn-yellow" onclick="openUsuarioModal()">+ Novo usuário</button><button class="btn btn-ghost" onclick="renderUsuarios()">Atualizar</button>') + loadingPanel('Carregando usuários...');
       try {
         await ensureUsuariosCache(true);
         paintUsuarioTable(filter);
@@ -2426,7 +2766,7 @@
       const inativos = state.cache.usuarios.filter(item => normalizeText(item.status) === 'inativo').length;
       const perfis = new Set(state.cache.usuarios.map(item => item.perfil).filter(Boolean)).size;
       els.viewRoot.innerHTML = `
-        ${topbar('Usuários e Permissões', 'Controle de acesso, perfis e status dos usuários do ERP.', '<button class="btn btn-yellow" onclick="openUsuarioModal()">+ Novo usuário</button><button class="btn btn-ghost" onclick="renderUsuarios()">Atualizar</button>')}
+        ${topbar('Usuários e Permissões', 'Controle de acesso, perfis e status dos usuários do sistema.', '<button class="btn btn-yellow" onclick="openUsuarioModal()">+ Novo usuário</button><button class="btn btn-ghost" onclick="renderUsuarios()">Atualizar</button>')}
         <div class="content-panel">
           <div class="summary-strip">${summaryItem('Total', state.cache.usuarios.length)}${summaryItem('Ativos', ativos)}${summaryItem('Inativos', inativos)}${summaryItem('Perfis em uso', perfis)}${summaryItem('Filtrados', data.length)}</div>
           <div class="panel-head"><div><h3>Base de usuários</h3><p>${data.length} registro(s) encontrado(s). Senhas e tokens não são exibidos.</p></div><div class="toolbar"><input class="search" placeholder="Buscar por nome, e-mail, perfil, setor..." value="${escapeHtml(filter)}" oninput="paintUsuarioTable(this.value)" /></div></div>
@@ -4101,15 +4441,84 @@
       return `<div class="empty"><strong>${escapeHtml(title)}</strong>${escapeHtml(subtitle)}</div>`;
     }
 
+    async function renderSobre() {
+      let apiInfo = state.cache.apiStatus;
+      try {
+        apiInfo = await apiGet('ping');
+        state.cache.apiStatus = apiInfo;
+      } catch (error) {
+        apiInfo = { success: false, message: error.message };
+      }
+
+      const user = state.user || {};
+      const brand = BRAND_CONFIG || {};
+      const apiOk = apiInfo?.success;
+      els.viewRoot.innerHTML = `
+        ${topbar('Sobre o Sistema', 'Informações gerais do ambiente, versão e identidade white label.', '<button class="btn btn-ghost" onclick="renderSobre()">Atualizar</button>')}
+        <div class="about-grid">
+          <div class="content-panel about-card-main">
+            <div class="about-brand-row">
+              <div class="brand-mark about-mark">${escapeHtml(brand.logoText || 'SG')}</div>
+              <div>
+                <span class="eyebrow-inline">White label</span>
+                <h3>${escapeHtml(brand.appName || 'Sistema Gerencial')}</h3>
+                <p>${escapeHtml(brand.appSubtitle || 'Operação Veicular')}</p>
+              </div>
+            </div>
+            <div class="summary-strip compact-strip">
+              ${summaryItem('Versão front-end', APP_VERSION)}
+              ${summaryItem('API', apiOk ? 'Online' : 'Atenção')}
+              ${summaryItem('Usuário', user.nome || 'Usuário')}
+              ${summaryItem('Perfil', user.perfil || 'Perfil')}
+            </div>
+          </div>
+
+          <div class="content-panel">
+            <div class="panel-head"><div><h3>Configuração de marca</h3><p>Campos centrais usados para adaptar o sistema a cada empresa.</p></div></div>
+            <div class="data-table-wrap">
+              <table>
+                <tbody>
+                  <tr><td>Nome do sistema</td><td><strong>${escapeHtml(brand.appName || '-')}</strong></td></tr>
+                  <tr><td>Subtítulo</td><td>${escapeHtml(brand.appSubtitle || '-')}</td></tr>
+                  <tr><td>Empresa/ambiente</td><td>${escapeHtml(brand.companyName || '-')}</td></tr>
+                  <tr><td>Texto da logo</td><td>${escapeHtml(brand.logoText || '-')}</td></tr>
+                  <tr><td>Logo por URL</td><td>${brand.logoUrl ? 'Configurada' : 'Não configurada'}</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="content-panel">
+            <div class="panel-head"><div><h3>Status técnico</h3><p>Resumo de conexão do ambiente atual.</p></div></div>
+            <div class="data-table-wrap">
+              <table>
+                <tbody>
+                  <tr><td>Status da API</td><td>${statusBadge(apiOk ? 'Online' : 'Falha')}</td></tr>
+                  <tr><td>Mensagem</td><td>${escapeHtml(apiInfo?.message || '-')}</td></tr>
+                  <tr><td>Versão da API</td><td>${escapeHtml(apiInfo?.version || '-')}</td></tr>
+                  <tr><td>Data/hora</td><td>${dateTimeBR(apiInfo?.timestamp || new Date())}</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="content-panel">
+            <div class="panel-head"><div><h3>Observação comercial</h3><p>Esta versão foi preparada para operação white label.</p></div></div>
+            <div class="empty align-left"><strong>Estrutura reutilizável</strong> Para trocar a identidade de uma empresa, altere apenas o objeto <code>BRAND_CONFIG</code> no arquivo <code>index.html</code>. A lógica, telas e banco permanecem os mesmos.</div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderError(message) {
-      els.viewRoot.innerHTML = `${topbar('Erro ao carregar', 'A API respondeu com falha ou o proxy não está publicado corretamente.')}<div class="content-panel"><div class="empty"><strong>Não foi possível carregar os dados.</strong>${escapeHtml(message)}</div></div>`;
+      els.viewRoot.innerHTML = `${topbar('Erro ao carregar', 'A conexão respondeu com falha ou o ambiente não está publicado corretamente.')}<div class="content-panel"><div class="empty"><strong>Não foi possível carregar os dados.</strong>${escapeHtml(message)}</div></div>`;
       toast(message, 'error');
     }
 
 
     function renderBlocked(view) {
       const label = MODULE_LABELS[view] || view;
-      els.viewRoot.innerHTML = `${topbar('Acesso restrito', 'Seu perfil não possui permissão para acessar este módulo.')}<div class="content-panel"><div class="empty"><strong>Módulo bloqueado: ${escapeHtml(label)}</strong>Solicite liberação a um usuário Super Admin ou Administrativo.</div></div>`;
+      els.viewRoot.innerHTML = `${topbar('Acesso restrito', 'Seu perfil não possui permissão para acessar este módulo.')}<div class="content-panel"><div class="empty"><strong>Módulo bloqueado: ${escapeHtml(label)}</strong>Solicite liberação a um usuário administrador.</div></div>`;
       toast('Acesso não permitido para este perfil.', 'error');
     }
 
