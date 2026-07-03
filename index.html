@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sistema Gerencial</title>
+  <title>Sistema Gerencial — Beta</title>
   <style>
     :root {
       --bg: #f5f6fa;
@@ -2109,6 +2109,72 @@
       .compact-strip { grid-template-columns: 1fr; }
     }
 
+  
+
+    .nav-section {
+      margin: 12px 10px 4px;
+      color: rgba(226, 232, 240, .42);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .nav-commercial button {
+      min-height: 40px;
+    }
+
+    .onboarding-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 10px;
+    }
+
+    .check-item {
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .check-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(148, 163, 184, .14);
+      color: var(--accent-strong, #cbd5e1);
+      font-weight: 900;
+    }
+
+    .check-item.done .check-icon {
+      background: rgba(22, 163, 74, .18);
+      color: #86efac;
+    }
+
+    .config-code {
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.65;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.22);
+      overflow: auto;
+    }
+
   </style>
 </head>
 <body>
@@ -2161,21 +2227,31 @@
         </div>
       </div>
 
-      <nav class="nav">
-        <button data-view="dashboard" class="active">📊 Dashboard</button>
+      <nav class="nav nav-commercial">
+        <span class="nav-section">Visão geral</span>
+        <button data-view="dashboard" class="active">📊 Painel Executivo</button>
+        <button data-view="implantacao">✅ Implantação</button>
+
+        <span class="nav-section">Base</span>
         <button data-view="associados">👥 Associados</button>
         <button data-view="veiculos">🚗 Veículos</button>
         <button data-view="consultores">🧑‍💼 Consultores</button>
+        <button data-view="oficinas">🏭 Oficinas</button>
+
+        <span class="nav-section">Operação</span>
         <button data-view="eventos">🛠️ Eventos</button>
         <button data-view="vistorias">🔎 Vistorias</button>
         <button data-view="compras">🛒 Compras</button>
-        <button data-view="financeiro">💰 Financeiro</button>
-        <button data-view="oficinas">🏭 Oficinas</button>
         <button data-view="kanban">🧩 Kanban</button>
+
+        <span class="nav-section">Gestão</span>
+        <button data-view="financeiro">💰 Financeiro</button>
         <button data-view="relatorios">📈 Relatórios</button>
         <button data-view="importacao">⬆️ Importação</button>
-        <button data-view="manutencao">🧰 Manutenção</button>
+
+        <span class="nav-section">Administração</span>
         <button data-view="usuarios">👤 Usuários</button>
+        <button data-view="manutencao">🧰 Manutenção</button>
         <button data-view="sobre">⚙️ Sobre</button>
       </nav>
 
@@ -2276,7 +2352,7 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.1.9';
+    const APP_VERSION = '0.2.0';
 
     const state = {
       user: null,
@@ -2318,7 +2394,8 @@
 
 
     const MODULE_LABELS = {
-      dashboard: 'Dashboard',
+      dashboard: 'Painel Executivo',
+      implantacao: 'Implantação',
       associados: 'Associados',
       veiculos: 'Veículos',
       consultores: 'Consultores',
@@ -2336,8 +2413,8 @@
     };
 
     const ROLE_PERMISSIONS = {
-      'super admin': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
-      'administrativo': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
+      'super admin': ['dashboard', 'implantacao', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
+      'administrativo': ['dashboard', 'implantacao', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
       'cadastro': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios', 'importacao', 'sobre'],
       'eventos': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
       'regulacao': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'oficinas', 'kanban', 'relatorios', 'sobre'],
@@ -2566,6 +2643,7 @@
       state.view = view;
       setActiveNav(view);
       if (view === 'dashboard') return renderDashboard();
+      if (view === 'implantacao') return renderImplantacao();
       if (view === 'associados') return renderAssociados();
       if (view === 'veiculos') return renderVeiculos();
       if (view === 'consultores') return renderConsultores();
@@ -2603,8 +2681,80 @@
       return `<div class="summary-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
     }
 
+
+    async function renderImplantacao() {
+      await Promise.all([
+        ensureUsuariosCache(true).catch(() => {}),
+        ensureConsultoresCache(true).catch(() => {}),
+        ensureOficinasCache(true).catch(() => {}),
+        ensureAssociadosCache(true).catch(() => {}),
+        ensureVeiculosCache(true).catch(() => {}),
+        ensureFinanceiroCache(true).catch(() => {})
+      ]);
+
+      const usuariosAtivos = state.cache.usuarios.filter(u => normalizeText(u.status) === 'ativo').length;
+      const consultoresAtivos = state.cache.consultores.filter(c => normalizeText(c.status) === 'ativo').length;
+      const oficinasAtivas = state.cache.oficinas.filter(o => normalizeText(o.status) === 'ativo').length;
+      const associados = state.cache.associados.length;
+      const veiculos = state.cache.veiculos.length;
+      const financeiro = state.cache.financeiro.length;
+
+      const steps = [
+        { label: 'Usuário administrador ativo', note: 'Garanta pelo menos um Super Admin ativo.', done: usuariosAtivos > 0, view: 'usuarios' },
+        { label: 'Consultores/regionais cadastrados', note: 'Base comercial para vínculo com veículos e relatórios.', done: consultoresAtivos > 0, view: 'consultores' },
+        { label: 'Oficinas cadastradas', note: 'Base operacional para eventos e vistorias.', done: oficinasAtivas > 0, view: 'oficinas' },
+        { label: 'Associados cadastrados/importados', note: 'Base principal da operação.', done: associados > 0, view: 'associados' },
+        { label: 'Veículos cadastrados/importados', note: 'Carteira operacional e indicadores de FIPE/mensalidade.', done: veiculos > 0, view: 'veiculos' },
+        { label: 'Financeiro iniciado', note: 'Controle de competência, vencimento e status financeiro.', done: financeiro > 0, view: 'financeiro' }
+      ];
+
+      const doneCount = steps.filter(s => s.done).length;
+      const percent = Math.round((doneCount / steps.length) * 100);
+
+      els.viewRoot.innerHTML = topbar('Implantação', 'Checklist para configurar uma nova operação white label.', `
+        <button class="btn btn-secondary" onclick="renderView('sobre')">Sobre o sistema</button>
+        <button class="btn btn-primary" onclick="renderView('importacao')">Importar dados</button>
+      `) + `
+        <div class="grid-cards">
+          ${metric('Progresso', percent + '%', doneCount + ' de ' + steps.length + ' etapas')}
+          ${metric('Usuários ativos', usuariosAtivos, 'Acessos autorizados')}
+          ${metric('Base cadastrada', associados + veiculos, 'Associados + veículos')}
+          ${metric('Versão beta', APP_VERSION, 'White label comercial')}
+        </div>
+
+        <div class="onboarding-grid">
+          <section class="card panel">
+            <div class="panel-head"><div><h3>Checklist de implantação</h3><p>Use esta lista para preparar o sistema antes de operar com dados reais.</p></div></div>
+            <div class="checklist">
+              ${steps.map(step => `
+                <div class="check-item ${step.done ? 'done' : ''}">
+                  <div class="check-icon">${step.done ? '✓' : '•'}</div>
+                  <div><strong>${escapeHtml(step.label)}</strong><small>${escapeHtml(step.note)}</small></div>
+                  <button class="btn btn-secondary" onclick="renderView('${step.view}')">Abrir</button>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+
+          <aside class="card panel">
+            <div class="panel-head"><div><h3>Configuração white label</h3><p>Identidade centralizada para replicar o sistema para outro cliente.</p></div></div>
+            <div class="config-code">${escapeHtml(`const BRAND_CONFIG = {
+  appName: '${BRAND_CONFIG.appName}',
+  appSubtitle: '${BRAND_CONFIG.appSubtitle}',
+  companyName: '${BRAND_CONFIG.companyName}',
+  logoText: '${BRAND_CONFIG.logoText}',
+  logoUrl: '${BRAND_CONFIG.logoUrl || ''}',
+  documentTitle: '${BRAND_CONFIG.documentTitle}',
+  colors: { ... }
+};`)}</div>
+            <div class="empty-state compact"><strong>Pronto para comercialização</strong><p>Troque identidade, banco e deploy por cliente sem alterar a estrutura operacional.</p></div>
+          </aside>
+        </div>
+      `;
+    }
+
     async function renderDashboard() {
-      els.viewRoot.innerHTML = topbar('Dashboard Executivo', 'Indicadores consolidados, gráficos e alertas operacionais.') + skeletonDashboard();
+      els.viewRoot.innerHTML = topbar('Painel Executivo', 'Visão consolidada da operação, alertas e indicadores gerenciais.') + skeletonDashboard();
       try {
         await Promise.all([
           apiGet('dashboard').then(result => { state.cache.dashboard = result.data || {}; }),
