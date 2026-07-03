@@ -2174,6 +2174,7 @@
         <button data-view="kanban">🧩 Kanban</button>
         <button data-view="relatorios">📈 Relatórios</button>
         <button data-view="importacao">⬆️ Importação</button>
+        <button data-view="manutencao">🧰 Manutenção</button>
         <button data-view="usuarios">👤 Usuários</button>
         <button data-view="sobre">⚙️ Sobre</button>
       </nav>
@@ -2275,7 +2276,7 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.1.8';
+    const APP_VERSION = '0.1.9';
 
     const state = {
       user: null,
@@ -2329,13 +2330,14 @@
       kanban: 'Kanban',
       relatorios: 'Relatórios',
       importacao: 'Importação',
+      manutencao: 'Manutenção',
       usuarios: 'Usuários',
       sobre: 'Sobre'
     };
 
     const ROLE_PERMISSIONS = {
-      'super admin': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'usuarios', 'sobre'],
-      'administrativo': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'usuarios', 'sobre'],
+      'super admin': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
+      'administrativo': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
       'cadastro': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios', 'importacao', 'sobre'],
       'eventos': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
       'regulacao': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'oficinas', 'kanban', 'relatorios', 'sobre'],
@@ -2575,6 +2577,7 @@
       if (view === 'kanban') return renderKanban();
       if (view === 'relatorios') return renderRelatorios();
       if (view === 'importacao') return renderImportacao();
+      if (view === 'manutencao') return renderManutencao();
       if (view === 'usuarios') return renderUsuarios();
       if (view === 'sobre') return renderSobre();
     }
@@ -5206,6 +5209,180 @@
       downloadTextFile(`modelo_${tabela}.csv`, content, 'text/csv;charset=utf-8');
     }
 
+
+    const BACKUP_TABLES = [
+      { tabela: 'Associados', label: 'Associados' },
+      { tabela: 'Veiculos', label: 'Veículos' },
+      { tabela: 'Eventos', label: 'Eventos' },
+      { tabela: 'Historico_Eventos', label: 'Histórico de eventos' },
+      { tabela: 'Vistorias_Regulacao', label: 'Vistorias / Regulação' },
+      { tabela: 'Compras', label: 'Compras' },
+      { tabela: 'Financeiro', label: 'Financeiro' },
+      { tabela: 'Consultores_Regionais', label: 'Consultores / Regionais' },
+      { tabela: 'Oficinas', label: 'Oficinas' },
+      { tabela: 'Usuarios', label: 'Usuários' },
+      { tabela: 'Configuracoes', label: 'Configurações' },
+      { tabela: 'Logs_Sistema', label: 'Logs / Auditoria' }
+    ];
+
+    async function carregarTabelaBackup(tabela) {
+      try {
+        const result = await apiGet('listar', { tabela });
+        return { success: true, tabela, data: result.data || [], total: result.total || 0 };
+      } catch (error) {
+        return { success: false, tabela, data: [], total: 0, message: error.message };
+      }
+    }
+
+    async function renderManutencao() {
+      if (!hasPermission('manutencao')) return renderBlocked('manutencao');
+      els.viewRoot.innerHTML = topbar('Manutenção', 'Backup, exportação geral, auditoria e saúde do ambiente.', '<button class="btn btn-ghost" onclick="renderManutencao()">Atualizar</button>') + skeletonDashboard();
+      try {
+        const apiInfo = await apiGet('ping').catch(error => ({ success: false, message: error.message }));
+        const resultados = await Promise.all(BACKUP_TABLES.map(item => carregarTabelaBackup(item.tabela)));
+        const ok = resultados.filter(r => r.success).length;
+        const totalRegistros = resultados.reduce((sum, r) => sum + (r.total || 0), 0);
+        const logs = (resultados.find(r => r.tabela === 'Logs_Sistema')?.data || []).slice(-12).reverse();
+        const inativos = resultados.reduce((sum, r) => sum + (r.data || []).filter(item => {
+          const status = normalizeText(item.status || item.status_evento || item.status_compra || item.status_financeiro || '');
+          return ['inativo', 'cancelado', 'recusado'].some(term => status.includes(term));
+        }).length, 0);
+
+        const rowsHtml = resultados.map(r => `
+          <tr>
+            <td><strong>${escapeHtml((BACKUP_TABLES.find(t => t.tabela === r.tabela) || {}).label || r.tabela)}</strong><small>${escapeHtml(r.tabela)}</small></td>
+            <td>${r.success ? statusBadge('OK') : statusBadge('Falha')}</td>
+            <td>${r.total || 0}</td>
+            <td>${r.success ? '-' : escapeHtml(r.message || 'Erro')}</td>
+            <td><button class="btn btn-soft" onclick="exportarTabelaManutencao(${jsArg(r.tabela)})">CSV</button></td>
+          </tr>
+        `).join('');
+
+        const logsHtml = logs.length ? logs.map(log => `
+          <tr>
+            <td>${dateTimeBR(log.data_hora)}</td>
+            <td>${escapeHtml(log.usuario || '-')}</td>
+            <td>${escapeHtml(log.modulo || '-')}</td>
+            <td>${escapeHtml(log.acao || '-')}</td>
+            <td>${escapeHtml(String(log.detalhes || '').slice(0, 120))}</td>
+          </tr>
+        `).join('') : '<tr><td colspan="5" class="muted">Nenhum log encontrado.</td></tr>';
+
+        els.viewRoot.innerHTML = `
+          ${topbar('Manutenção', 'Backup, exportação geral, auditoria e saúde do ambiente.', `
+            <button class="btn btn-primary" onclick="exportarBackupJson()">Backup JSON</button>
+            <button class="btn btn-ghost" onclick="exportarTodosCSVs()">Exportar CSVs</button>
+            <button class="btn btn-ghost" onclick="renderManutencao()">Atualizar</button>
+          `)}
+
+          <div class="grid-cards">
+            ${metric('Status da API', apiInfo.success ? 'Online' : 'Falha', apiInfo.message || 'Ambiente conectado')}
+            ${metric('Tabelas OK', `${ok}/${BACKUP_TABLES.length}`, 'Bases consultadas')}
+            ${metric('Registros totais', String(totalRegistros), 'Soma de todas as tabelas')}
+            ${metric('Inativos/cancelados', String(inativos), 'Registros encerrados')}
+          </div>
+
+          <div class="content-panel">
+            <div class="panel-head">
+              <div><h3>Saúde do banco</h3><p>Contagem por tabela e exportação individual.</p></div>
+              <div class="actions"><button class="btn btn-soft" onclick="exportarResumoManutencao()">Exportar resumo</button></div>
+            </div>
+            <div class="data-table-wrap">
+              <table>
+                <thead><tr><th>Tabela</th><th>Status</th><th>Registros</th><th>Observação</th><th>Ações</th></tr></thead>
+                <tbody>${rowsHtml}</tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="content-panel">
+            <div class="panel-head">
+              <div><h3>Últimas ações de auditoria</h3><p>Leitura dos registros mais recentes da aba Logs_Sistema.</p></div>
+              <div class="actions"><button class="btn btn-soft" onclick="exportarTabelaManutencao('Logs_Sistema')">Exportar logs</button></div>
+            </div>
+            <div class="data-table-wrap">
+              <table>
+                <thead><tr><th>Data</th><th>Usuário</th><th>Módulo</th><th>Ação</th><th>Detalhes</th></tr></thead>
+                <tbody>${logsHtml}</tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="content-panel">
+            <div class="panel-head"><div><h3>Orientação de segurança</h3><p>Use esta tela antes de limpezas, migrações ou alterações estruturais.</p></div></div>
+            <div class="empty align-left"><strong>Boa prática</strong> Antes de excluir registros, importar bases grandes ou alterar o Apps Script, gere um Backup JSON e exporte os CSVs principais. Esta versão não executa limpeza automática para evitar perda acidental de dados.</div>
+          </div>
+        `;
+      } catch (error) {
+        renderError(error.message);
+      }
+    }
+
+    async function obterBackupCompleto() {
+      const resultados = await Promise.all(BACKUP_TABLES.map(item => carregarTabelaBackup(item.tabela)));
+      return {
+        sistema: BRAND_CONFIG.appName || 'Sistema Gerencial',
+        versao: APP_VERSION,
+        exportado_em: new Date().toISOString(),
+        usuario: state.user?.email || '',
+        tabelas: resultados.reduce((acc, item) => {
+          acc[item.tabela] = { success: item.success, total: item.total, data: item.data, message: item.message || '' };
+          return acc;
+        }, {})
+      };
+    }
+
+    async function exportarBackupJson() {
+      try {
+        toast('Gerando backup geral...');
+        const backup = await obterBackupCompleto();
+        downloadTextFile(`backup_sistema_${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(backup, null, 2), 'application/json;charset=utf-8');
+        toast('Backup JSON gerado com sucesso.');
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    async function exportarTabelaManutencao(tabela) {
+      try {
+        const result = await carregarTabelaBackup(tabela);
+        if (!result.success) throw new Error(result.message || 'Falha ao carregar tabela.');
+        const rows = result.data || [];
+        const headers = rows.length ? Object.keys(rows[0]) : ((BACKUP_TABLES.find(t => t.tabela === tabela) || {}).headers || []);
+        const content = [headers.map(csvEscape).join(';')].concat(rows.map(row => headers.map(h => csvEscape(row[h])).join(';'))).join('\n');
+        downloadTextFile(`${tabela}_${new Date().toISOString().slice(0,10)}.csv`, content, 'text/csv;charset=utf-8');
+        toast(`CSV de ${tabela} exportado.`);
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    async function exportarTodosCSVs() {
+      try {
+        toast('Preparando exportação geral em CSV...');
+        for (const item of BACKUP_TABLES) {
+          await exportarTabelaManutencao(item.tabela);
+          await delay(180);
+        }
+        toast('Exportação geral concluída.');
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    async function exportarResumoManutencao() {
+      try {
+        const resultados = await Promise.all(BACKUP_TABLES.map(item => carregarTabelaBackup(item.tabela)));
+        const headers = ['tabela', 'nome', 'status', 'registros', 'observacao'];
+        const rows = resultados.map(r => [r.tabela, (BACKUP_TABLES.find(t => t.tabela === r.tabela) || {}).label || r.tabela, r.success ? 'OK' : 'Falha', r.total || 0, r.message || '']);
+        const content = [headers.join(';')].concat(rows.map(row => row.map(csvEscape).join(';'))).join('\n');
+        downloadTextFile(`resumo_manutencao_${new Date().toISOString().slice(0,10)}.csv`, content, 'text/csv;charset=utf-8');
+        toast('Resumo de manutenção exportado.');
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
     async function renderSobre() {
       let apiInfo = state.cache.apiStatus;
       try {
@@ -5351,6 +5528,11 @@
     window.renderVistorias = renderVistorias;
     window.renderCompras = renderCompras;
     window.renderImportacao = renderImportacao;
+    window.renderManutencao = renderManutencao;
+    window.exportarBackupJson = exportarBackupJson;
+    window.exportarTodosCSVs = exportarTodosCSVs;
+    window.exportarTabelaManutencao = exportarTabelaManutencao;
+    window.exportarResumoManutencao = exportarResumoManutencao;
     window.setImportTable = setImportTable;
     window.readImportFile = readImportFile;
     window.analisarImportacao = analisarImportacao;
