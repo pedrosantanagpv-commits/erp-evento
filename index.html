@@ -809,6 +809,31 @@
 
 
 
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: rgba(148, 163, 184, .10);
+      color: var(--dark);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .lookup-note.danger {
+      border-color: rgba(220, 38, 38, .45);
+      background: rgba(220, 38, 38, .10);
+      color: #fecaca;
+    }
+
     .event-hero {
       border: 1px solid var(--line);
       background:
@@ -1301,6 +1326,31 @@
       box-shadow: 0 14px 30px rgba(15, 23, 42, .06);
     }
 
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: rgba(148, 163, 184, .10);
+      color: var(--dark);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .lookup-note.danger {
+      border-color: rgba(220, 38, 38, .45);
+      background: rgba(220, 38, 38, .10);
+      color: #fecaca;
+    }
+
     .event-hero {
       border-radius: 24px;
       background:
@@ -1582,6 +1632,31 @@
     .modal-actions { background: rgba(15, 23, 42, .38); border-top-color: rgba(148, 163, 184, .14); }
 
     .empty { color: var(--muted); }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: rgba(148, 163, 184, .10);
+      color: var(--dark);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .lookup-note.danger {
+      border-color: rgba(220, 38, 38, .45);
+      background: rgba(220, 38, 38, .10);
+      color: #fecaca;
+    }
+
     .event-hero { background: linear-gradient(135deg, #111827 0%, #1e293b 100%); }
     .workflow-step.active { background: rgba(148, 163, 184, .16); border-color: #94a3b8; }
 
@@ -1968,6 +2043,7 @@
         <button data-view="oficinas">🏭 Oficinas</button>
         <button data-view="kanban">🧩 Kanban</button>
         <button data-view="relatorios">📈 Relatórios</button>
+        <button data-view="importacao">⬆️ Importação</button>
         <button data-view="usuarios">👤 Usuários</button>
         <button data-view="sobre">⚙️ Sobre</button>
       </nav>
@@ -2069,7 +2145,7 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.1.6';
+    const APP_VERSION = '0.1.7';
 
     const state = {
       user: null,
@@ -2122,18 +2198,19 @@
       oficinas: 'Oficinas',
       kanban: 'Kanban',
       relatorios: 'Relatórios',
+      importacao: 'Importação',
       usuarios: 'Usuários',
       sobre: 'Sobre'
     };
 
     const ROLE_PERMISSIONS = {
-      'super admin': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'usuarios', 'sobre'],
-      'administrativo': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'usuarios', 'sobre'],
-      'cadastro': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios', 'sobre'],
+      'super admin': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'usuarios', 'sobre'],
+      'administrativo': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'usuarios', 'sobre'],
+      'cadastro': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios', 'importacao', 'sobre'],
       'eventos': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
       'regulacao': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'oficinas', 'kanban', 'relatorios', 'sobre'],
       'compras': ['dashboard', 'eventos', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
-      'financeiro': ['dashboard', 'associados', 'veiculos', 'consultores', 'financeiro', 'compras', 'relatorios', 'sobre'],
+      'financeiro': ['dashboard', 'associados', 'veiculos', 'consultores', 'financeiro', 'compras', 'relatorios', 'importacao', 'sobre'],
       'consultor': ['dashboard', 'associados', 'veiculos', 'eventos', 'kanban', 'sobre'],
       'regional': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'financeiro', 'kanban', 'relatorios', 'sobre'],
       'oficina': ['dashboard', 'eventos', 'vistorias', 'compras', 'sobre']
@@ -2367,6 +2444,7 @@
       if (view === 'oficinas') return renderOficinas();
       if (view === 'kanban') return renderKanban();
       if (view === 'relatorios') return renderRelatorios();
+      if (view === 'importacao') return renderImportacao();
       if (view === 'usuarios') return renderUsuarios();
       if (view === 'sobre') return renderSobre();
     }
@@ -4441,6 +4519,309 @@
       return `<div class="empty"><strong>${escapeHtml(title)}</strong>${escapeHtml(subtitle)}</div>`;
     }
 
+
+    /* =========================================================
+       IMPORTAÇÃO DE DADOS — v0.1.7
+       Importação CSV/TSV com pré-visualização e criação segura via API.
+       Não altera o banco e não exige mudança no Apps Script.
+    ========================================================= */
+
+    const IMPORT_TABLES = {
+      Associados: {
+        label: 'Associados',
+        idField: 'id_associado',
+        fields: ['id_associado','nome','cpf_cnpj','telefone','email','cep','endereco','bairro','cidade','estado','status','data_cadastro','observacoes'],
+        sample: ['','João Exemplo','000.000.000-00','81999999999','joao@exemplo.com','55000-000','Rua Exemplo','Centro','Caruaru','PE','Ativo','','Importado via CSV']
+      },
+      Veiculos: {
+        label: 'Veículos',
+        idField: 'id_veiculo',
+        fields: ['id_veiculo','placa','id_associado','associado','marca','modelo','ano_modelo','tipo_combustivel','codigo_fipe','valor_fipe','mensalidade','consultor','regional','cooperativa','status','rastreador','data_entrada','observacoes'],
+        sample: ['','ABC1D23','','João Exemplo','Fiat','Argo','2022','Flex','001267-0','65000','180','Consultor Exemplo','Regional Exemplo','Cooperativa Exemplo','Ativo','Sim','','Importado via CSV']
+      },
+      Eventos: {
+        label: 'Eventos',
+        idField: 'id_evento',
+        fields: ['id_evento','numero_evento','data_abertura','tipo_evento','status_evento','etapa_kanban','prioridade','placa','id_veiculo','id_associado','associado','telefone','cidade','estado','descricao','responsavel','setor_atual','oficina','valor_estimado','valor_aprovado','data_ultima_atualizacao','observacoes'],
+        sample: ['','','','Colisão','Aberto','Aberto','Média','ABC1D23','','','João Exemplo','81999999999','Caruaru','PE','Evento importado para teste','Administrador','Eventos','','2500','0','','Importado via CSV']
+      },
+      Financeiro: {
+        label: 'Financeiro',
+        idField: 'id_financeiro',
+        fields: ['id_financeiro','id_associado','associado','id_veiculo','placa','competencia','data_vencimento','valor_mensalidade','valor_pago','data_pagamento','status_financeiro','forma_pagamento','consultor','regional','observacoes','data_criacao'],
+        sample: ['','','João Exemplo','','ABC1D23','2026-07','2026-07-10','180','0','','Aberto','Boleto','Consultor Exemplo','Regional Exemplo','Importado via CSV','']
+      },
+      Consultores_Regionais: {
+        label: 'Consultores / Regionais',
+        idField: 'id_consultor',
+        fields: ['id_consultor','nome','cpf_cnpj','telefone','email','regional','cooperativa','tipo','status','data_cadastro','observacoes'],
+        sample: ['','Consultor Exemplo','000.000.000-00','81999999999','consultor@exemplo.com','Regional Exemplo','Cooperativa Exemplo','Consultor','Ativo','','Importado via CSV']
+      },
+      Oficinas: {
+        label: 'Oficinas',
+        idField: 'id_oficina',
+        fields: ['id_oficina','nome','cnpj','telefone','email','cidade','estado','responsavel','status','observacoes'],
+        sample: ['','Oficina Exemplo','00.000.000/0001-00','81999999999','oficina@exemplo.com','Caruaru','PE','Responsável Exemplo','Ativo','Importado via CSV']
+      },
+      Compras: {
+        label: 'Compras',
+        idField: 'id_compra',
+        fields: ['id_compra','id_evento','placa','item','fornecedor','valor_cotado','valor_aprovado','status_compra','responsavel','data_solicitacao','data_aprovacao','data_entrega','observacoes'],
+        sample: ['','','ABC1D23','Peça Exemplo','Fornecedor Exemplo','500','450','Solicitado','Administrador','','','','Importado via CSV']
+      },
+      Vistorias_Regulacao: {
+        label: 'Vistorias / Regulação',
+        idField: 'id_regulacao',
+        fields: ['id_regulacao','id_evento','placa','tipo_vistoria','status','responsavel','data_entrada','data_saida','parecer','valor_orcado','valor_aprovado','observacoes'],
+        sample: ['','','ABC1D23','Vistoria inicial','Em análise','Administrador','','','Parecer importado','2500','0','Importado via CSV']
+      }
+    };
+
+    const IMPORT_ALIASES = {
+      cpf: 'cpf_cnpj', cnpj: 'cpf_cnpj', cpfcnpj: 'cpf_cnpj', 'cpf/cnpj': 'cpf_cnpj', documento: 'cpf_cnpj',
+      celular: 'telefone', fone: 'telefone', contato: 'telefone',
+      uf: 'estado', municipio: 'cidade', endereço: 'endereco', endereco_completo: 'endereco',
+      veiculo: 'modelo', carro: 'modelo', combustível: 'tipo_combustivel', combustivel: 'tipo_combustivel', ano: 'ano_modelo',
+      fipe: 'valor_fipe', valorfipe: 'valor_fipe', valor_fipe_total: 'valor_fipe', valor: 'valor_mensalidade', mensal: 'mensalidade', mensalidade_prevista: 'mensalidade',
+      cooperativa_sigla: 'cooperativa', regional_nome: 'regional', consultor_nome: 'consultor',
+      evento: 'id_evento', id: '', numero: 'numero_evento', tipo: 'tipo_evento', status: 'status', etapa: 'etapa_kanban',
+      vencimento: 'data_vencimento', competencia_mes: 'competencia', pagamento: 'data_pagamento', valor_pago_real: 'valor_pago',
+      status_fin: 'status_financeiro', statusfinanceiro: 'status_financeiro', forma: 'forma_pagamento', forma_pgto: 'forma_pagamento',
+      oficina_nome: 'oficina', fornecedor_nome: 'fornecedor', peça: 'item', peca: 'item',
+      orçamento: 'valor_orcado', orcamento: 'valor_orcado', aprovado: 'valor_aprovado', cotado: 'valor_cotado'
+    };
+
+    const importState = {
+      tabela: 'Veiculos',
+      rows: [],
+      mappedRows: [],
+      headers: [],
+      delimiter: ';',
+      errors: []
+    };
+
+    function renderImportacao() {
+      const options = Object.entries(IMPORT_TABLES).map(([key, cfg]) => `<option value="${escapeHtml(key)}" ${key === importState.tabela ? 'selected' : ''}>${escapeHtml(cfg.label)}</option>`).join('');
+      els.viewRoot.innerHTML = `
+        ${topbar('Importação de Dados', 'Entrada rápida de dados por CSV/TSV para alimentar a base gerencial.', '<button class="btn btn-ghost" onclick="renderImportacao()">Limpar tela</button>')}
+        <div class="grid-2">
+          <div class="content-panel">
+            <div class="panel-head"><div><h3>Arquivo ou colagem</h3><p>Use CSV separado por ponto e vírgula, vírgula ou TAB. A primeira linha precisa conter os cabeçalhos.</p></div></div>
+            <div class="form-grid two">
+              <div class="field"><label>Tabela de destino</label><select id="importTabela" onchange="setImportTable(this.value)">${options}</select></div>
+              <div class="field"><label>Arquivo CSV/TSV</label><input id="importFile" type="file" accept=".csv,.txt,.tsv" onchange="readImportFile(this.files[0])" /></div>
+            </div>
+            <div class="field"><label>Conteúdo para importar</label><textarea id="importText" placeholder="Cole aqui o conteúdo CSV/TSV..." style="min-height:220px"></textarea></div>
+            <div class="quick-actions">
+              <button class="btn btn-yellow" onclick="analisarImportacao()">Analisar dados</button>
+              <button class="btn btn-ghost" onclick="downloadImportTemplate()">Baixar modelo CSV</button>
+              <button class="btn btn-ghost" onclick="limparImportacao()">Limpar</button>
+            </div>
+            <div class="lookup-note" style="margin-top:14px">Dica: deixe as colunas de ID vazias. O sistema cria os IDs automaticamente no momento da importação.</div>
+          </div>
+          <div class="content-panel">
+            <div class="panel-head"><div><h3>Campos aceitos</h3><p>Campos oficiais da tabela selecionada. Cabeçalhos parecidos também são reconhecidos em alguns casos.</p></div></div>
+            <div id="importSchemaBox">${renderImportSchemaBox(importState.tabela)}</div>
+          </div>
+        </div>
+        <div id="importPreviewRoot" class="content-panel" style="margin-top:16px">
+          ${emptyState('Nenhum arquivo analisado.', 'Selecione um arquivo ou cole dados CSV para pré-visualizar antes de importar.')}
+        </div>
+      `;
+    }
+
+    function renderImportSchemaBox(tabela) {
+      const cfg = IMPORT_TABLES[tabela] || IMPORT_TABLES.Veiculos;
+      return `<div class="chip-list">${cfg.fields.map(f => `<span class="chip">${escapeHtml(f)}</span>`).join('')}</div>`;
+    }
+
+    function setImportTable(tabela) {
+      importState.tabela = tabela;
+      const box = document.getElementById('importSchemaBox');
+      if (box) box.innerHTML = renderImportSchemaBox(tabela);
+    }
+
+    function limparImportacao() {
+      importState.rows = [];
+      importState.mappedRows = [];
+      importState.headers = [];
+      importState.errors = [];
+      const txt = document.getElementById('importText');
+      const file = document.getElementById('importFile');
+      if (txt) txt.value = '';
+      if (file) file.value = '';
+      const root = document.getElementById('importPreviewRoot');
+      if (root) root.innerHTML = emptyState('Nenhum arquivo analisado.', 'Selecione um arquivo ou cole dados CSV para pré-visualizar antes de importar.');
+    }
+
+    function readImportFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const txt = document.getElementById('importText');
+        if (txt) txt.value = String(reader.result || '');
+        analisarImportacao();
+      };
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    function detectDelimiter(line) {
+      const candidates = [';', '\t', ','];
+      let best = ';';
+      let bestCount = -1;
+      candidates.forEach(delimiter => {
+        const count = parseCSVLine(line, delimiter).length;
+        if (count > bestCount) { best = delimiter; bestCount = count; }
+      });
+      return best;
+    }
+
+    function parseCSVLine(line, delimiter) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const next = line[i + 1];
+        if (char === '"' && inQuotes && next === '"') { current += '"'; i++; continue; }
+        if (char === '"') { inQuotes = !inQuotes; continue; }
+        if (char === delimiter && !inQuotes) { result.push(current.trim()); current = ''; continue; }
+        current += char;
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    function normalizeHeader(header) {
+      const cleaned = normalizeText(header).replace(/[^a-z0-9_\/]+/g, '_').replace(/^_+|_+$/g, '');
+      if (IMPORT_ALIASES[cleaned] !== undefined) return IMPORT_ALIASES[cleaned];
+      return cleaned;
+    }
+
+    function analisarImportacao() {
+      const tabela = document.getElementById('importTabela')?.value || importState.tabela || 'Veiculos';
+      importState.tabela = tabela;
+      const cfg = IMPORT_TABLES[tabela];
+      const raw = String(document.getElementById('importText')?.value || '').replace(/^\uFEFF/, '').trim();
+      if (!raw) { toast('Informe um arquivo ou cole dados CSV para analisar.', 'error'); return; }
+      const lines = raw.split(/\r?\n/).filter(line => line.trim());
+      if (lines.length < 2) { toast('O conteúdo precisa ter cabeçalho e pelo menos uma linha de dados.', 'error'); return; }
+      const delimiter = detectDelimiter(lines[0]);
+      const originalHeaders = parseCSVLine(lines[0], delimiter);
+      const mappedHeaders = originalHeaders.map(normalizeHeader);
+      const validFields = new Set(cfg.fields);
+      const ignoredHeaders = originalHeaders.filter((h, i) => !validFields.has(mappedHeaders[i]) || !mappedHeaders[i]);
+      const rows = [];
+      const mappedRows = [];
+      const errors = [];
+      lines.slice(1).forEach((line, lineIndex) => {
+        const values = parseCSVLine(line, delimiter);
+        const rawItem = {};
+        const item = {};
+        originalHeaders.forEach((header, index) => {
+          const value = values[index] ?? '';
+          rawItem[header] = value;
+          const mapped = mappedHeaders[index];
+          if (mapped && validFields.has(mapped)) item[mapped] = value;
+        });
+        const hasContent = Object.values(item).some(value => String(value || '').trim());
+        if (!hasContent) return;
+        if (cfg.idField && item[cfg.idField] === '') delete item[cfg.idField];
+        rows.push(rawItem);
+        mappedRows.push(item);
+        if (Object.keys(item).length <= 1) errors.push(`Linha ${lineIndex + 2}: poucos campos reconhecidos.`);
+      });
+
+      importState.headers = originalHeaders;
+      importState.rows = rows;
+      importState.mappedRows = mappedRows;
+      importState.delimiter = delimiter;
+      importState.errors = errors;
+
+      paintImportPreview(ignoredHeaders);
+    }
+
+    function paintImportPreview(ignoredHeaders = []) {
+      const root = document.getElementById('importPreviewRoot');
+      if (!root) return;
+      const cfg = IMPORT_TABLES[importState.tabela] || IMPORT_TABLES.Veiculos;
+      const rows = importState.mappedRows || [];
+      const previewFields = cfg.fields.filter(f => rows.some(r => r[f])).slice(0, 9);
+      const ignored = Array.from(new Set(ignoredHeaders.filter(Boolean)));
+      root.innerHTML = `
+        <div class="panel-head"><div><h3>Pré-visualização da importação</h3><p>${rows.length} registro(s) reconhecido(s) para ${escapeHtml(cfg.label)}. Delimitador detectado: <strong>${importState.delimiter === '\t' ? 'TAB' : importState.delimiter}</strong>.</p></div><div class="actions"><button class="btn btn-yellow" onclick="importarDadosPreview()" ${rows.length ? '' : 'disabled'}>Importar ${rows.length} registro(s)</button></div></div>
+        <div class="summary-strip compact-strip">
+          ${summaryItem('Tabela', cfg.label)}
+          ${summaryItem('Linhas válidas', rows.length)}
+          ${summaryItem('Campos reconhecidos', previewFields.length)}
+          ${summaryItem('Campos ignorados', ignored.length)}
+        </div>
+        ${ignored.length ? `<div class="lookup-note">Campos ignorados: ${escapeHtml(ignored.join(', '))}</div>` : ''}
+        ${importState.errors.length ? `<div class="lookup-note danger">Atenção: ${escapeHtml(importState.errors.slice(0, 3).join(' | '))}</div>` : ''}
+        ${rows.length ? `<div class="data-table-wrap"><table><thead><tr>${previewFields.map(f => `<th>${escapeHtml(f)}</th>`).join('')}</tr></thead><tbody>${rows.slice(0, 12).map(row => `<tr>${previewFields.map(f => `<td>${escapeHtml(row[f] || '')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : emptyState('Nenhuma linha reconhecida.', 'Confira se o cabeçalho do CSV usa campos compatíveis com a tabela selecionada.')}
+        <div id="importProgress" class="lookup-note" style="display:none;margin-top:14px"></div>
+      `;
+    }
+
+    async function importarDadosPreview() {
+      const tabela = importState.tabela;
+      const rows = importState.mappedRows || [];
+      if (!rows.length) { toast('Nenhum dado analisado para importar.', 'error'); return; }
+      const confirm = window.confirm(`Importar ${rows.length} registro(s) para ${IMPORT_TABLES[tabela].label}?`);
+      if (!confirm) return;
+      const progress = document.getElementById('importProgress');
+      if (progress) { progress.style.display = 'block'; progress.textContent = 'Iniciando importação...'; }
+      let ok = 0;
+      let fail = 0;
+      for (let i = 0; i < rows.length; i++) {
+        try {
+          await apiPost({ action: 'criar', tabela, dados: rows[i] });
+          ok++;
+        } catch (error) {
+          console.warn('Falha ao importar linha', i + 1, error);
+          fail++;
+        }
+        if (progress) progress.textContent = `Processando ${i + 1}/${rows.length} • Sucesso: ${ok} • Falhas: ${fail}`;
+      }
+      invalidateCacheAfterImport(tabela);
+      toast(`Importação concluída. Sucesso: ${ok}. Falhas: ${fail}.`, fail ? 'error' : 'success');
+      if (progress) progress.textContent = `Concluído. Sucesso: ${ok}. Falhas: ${fail}. Atualize os módulos para visualizar os dados.`;
+    }
+
+    function invalidateCacheAfterImport(tabela) {
+      const map = {
+        Associados: 'associados', Veiculos: 'veiculos', Eventos: 'eventos', Financeiro: 'financeiro',
+        Consultores_Regionais: 'consultores', Oficinas: 'oficinas', Compras: 'compras', Vistorias_Regulacao: 'regulacoes'
+      };
+      const key = map[tabela];
+      if (key && Array.isArray(state.cache[key])) state.cache[key] = [];
+      state.cache.dashboard = null;
+      state.cache.kanban = null;
+    }
+
+    function csvEscape(value) {
+      const text = String(value ?? '');
+      if (/[";\n\r]/.test(text)) return `"${text.replaceAll('"', '""')}"`;
+      return text;
+    }
+
+    function downloadTextFile(filename, content, mime = 'text/plain;charset=utf-8') {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadImportTemplate() {
+      const tabela = document.getElementById('importTabela')?.value || importState.tabela || 'Veiculos';
+      const cfg = IMPORT_TABLES[tabela] || IMPORT_TABLES.Veiculos;
+      const content = [cfg.fields.map(csvEscape).join(';'), cfg.sample.map(csvEscape).join(';')].join('\n');
+      downloadTextFile(`modelo_${tabela}.csv`, content, 'text/csv;charset=utf-8');
+    }
+
     async function renderSobre() {
       let apiInfo = state.cache.apiStatus;
       try {
@@ -4583,6 +4964,13 @@
     window.renderEventos = renderEventos;
     window.renderVistorias = renderVistorias;
     window.renderCompras = renderCompras;
+    window.renderImportacao = renderImportacao;
+    window.setImportTable = setImportTable;
+    window.readImportFile = readImportFile;
+    window.analisarImportacao = analisarImportacao;
+    window.limparImportacao = limparImportacao;
+    window.importarDadosPreview = importarDadosPreview;
+    window.downloadImportTemplate = downloadImportTemplate;
     window.renderFinanceiro = renderFinanceiro;
     window.renderOficinas = renderOficinas;
     window.renderReclamacoes = renderReclamacoes;
