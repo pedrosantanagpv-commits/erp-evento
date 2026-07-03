@@ -1,15 +1,17 @@
-# Sistema Gerencial — v0.2.1 Beta Gerencial
+# Sistema Gerencial — v0.2.2
 
-Versão beta gerencial com foco em organização de produto, implantação e apresentação identidade configurável.
+Versão focada em polimento operacional, linguagem final e experiência do usuário.
 
-## Principais mudanças
+## O que mudou
 
-- Menu lateral reorganizado por grupos: Visão geral, Base, Operação, Gestão e Administração.
-- Novo módulo **Implantação** com checklist para configurar uma nova operação.
-- Painel executivo com nomenclatura mais gerencial e genérica.
-- Estrutura identidade configurável reforçada via `BRAND_CONFIG` no `index.html`.
-- Mantém os módulos existentes: associados, veículos, consultores, oficinas, eventos, vistorias, compras, financeiro, kanban, relatórios, importação, usuários e manutenção.
-- Não exige alteração no Apps Script se a versão anterior já estiver aplicada.
+- Linguagem da interface menos técnica e mais adequada ao usuário final.
+- Termos como API, infraestrutura e nomes internos foram suavizados na tela.
+- Menu mantém a organização comercial por grupos.
+- A tela de Preparação agora parece uma etapa operacional, não uma explicação de produto.
+- A Administração do Ambiente ficou mais clara para backup, auditoria e integridade dos dados.
+- Estados vazios, botões, tabelas e ações receberam refinamentos visuais.
+- Responsividade melhorada para notebook, tablet e telas menores.
+- Mantém a estrutura de configuração por `BRAND_CONFIG`, sem expor estratégia comercial ao usuário final.
 
 ## Arquivos para substituir no GitHub
 
@@ -18,25 +20,8 @@ Versão beta gerencial com foco em organização de produto, implantação e apr
 - `package.json`
 - `README.md`
 
-## Observações
+## Importante
 
 Não rode `setupBancoERP`.
 
-A atualização é de front-end e organização gerencial. O banco atual será mantido.
-
-## Configuração identidade configurável
-
-A identidade visual fica centralizada no objeto `BRAND_CONFIG`, dentro do `index.html`.
-
-```js
-const BRAND_CONFIG = {
-  appName: 'Sistema Gerencial',
-  appSubtitle: 'Operação Veicular',
-  companyName: 'Cliente / Operação',
-  logoText: 'SG',
-  logoUrl: '',
-  documentTitle: 'Sistema Gerencial'
-};
-```
-
-Para outro cliente, altere esse bloco e publique novamente na Vercel.
+Esta versão não exige alteração no Apps Script se você já aplicou as versões anteriores com Financeiro e exclusão definitiva de usuários.
