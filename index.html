@@ -2521,6 +2521,7 @@
         <button data-view="kanban"><span class="nav-icon">◰</span>Kanban</button>
 
         <span class="nav-section">Gestão</span>
+        <button data-view="cotacoes"><span class="nav-icon">◇</span>Cotações</button>
         <button data-view="financeiro"><span class="nav-icon">◍</span>Financeiro</button>
         <button data-view="relatorios"><span class="nav-icon">▥</span>Relatórios</button>
         <button data-view="importacao"><span class="nav-icon">↥</span>Importar dados</button>
@@ -2628,7 +2629,7 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.2.3';
+    const APP_VERSION = '0.2.4';
 
     const state = {
       user: null,
@@ -2645,6 +2646,7 @@
         historico: [],
         compras: [],
         financeiro: [],
+        cotacoes: [],
         regulacoes: [],
         reclamacoes: [],
         consultores: [],
@@ -2680,6 +2682,7 @@
       eventos: 'Eventos',
       vistorias: 'Vistorias',
       compras: 'Compras',
+      cotacoes: 'Cotações',
       financeiro: 'Financeiro',
       oficinas: 'Oficinas',
       kanban: 'Kanban',
@@ -2691,15 +2694,15 @@
     };
 
     const ROLE_PERMISSIONS = {
-      'super admin': ['dashboard', 'implantacao', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
-      'administrativo': ['dashboard', 'implantacao', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
-      'cadastro': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'kanban', 'relatorios', 'importacao', 'sobre'],
-      'eventos': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
-      'regulacao': ['dashboard', 'associados', 'veiculos', 'eventos', 'vistorias', 'oficinas', 'kanban', 'relatorios', 'sobre'],
+      'super admin': ['dashboard', 'implantacao', 'associados', 'veiculos', 'cotacoes', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
+      'administrativo': ['dashboard', 'implantacao', 'associados', 'veiculos', 'cotacoes', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
+      'cadastro': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'consultores', 'eventos', 'kanban', 'relatorios', 'importacao', 'sobre'],
+      'eventos': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
+      'regulacao': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'eventos', 'vistorias', 'oficinas', 'kanban', 'relatorios', 'sobre'],
       'compras': ['dashboard', 'eventos', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
-      'financeiro': ['dashboard', 'associados', 'veiculos', 'consultores', 'financeiro', 'compras', 'relatorios', 'importacao', 'sobre'],
-      'consultor': ['dashboard', 'associados', 'veiculos', 'eventos', 'kanban', 'sobre'],
-      'regional': ['dashboard', 'associados', 'veiculos', 'consultores', 'eventos', 'financeiro', 'kanban', 'relatorios', 'sobre'],
+      'financeiro': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'consultores', 'financeiro', 'compras', 'relatorios', 'importacao', 'sobre'],
+      'consultor': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'eventos', 'kanban', 'sobre'],
+      'regional': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'consultores', 'eventos', 'financeiro', 'kanban', 'relatorios', 'sobre'],
       'oficina': ['dashboard', 'eventos', 'vistorias', 'compras', 'sobre']
     };
 
@@ -2928,6 +2931,7 @@
       if (view === 'eventos') return renderEventos();
       if (view === 'vistorias') return renderVistorias();
       if (view === 'compras') return renderCompras();
+      if (view === 'cotacoes') return renderCotacoes();
       if (view === 'financeiro') return renderFinanceiro();
       if (view === 'oficinas') return renderOficinas();
       if (view === 'kanban') return renderKanban();
@@ -3093,6 +3097,7 @@
           ensureComprasCache(true),
           ensureRegulacoesCache(true),
           ensureFinanceiroCache(true),
+          ensureCotacoesCache(true),
           ensureConsultoresCache(true),
           ensureOficinasCache(true)
         ]);
@@ -3382,6 +3387,13 @@
       return state.cache.financeiro;
     }
 
+    async function ensureCotacoesCache(force = false) {
+      if (!force && state.cache.cotacoes.length) return state.cache.cotacoes;
+      const result = await apiGet('listar', { tabela: 'Cotacoes' });
+      state.cache.cotacoes = result.data || [];
+      return state.cache.cotacoes;
+    }
+
     async function ensureRegulacoesCache(force = false) {
       if (!force && state.cache.regulacoes.length) return state.cache.regulacoes;
       const result = await apiGet('listar', { tabela: 'Vistorias_Regulacao' });
@@ -3451,6 +3463,10 @@
 
     function findFinanceiroById(id) {
       return state.cache.financeiro.find(f => String(f.id_financeiro) === String(id));
+    }
+
+    function findCotacaoById(id) {
+      return state.cache.cotacoes.find(c => String(c.id_cotacao) === String(id));
     }
 
     function findConsultorById(id) {
@@ -4173,6 +4189,290 @@
       return item.status_financeiro || 'Aberto';
     }
 
+
+    function cotacaoTipoLabel(value) {
+      const map = { cars: 'Carros', carros: 'Carros', motorcycles: 'Motos', motos: 'Motos', trucks: 'Caminhões', caminhoes: 'Caminhões', 'caminhões': 'Caminhões' };
+      return map[String(value || '').toLowerCase()] || value || 'Carros';
+    }
+
+    function cotacaoTipoOptions(selected = 'cars') {
+      const tipos = [
+        { value: 'cars', label: 'Carros' },
+        { value: 'motorcycles', label: 'Motos' },
+        { value: 'trucks', label: 'Caminhões' }
+      ];
+      return tipos.map(t => `<option value="${t.value}" ${String(selected) === t.value || normalizeText(selected) === normalizeText(t.label) ? 'selected' : ''}>${t.label}</option>`).join('');
+    }
+
+    function cotacaoStatusOptions(selected = 'Em análise') {
+      return selectOptions(parseOptions('status_cotacao', ['Em análise','Aprovada','Recusada','Convertida','Cancelada']), selected || 'Em análise');
+    }
+
+    async function renderCotacoes(filter = '') {
+      els.viewRoot.innerHTML = topbar('Cotações', 'Consulta FIPE, cálculo de mensalidade e conversão para veículo.', '<button class="btn btn-yellow" onclick="openCotacaoModal()">+ Nova cotação</button><button class="btn btn-ghost" onclick="renderCotacoes()">Atualizar</button>') + loadingPanel('Carregando cotações...');
+      try {
+        await Promise.all([ensureCotacoesCache(true), ensureVeiculosCache(true), ensureConsultoresCache(true)]);
+        paintCotacoesTable(filter);
+      } catch (error) { renderError(error.message); }
+    }
+
+    function calcularResumoCotacoes(data) {
+      return {
+        total: data.length,
+        analise: data.filter(c => ['em análise','em analise'].includes(normalizeText(c.status_cotacao))).length,
+        convertidas: data.filter(c => normalizeText(c.status_cotacao) === 'convertida').length,
+        fipe: data.reduce((sum, item) => sum + parseMoneyBR(item.valor_fipe), 0),
+        mensalidade: data.reduce((sum, item) => sum + parseMoneyBR(item.mensalidade_sugerida), 0)
+      };
+    }
+
+    function paintCotacoesTable(filter = '') {
+      const termo = String(filter || '').toLowerCase();
+      const statusFiltro = document.getElementById('filtroCotStatus')?.value || '';
+      let data = state.cache.cotacoes.filter(item => `${item.id_cotacao} ${item.associado} ${item.telefone} ${item.marca} ${item.modelo} ${item.ano_modelo} ${item.codigo_fipe} ${item.consultor} ${item.regional} ${item.status_cotacao}`.toLowerCase().includes(termo));
+      if (statusFiltro) data = data.filter(item => String(item.status_cotacao || '') === statusFiltro);
+      const resumo = calcularResumoCotacoes(data);
+      els.viewRoot.innerHTML = `
+        ${topbar('Cotações', 'Consulta FIPE, cálculo de mensalidade e conversão para veículo.', '<button class="btn btn-yellow" onclick="openCotacaoModal()">+ Nova cotação</button><button class="btn btn-ghost" onclick="renderCotacoes()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="summary-strip">${summaryItem('Total', resumo.total)}${summaryItem('Em análise', resumo.analise)}${summaryItem('Convertidas', resumo.convertidas)}${summaryItem('FIPE cotada', money(resumo.fipe))}${summaryItem('Mensalidade sugerida', money(resumo.mensalidade))}</div>
+          <div class="panel-head"><div><h3>Histórico de cotações</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por associado, modelo, FIPE..." value="${escapeHtml(filter)}" oninput="paintCotacoesTable(this.value)" /></div></div>
+          <div class="toolbar" style="margin-bottom:14px; flex-wrap:wrap;">
+            <select id="filtroCotStatus" onchange="paintCotacoesTable('${escapeHtml(filter)}')"><option value="">Todos os status</option>${cotacaoStatusOptions(statusFiltro)}</select>
+            <button class="btn btn-ghost btn-small" onclick="limparFiltrosCotacoes()">Limpar filtros</button>
+          </div>
+          ${data.length ? cotacoesTable(data) : emptyState('Nenhuma cotação encontrada.', 'Clique em “Nova cotação” para consultar a FIPE e calcular uma mensalidade sugerida.')}
+        </div>`;
+    }
+
+    function cotacoesTable(data) {
+      const pager = paginateData('cotacoes', data);
+      data = pager.items;
+      return `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Veículo</th><th>Associado</th><th>FIPE</th><th>Mensalidade</th><th>Consultor/Regional</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+        ${data.map(item => `<tr>
+          <td>${dateBR(item.data_cotacao)}</td>
+          <td><strong>${escapeHtml([item.marca, item.modelo].filter(Boolean).join(' ') || '-')}</strong><br><small>${escapeHtml([item.ano_modelo, item.combustivel, item.codigo_fipe].filter(Boolean).join(' • '))}</small></td>
+          <td>${escapeHtml(item.associado || '-')}<br><small>${escapeHtml(item.telefone || '')}</small></td>
+          <td>${money(item.valor_fipe)}</td><td>${money(item.mensalidade_sugerida)}</td>
+          <td>${escapeHtml(item.consultor || '-')}<br><small>${escapeHtml(item.regional || '')}</small></td>
+          <td>${statusBadge(item.status_cotacao || 'Em análise')}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCotacaoDetails(${jsArg(item.id_cotacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button><button class="btn btn-yellow btn-small" onclick="converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter</button><button class="btn btn-danger btn-small" onclick="cancelarCotacao(${jsArg(item.id_cotacao)})">Cancelar</button></div></td>
+        </tr>`).join('')}
+      </tbody></table>${paginationHtml('cotacoes', pager)}</div>`;
+    }
+
+    async function openCotacaoModalById(id) {
+      await ensureCotacoesCache();
+      const item = findCotacaoById(id);
+      if (!item) return toast('Cotação não encontrada.', 'error');
+      openCotacaoModal(item);
+    }
+
+    async function openCotacaoModal(item = null) {
+      const isEdit = Boolean(item?.id_cotacao);
+      await ensureConsultoresCache(true).catch(() => {});
+      const percentualPadrao = state.options.percentual_cotacao_padrao || '0,28';
+      openModal(isEdit ? 'Editar cotação' : 'Nova cotação', `
+        <div class="form-grid">
+          <div class="field"><label>Tipo de veículo</label><select name="tipo_veiculo" id="cotTipo" onchange="cotacaoCarregarMarcas()">${cotacaoTipoOptions(item?.tipo_veiculo || 'cars')}</select></div>
+          <div class="field"><label>Marca</label><select name="codigo_marca" id="cotMarca" onchange="cotacaoCarregarModelos()"><option value="${escapeHtml(item?.codigo_marca || '')}">${escapeHtml(item?.marca || 'Selecione o tipo para carregar')}</option></select></div>
+          <div class="field full"><label>Modelo</label><select name="codigo_modelo" id="cotModelo" onchange="cotacaoCarregarAnos()"><option value="${escapeHtml(item?.codigo_modelo || '')}">${escapeHtml(item?.modelo || 'Selecione a marca')}</option></select></div>
+          <div class="field"><label>Ano/combustível</label><select name="codigo_ano" id="cotAno" onchange="cotacaoConsultarValor()"><option value="${escapeHtml(item?.codigo_ano || '')}">${escapeHtml(item?.ano_modelo || 'Selecione o modelo')}</option></select></div>
+          ${field('codigo_fipe', 'Código FIPE', '000000-0', '', item?.codigo_fipe || '')}${field('valor_fipe', 'Valor FIPE', 'R$ 0,00', '', item?.valor_fipe || '')}
+          ${field('combustivel', 'Combustível', 'Flex', '', item?.combustivel || '')}${field('percentual', 'Percentual sobre FIPE (%)', '0,28', '', item?.percentual || percentualPadrao)}
+          ${field('mensalidade_sugerida', 'Mensalidade sugerida', 'R$ 0,00', '', item?.mensalidade_sugerida || '')}${field('valor_adesao', 'Valor adesão', 'R$ 0,00', '', item?.valor_adesao || '')}
+          ${selectField('rastreador', 'Rastreador', parseOptions('rastreador_cotacao', ['Sim','Não','A definir']), item?.rastreador || 'A definir')}${selectField('plano', 'Plano', parseOptions('planos_cotacao', ['Básico','Completo','Premium','Personalizado']), item?.plano || 'Completo')}
+          ${field('associado', 'Nome / associado', 'Nome do interessado', '', item?.associado || '')}${field('telefone', 'Telefone', '(00) 00000-0000', '', item?.telefone || '')}
+          ${selectConsultorField(item?.consultor || '')}${field('regional', 'Regional', 'Regional', '', item?.regional || '')}
+          <div class="field"><label>Status</label><select name="status_cotacao">${cotacaoStatusOptions(item?.status_cotacao || 'Em análise')}</select></div>
+          ${textareaField('observacoes', 'Observações', 'Condições comerciais, observações da cotação...', 'full', item?.observacoes || '')}
+        </div>
+        <div class="lookup-note">A consulta usa provedor FIPE gratuito. Se a consulta oscilar, preencha o valor manualmente e salve a cotação.</div>
+      `, isEdit ? 'Salvar cotação' : 'Criar cotação', async data => {
+        const marcaSelect = document.getElementById('cotMarca');
+        const modeloSelect = document.getElementById('cotModelo');
+        const anoSelect = document.getElementById('cotAno');
+        data.marca = selectedOptionText(marcaSelect, item?.marca || '');
+        data.modelo = selectedOptionText(modeloSelect, item?.modelo || '');
+        data.ano_modelo = selectedOptionText(anoSelect, item?.ano_modelo || '');
+        const consultorSelect = document.getElementById('vehicleConsultorSelect');
+        if (consultorSelect?.value) {
+          const opt = consultorSelect.options[consultorSelect.selectedIndex];
+          data.consultor = opt?.dataset?.nome || data.consultor || '';
+          data.regional = opt?.dataset?.regional || data.regional || '';
+        }
+        delete data._consultor_ref;
+        if (!data.valor_fipe) throw new Error('Informe ou consulte o valor FIPE.');
+        if (!data.mensalidade_sugerida) atualizarCalculoCotacao();
+        if (!isEdit) data.data_cotacao = new Date().toISOString();
+        const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Cotacoes', dados: data };
+        if (isEdit) payload.id = item.id_cotacao;
+        await apiPost(payload);
+        state.cache.cotacoes = [];
+        toast(isEdit ? 'Cotação atualizada.' : 'Cotação criada.');
+        await renderCotacoes();
+      });
+      attachCotacaoEvents();
+      attachVehicleConsultorSelect();
+    }
+
+    function attachCotacaoEvents() {
+      const valor = els.modalRoot.querySelector('[name="valor_fipe"]');
+      const percentual = els.modalRoot.querySelector('[name="percentual"]');
+      if (valor) valor.addEventListener('input', atualizarCalculoCotacao);
+      if (percentual) percentual.addEventListener('input', atualizarCalculoCotacao);
+      atualizarCalculoCotacao();
+    }
+
+    function selectedOptionText(select, fallback = '') {
+      if (!select) return fallback || '';
+      const option = select.options[select.selectedIndex];
+      const text = option?.textContent || fallback || '';
+      if (['Selecione o tipo para carregar','Selecione a marca','Selecione o modelo'].includes(text)) return fallback || '';
+      return text;
+    }
+
+    async function cotacaoCarregarMarcas() {
+      const tipo = document.getElementById('cotTipo')?.value || 'cars';
+      const marca = document.getElementById('cotMarca');
+      const modelo = document.getElementById('cotModelo');
+      const ano = document.getElementById('cotAno');
+      if (!marca) return;
+      marca.innerHTML = '<option>Carregando marcas...</option>';
+      if (modelo) modelo.innerHTML = '<option value="">Selecione a marca</option>';
+      if (ano) ano.innerHTML = '<option value="">Selecione o modelo</option>';
+      try {
+        const result = await apiGet('fipe_marcas', { tipo });
+        marca.innerHTML = '<option value="">Selecione a marca</option>' + (result.data || []).map(item => `<option value="${escapeHtml(item.codigo)}">${escapeHtml(item.nome)}</option>`).join('');
+      } catch (error) { marca.innerHTML = '<option value="">Erro ao carregar</option>'; toast(error.message, 'error'); }
+    }
+
+    async function cotacaoCarregarModelos() {
+      const tipo = document.getElementById('cotTipo')?.value || 'cars';
+      const codigo_marca = document.getElementById('cotMarca')?.value || '';
+      const modelo = document.getElementById('cotModelo');
+      const ano = document.getElementById('cotAno');
+      if (!modelo || !codigo_marca) return;
+      modelo.innerHTML = '<option>Carregando modelos...</option>';
+      if (ano) ano.innerHTML = '<option value="">Selecione o modelo</option>';
+      try {
+        const result = await apiGet('fipe_modelos', { tipo, codigo_marca });
+        modelo.innerHTML = '<option value="">Selecione o modelo</option>' + (result.data || []).map(item => `<option value="${escapeHtml(item.codigo)}">${escapeHtml(item.nome)}</option>`).join('');
+      } catch (error) { modelo.innerHTML = '<option value="">Erro ao carregar</option>'; toast(error.message, 'error'); }
+    }
+
+    async function cotacaoCarregarAnos() {
+      const tipo = document.getElementById('cotTipo')?.value || 'cars';
+      const codigo_marca = document.getElementById('cotMarca')?.value || '';
+      const codigo_modelo = document.getElementById('cotModelo')?.value || '';
+      const ano = document.getElementById('cotAno');
+      if (!ano || !codigo_marca || !codigo_modelo) return;
+      ano.innerHTML = '<option>Carregando anos...</option>';
+      try {
+        const result = await apiGet('fipe_anos', { tipo, codigo_marca, codigo_modelo });
+        ano.innerHTML = '<option value="">Selecione o ano</option>' + (result.data || []).map(item => `<option value="${escapeHtml(item.codigo)}">${escapeHtml(item.nome)}</option>`).join('');
+      } catch (error) { ano.innerHTML = '<option value="">Erro ao carregar</option>'; toast(error.message, 'error'); }
+    }
+
+    async function cotacaoConsultarValor() {
+      const tipo = document.getElementById('cotTipo')?.value || 'cars';
+      const codigo_marca = document.getElementById('cotMarca')?.value || '';
+      const codigo_modelo = document.getElementById('cotModelo')?.value || '';
+      const codigo_ano = document.getElementById('cotAno')?.value || '';
+      if (!codigo_marca || !codigo_modelo || !codigo_ano) return;
+      try {
+        const result = await apiGet('fipe_valor', { tipo, codigo_marca, codigo_modelo, codigo_ano });
+        const data = result.data || {};
+        setFormValue('codigo_fipe', data.codigo_fipe || '');
+        setFormValue('valor_fipe', data.valor_fipe || '');
+        setFormValue('combustivel', data.combustivel || '');
+        atualizarCalculoCotacao();
+        toast('Valor FIPE carregado.');
+      } catch (error) { toast(error.message, 'error'); }
+    }
+
+    function atualizarCalculoCotacao() {
+      const valorInput = els.modalRoot.querySelector('[name="valor_fipe"]');
+      const percentualInput = els.modalRoot.querySelector('[name="percentual"]');
+      const mensalidadeInput = els.modalRoot.querySelector('[name="mensalidade_sugerida"]');
+      if (!valorInput || !percentualInput || !mensalidadeInput) return;
+      const valor = parseMoneyBR(valorInput.value);
+      const percentual = parseMoneyBR(percentualInput.value);
+      if (valor > 0 && percentual > 0) mensalidadeInput.value = money(valor * percentual / 100);
+    }
+
+    async function openCotacaoDetails(id) {
+      await ensureCotacoesCache(true);
+      const item = findCotacaoById(id);
+      if (!item) return toast('Cotação não encontrada.', 'error');
+      const veiculoConvertido = item.id_veiculo_convertido ? findVehicleById(item.id_veiculo_convertido) : null;
+      openCustomModal('Detalhes da cotação', `
+        <div class="detail-grid">
+          ${detailCard('Status', item.status_cotacao)}${detailCard('Data', dateBR(item.data_cotacao))}${detailCard('Tipo', cotacaoTipoLabel(item.tipo_veiculo))}
+          ${detailCard('Veículo', [item.marca, item.modelo, item.ano_modelo].filter(Boolean).join(' '))}${detailCard('Código FIPE', item.codigo_fipe)}${detailCard('Combustível', item.combustivel)}
+          ${detailCard('Valor FIPE', money(item.valor_fipe))}${detailCard('Percentual', `${item.percentual || '-'}%`)}${detailCard('Mensalidade sugerida', money(item.mensalidade_sugerida))}
+          ${detailCard('Adesão', money(item.valor_adesao))}${detailCard('Plano', item.plano)}${detailCard('Rastreador', item.rastreador)}
+          ${detailCard('Associado/interessado', item.associado)}${detailCard('Telefone', item.telefone)}${detailCard('Consultor', item.consultor)}
+          ${detailCard('Regional', item.regional)}${detailCard('Convertido em veículo', veiculoConvertido?.placa || item.id_veiculo_convertido || '-')}${detailCard('Conversão', dateBR(item.data_conversao))}
+        </div>
+        <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
+        <div class="quick-actions"><button class="btn btn-ghost" onclick="closeModal(); openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button><button class="btn btn-yellow" onclick="closeModal(); converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter em veículo</button></div>
+      `, true);
+    }
+
+    async function converterCotacaoEmVeiculo(id) {
+      await Promise.all([ensureCotacoesCache(true), ensureVeiculosCache(true)]);
+      const item = findCotacaoById(id);
+      if (!item) return toast('Cotação não encontrada.', 'error');
+      if (normalizeText(item.status_cotacao) === 'convertida' && item.id_veiculo_convertido) return toast('Esta cotação já foi convertida.', 'error');
+      openModal('Converter cotação em veículo', `
+        <div class="form-grid">
+          ${field('placa', 'Placa', 'ABC1D23', '', '')}${selectField('status', 'Status inicial', ['Pendente','Ativo'], 'Pendente')}
+          ${selectField('rastreador', 'Rastreador', ['Sim','Não','A definir'], item.rastreador || 'A definir')}${textareaField('observacoes', 'Observações do veículo', 'Gerado a partir de cotação...', 'full', `Criado a partir da cotação ${item.id_cotacao || ''}`)}
+        </div>`, 'Converter', async data => {
+          if (!data.placa) throw new Error('Informe a placa para criar o veículo.');
+          const veiculo = {
+            placa: data.placa,
+            associado: item.associado || '',
+            marca: item.marca || '',
+            modelo: item.modelo || '',
+            ano_modelo: item.ano_modelo || '',
+            tipo_combustivel: item.combustivel || '',
+            codigo_fipe: item.codigo_fipe || '',
+            valor_fipe: item.valor_fipe || '',
+            mensalidade: item.mensalidade_sugerida || '',
+            consultor: item.consultor || '',
+            regional: item.regional || '',
+            status: data.status || 'Pendente',
+            rastreador: data.rastreador || item.rastreador || '',
+            observacoes: data.observacoes || ''
+          };
+          const result = await apiPost({ action: 'criar', tabela: 'Veiculos', dados: veiculo });
+          await apiPost({ action: 'editar', tabela: 'Cotacoes', id, dados: { status_cotacao: 'Convertida', data_conversao: new Date().toISOString(), id_veiculo_convertido: result.id || '' } });
+          state.cache.veiculos = [];
+          state.cache.cotacoes = [];
+          toast('Cotação convertida em veículo.');
+          await renderCotacoes();
+        });
+    }
+
+    async function cancelarCotacao(id) {
+      await ensureCotacoesCache();
+      const item = findCotacaoById(id);
+      confirmAction('Cancelar cotação', `Deseja cancelar a cotação ${item?.id_cotacao || id}?`, 'Cancelar cotação', async () => {
+        await apiPost({ action: 'excluir', tabela: 'Cotacoes', id });
+        state.cache.cotacoes = [];
+        toast('Cotação cancelada.');
+        if (state.view === 'cotacoes') await renderCotacoes();
+      });
+    }
+
+    function limparFiltrosCotacoes() {
+      const status = document.getElementById('filtroCotStatus');
+      if (status) status.value = '';
+      paintCotacoesTable('');
+    }
+
     async function renderFinanceiro(filter = '') {
       if (!hasPermission('financeiro')) return renderBlocked('financeiro');
       els.viewRoot.innerHTML = topbar('Financeiro Gerencial', 'Controle de mensalidades, vencimentos, recebimentos e inadimplência.', '<button class="btn btn-yellow" onclick="openFinanceiroModal()">+ Novo lançamento</button><button class="btn btn-ghost" onclick="renderFinanceiro()">Atualizar</button>') + loadingPanel('Carregando financeiro...');
@@ -4569,6 +4869,7 @@
           ensureComprasCache(true),
           ensureRegulacoesCache(true),
           ensureFinanceiroCache(true),
+          ensureCotacoesCache(true),
           ensureConsultoresCache(true),
           ensureOficinasCache(true)
         ]);
@@ -4993,6 +5294,7 @@
           ensureComprasCache(true),
           ensureRegulacoesCache(true),
           ensureFinanceiroCache(true),
+          ensureCotacoesCache(true),
           ensureConsultoresCache(true),
           ensureOficinasCache(true)
         ]);
@@ -6011,6 +6313,19 @@
     }
 
     window.closeModal = closeModal;
+    window.renderCotacoes = renderCotacoes;
+    window.openCotacaoModal = openCotacaoModal;
+    window.openCotacaoModalById = openCotacaoModalById;
+    window.openCotacaoDetails = openCotacaoDetails;
+    window.converterCotacaoEmVeiculo = converterCotacaoEmVeiculo;
+    window.cancelarCotacao = cancelarCotacao;
+    window.cotacaoCarregarMarcas = cotacaoCarregarMarcas;
+    window.cotacaoCarregarModelos = cotacaoCarregarModelos;
+    window.cotacaoCarregarAnos = cotacaoCarregarAnos;
+    window.cotacaoConsultarValor = cotacaoConsultarValor;
+    window.atualizarCalculoCotacao = atualizarCalculoCotacao;
+    window.paintCotacoesTable = paintCotacoesTable;
+    window.limparFiltrosCotacoes = limparFiltrosCotacoes;
     window.renderDashboard = renderDashboard;
     window.paintDashboardAvancado = paintDashboardAvancado;
     window.limparFiltrosDashboard = limparFiltrosDashboard;
