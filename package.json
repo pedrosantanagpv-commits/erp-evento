@@ -1,6 +1,6 @@
 {
   "name": "sistema-gerencial-white-label",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,5 +8,6 @@
     "dev": "vercel dev"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {},
+  "description": "Sistema gerencial white label - v0.2.2"
 }
