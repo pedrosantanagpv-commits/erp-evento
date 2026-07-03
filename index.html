@@ -1385,7 +1385,7 @@
 
 
     /* =========================================================
-       v0.1.5 — Tema premium escuro + base white label
+       v0.1.5 — Tema premium escuro + base configurável
        Ajustes visuais e estruturais sem mudar o banco/API.
     ========================================================= */
     :root {
@@ -1669,7 +1669,7 @@
 
 
     /* =========================================================
-       v0.1.6 — Acabamento comercial white label
+       v0.1.6 — Acabamento visual e identidade configurável
        Tema escuro, login premium, sidebar fixa e tela Sobre.
     ========================================================= */
     :root {
@@ -2189,7 +2189,7 @@
       <div class="login-badges">
         <span>Base configurável</span>
         <span>Operação centralizada</span>
-        <span>Pronto para white label</span>
+        <span>Pronto para operação</span>
       </div>
     </div>
 
@@ -2281,7 +2281,7 @@
     const API_BASE = '/api/erp';
 
     /* =========================================================
-       White label — altere apenas este objeto para outro cliente.
+       Identidade do sistema — ajuste este objeto para configurar o ambiente.
        Não precisa mudar telas, lógica, banco ou API.
     ========================================================= */
     const BRAND_CONFIG = {
@@ -2293,8 +2293,8 @@
       documentTitle: 'Sistema Gerencial',
       loginEyebrow: 'Plataforma gerencial',
       loginTitle: 'Gestão operacional com visão centralizada.',
-      loginDescription: 'Estrutura white label para organizar base, veículos, eventos, vistorias, compras, financeiro e relatórios sem depender de identidade comercial fixa.',
-      loginBadges: ['White label', 'Gestão integrada', 'Operação escalável'],
+      loginDescription: 'Estrutura gerencial para organizar base, veículos, eventos, vistorias, compras, financeiro e relatórios.',
+      loginBadges: ['Base configurável', 'Gestão integrada', 'Operação escalável'],
       footerNote: 'Ambiente gerencial',
       colors: {
         accent: '#8b98a7',
@@ -2352,7 +2352,7 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.2.0';
+    const APP_VERSION = '0.2.1';
 
     const state = {
       user: null,
@@ -2701,7 +2701,7 @@
 
       const steps = [
         { label: 'Usuário administrador ativo', note: 'Garanta pelo menos um Super Admin ativo.', done: usuariosAtivos > 0, view: 'usuarios' },
-        { label: 'Consultores/regionais cadastrados', note: 'Base comercial para vínculo com veículos e relatórios.', done: consultoresAtivos > 0, view: 'consultores' },
+        { label: 'Consultores/regionais cadastrados', note: 'Base gerencial para vínculo com veículos e relatórios.', done: consultoresAtivos > 0, view: 'consultores' },
         { label: 'Oficinas cadastradas', note: 'Base operacional para eventos e vistorias.', done: oficinasAtivas > 0, view: 'oficinas' },
         { label: 'Associados cadastrados/importados', note: 'Base principal da operação.', done: associados > 0, view: 'associados' },
         { label: 'Veículos cadastrados/importados', note: 'Carteira operacional e indicadores de FIPE/mensalidade.', done: veiculos > 0, view: 'veiculos' },
@@ -2711,7 +2711,7 @@
       const doneCount = steps.filter(s => s.done).length;
       const percent = Math.round((doneCount / steps.length) * 100);
 
-      els.viewRoot.innerHTML = topbar('Implantação', 'Checklist para configurar uma nova operação white label.', `
+      els.viewRoot.innerHTML = topbar('Implantação', 'Checklist para configurar uma nova operação.', `
         <button class="btn btn-secondary" onclick="renderView('sobre')">Sobre o sistema</button>
         <button class="btn btn-primary" onclick="renderView('importacao')">Importar dados</button>
       `) + `
@@ -2719,7 +2719,7 @@
           ${metric('Progresso', percent + '%', doneCount + ' de ' + steps.length + ' etapas')}
           ${metric('Usuários ativos', usuariosAtivos, 'Acessos autorizados')}
           ${metric('Base cadastrada', associados + veiculos, 'Associados + veículos')}
-          ${metric('Versão beta', APP_VERSION, 'White label comercial')}
+          ${metric('Versão beta', APP_VERSION, 'Ambiente gerencial')}
         </div>
 
         <div class="onboarding-grid">
@@ -2737,17 +2737,14 @@
           </section>
 
           <aside class="card panel">
-            <div class="panel-head"><div><h3>Configuração white label</h3><p>Identidade centralizada para replicar o sistema para outro cliente.</p></div></div>
-            <div class="config-code">${escapeHtml(`const BRAND_CONFIG = {
-  appName: '${BRAND_CONFIG.appName}',
-  appSubtitle: '${BRAND_CONFIG.appSubtitle}',
-  companyName: '${BRAND_CONFIG.companyName}',
-  logoText: '${BRAND_CONFIG.logoText}',
-  logoUrl: '${BRAND_CONFIG.logoUrl || ''}',
-  documentTitle: '${BRAND_CONFIG.documentTitle}',
-  colors: { ... }
-};`)}</div>
-            <div class="empty-state compact"><strong>Pronto para comercialização</strong><p>Troque identidade, banco e deploy por cliente sem alterar a estrutura operacional.</p></div>
+            <div class="panel-head"><div><h3>Identidade do ambiente</h3><p>Resumo da configuração visual e operacional ativa.</p></div></div>
+            <div class="summary-strip vertical-strip">
+              ${summaryItem('Sistema', BRAND_CONFIG.appName || 'Sistema Gerencial')}
+              ${summaryItem('Operação', BRAND_CONFIG.appSubtitle || 'Operação Veicular')}
+              ${summaryItem('Ambiente', BRAND_CONFIG.companyName || 'Operação')}
+              ${summaryItem('Versão', APP_VERSION)}
+            </div>
+            <div class="empty-state compact"><strong>Ambiente configurado</strong><p>Identidade, usuários, base e módulos prontos para operação gerencial.</p></div>
           </aside>
         </div>
       `;
@@ -3158,7 +3155,7 @@
         ${topbar('Consultores e Regionais', 'Controle gerencial de consultores, regionais e cooperativas.', '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo consultor</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>')}
         <div class="content-panel">
           <div class="summary-strip">${summaryItem('Total', state.cache.consultores.length)}${summaryItem('Ativos', ativos)}${summaryItem('Inativos', inativos)}${summaryItem('Regionais', regionais)}${summaryItem('Filtrados', data.length)}</div>
-          <div class="panel-head"><div><h3>Base comercial</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por nome, regional, cooperativa..." value="${escapeHtml(filter)}" oninput="paintConsultorTable(this.value)" /></div></div>
+          <div class="panel-head"><div><h3>Base gerencial</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por nome, regional, cooperativa..." value="${escapeHtml(filter)}" oninput="paintConsultorTable(this.value)" /></div></div>
           ${data.length ? consultorTable(data) : emptyState('Nenhum consultor cadastrado.', 'Clique em “Novo consultor” para criar o primeiro registro.')}
         </div>`;
     }
@@ -5546,13 +5543,13 @@
       const brand = BRAND_CONFIG || {};
       const apiOk = apiInfo?.success;
       els.viewRoot.innerHTML = `
-        ${topbar('Sobre o Sistema', 'Informações gerais do ambiente, versão e identidade white label.', '<button class="btn btn-ghost" onclick="renderSobre()">Atualizar</button>')}
+        ${topbar('Sobre o Sistema', 'Informações gerais do ambiente, versão e identidade do sistema.', '<button class="btn btn-ghost" onclick="renderSobre()">Atualizar</button>')}
         <div class="about-grid">
           <div class="content-panel about-card-main">
             <div class="about-brand-row">
               <div class="brand-mark about-mark">${escapeHtml(brand.logoText || 'SG')}</div>
               <div>
-                <span class="eyebrow-inline">White label</span>
+                <span class="eyebrow-inline">Ambiente</span>
                 <h3>${escapeHtml(brand.appName || 'Sistema Gerencial')}</h3>
                 <p>${escapeHtml(brand.appSubtitle || 'Operação Veicular')}</p>
               </div>
@@ -5566,7 +5563,7 @@
           </div>
 
           <div class="content-panel">
-            <div class="panel-head"><div><h3>Configuração de marca</h3><p>Campos centrais usados para adaptar o sistema a cada empresa.</p></div></div>
+            <div class="panel-head"><div><h3>Configuração de marca</h3><p>Campos centrais usados pela identidade visual do sistema.</p></div></div>
             <div class="data-table-wrap">
               <table>
                 <tbody>
@@ -5595,8 +5592,8 @@
           </div>
 
           <div class="content-panel">
-            <div class="panel-head"><div><h3>Observação comercial</h3><p>Esta versão foi preparada para operação white label.</p></div></div>
-            <div class="empty align-left"><strong>Estrutura reutilizável</strong> Para trocar a identidade de uma empresa, altere apenas o objeto <code>BRAND_CONFIG</code> no arquivo <code>index.html</code>. A lógica, telas e banco permanecem os mesmos.</div>
+            <div class="panel-head"><div><h3>Resumo do ambiente</h3><p>Informações úteis para suporte e conferência operacional.</p></div></div>
+            <div class="empty align-left"><strong>Ambiente gerencial ativo</strong> Use esta tela para conferir versão, usuário logado, identidade visual e status da conexão.</div>
           </div>
         </div>
       `;
