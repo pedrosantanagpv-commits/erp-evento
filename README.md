@@ -1,30 +1,43 @@
-# Sistema Gerencial — v0.2.3.1
+# Sistema Gerencial — v0.2.4
 
-Versão focada em responsividade, tabelas e performance visual.
+Versão com módulo de **Cotações** e consulta FIPE gratuita.
 
-## O que mudou
+## Atualização no GitHub
 
-- Paginação nas principais tabelas do sistema.
-- Seleção de quantidade por página: 10, 25 ou 50 registros.
-- Cabeçalhos de tabela mais estáveis durante rolagem horizontal/vertical.
-- Ações de linha mais compactas e organizadas.
-- Melhor responsividade para notebook, tablet e telas menores.
-- Ajuste visual em tabelas, estados vazios e painéis de listagem.
-- Melhor prevenção visual contra telas muito longas quando houver muitos registros importados.
-
-## Arquivos para substituir no GitHub
+Substitua estes arquivos no repositório:
 
 - `index.html`
 - `api/erp.js`
 - `package.json`
 - `README.md`
 
-## Observações
+## Atualização no Apps Script
 
-Não precisa mexer no Apps Script e não rode `setupBancoERP`.
+Esta versão precisa atualizar o Apps Script para criar a aba `Cotacoes` e habilitar a consulta FIPE.
 
+1. Abra o Apps Script.
+2. Substitua o conteúdo do `Code.gs` pelo arquivo `APPS_SCRIPT_V024_COMPLETO.gs`.
+3. Salve.
+4. Execute apenas a função:
 
-## Correção v0.2.3.1
+```txt
+migrarBancoV024
+```
 
-- Corrigido erro `pager is not defined` no módulo Eventos.
-- Paginação do módulo Reclamações também foi padronizada.
+5. Faça novo deploy do Apps Script em **New version**.
+6. Aguarde a Vercel publicar o front-end.
+
+Não rode `setupBancoERP`.
+
+## O que entrou
+
+- Novo menu `Cotações`.
+- Consulta de marcas, modelos, anos e valor FIPE usando provedor gratuito.
+- Cálculo de mensalidade por percentual sobre FIPE.
+- Histórico de cotações.
+- Conversão de cotação em veículo.
+- Nova aba `Cotacoes`.
+
+## Observação
+
+O provedor gratuito pode ter limites e oscilações. Para operação comercial em volume, a estrutura já permite trocar o provedor no Apps Script sem alterar o módulo inteiro.
