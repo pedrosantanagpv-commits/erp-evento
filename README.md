@@ -1,14 +1,18 @@
-# Sistema Gerencial — v0.1.8.1
+# Sistema Gerencial — v0.1.9
 
-Versão de ajuste sobre a v0.1.8, com foco em usuários/permissões.
+Versão focada em **Backup, Exportação Geral e Manutenção Administrativa**.
 
-## Novidade principal
+## Novidades
 
-- Super Admin agora pode **excluir usuário definitivamente** pelo painel de Usuários.
-- Usuários comuns continuam sem essa permissão.
-- O próprio usuário logado não pode excluir a si mesmo.
-- O sistema impede excluir o último Super Admin ativo.
-- A ação fica registrada em `Logs_Sistema` como `excluir_definitivo`.
+- Novo menu **Manutenção**;
+- Painel de saúde do banco, com contagem por tabela;
+- Status da API direto na tela de manutenção;
+- Backup geral em JSON;
+- Exportação individual por tabela em CSV;
+- Exportação geral dos CSVs principais;
+- Resumo de manutenção em CSV;
+- Últimas ações de auditoria com leitura da aba `Logs_Sistema`;
+- Orientação de segurança antes de migrações, limpezas e importações grandes.
 
 ## Subir no GitHub
 
@@ -23,16 +27,10 @@ README.md
 
 ## Apps Script
 
-Esta versão também precisa atualizar o Apps Script para reconhecer a ação `excluir_definitivo`.
-
-Use o arquivo:
-
-```txt
-APPS_SCRIPT_V0181_COMPLETO.gs
-```
-
-Abra o Apps Script, substitua o conteúdo do `Code.gs`, salve e faça um novo deploy em **Manage deployments > New version > Deploy**.
+Não precisa alterar o Apps Script se você já aplicou a versão anterior com `excluir_definitivo` e a aba `Financeiro`.
 
 ## Atenção
 
 Não rode `setupBancoERP`.
+
+A tela de manutenção não executa limpeza automática. Ela foi feita para backup, auditoria, exportação e conferência antes de alterações importantes.
