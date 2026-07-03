@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sistema Gerencial — Beta</title>
+  <title>Sistema Gerencial</title>
   <style>
     :root {
       --bg: #f5f6fa;
@@ -1014,7 +1014,7 @@
 
     /* =========================================================
        v0.1.1 — Refinamento visual gerencial
-       Ajustes apenas de estética e experiência. Não altera a API.
+       Ajustes apenas de estética e experiência. Não altera a Conexão.
     ========================================================= */
     :root {
       --bg: #eef1f6;
@@ -1386,7 +1386,7 @@
 
     /* =========================================================
        v0.1.5 — Tema premium escuro + base configurável
-       Ajustes visuais e estruturais sem mudar o banco/API.
+       Ajustes visuais e estruturais sem mudar o banco/Conexão.
     ========================================================= */
     :root {
       --bg: #0b0f14;
@@ -2175,6 +2175,166 @@
       overflow: auto;
     }
 
+
+
+    /* =========================================================
+       v0.2.2 — Polimento operacional e experiência do usuário
+       Ajustes visuais e de linguagem sem alterar banco ou rotas.
+    ========================================================= */
+    :root {
+      --focus-ring: 0 0 0 4px rgba(148, 163, 184, .16);
+      --surface-hover: rgba(255,255,255,.055);
+    }
+
+    body {
+      min-width: 320px;
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .nav-commercial {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148,163,184,.35) transparent;
+    }
+
+    .nav-commercial::-webkit-scrollbar,
+    .data-table-wrap::-webkit-scrollbar,
+    .modal::-webkit-scrollbar {
+      height: 10px;
+      width: 10px;
+    }
+
+    .nav-commercial::-webkit-scrollbar-thumb,
+    .data-table-wrap::-webkit-scrollbar-thumb,
+    .modal::-webkit-scrollbar-thumb {
+      background: rgba(148,163,184,.28);
+      border-radius: 999px;
+      border: 3px solid transparent;
+      background-clip: content-box;
+    }
+
+    .topbar h2,
+    .panel-head h3,
+    .content-panel h3 {
+      letter-spacing: -.035em;
+    }
+
+    .topbar p,
+    .panel-head p,
+    .metric small,
+    .card-value small,
+    .empty-state p,
+    .empty p {
+      color: rgba(203,213,225,.68) !important;
+    }
+
+    .data-table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 18px;
+    }
+
+    .data-table-wrap table {
+      min-width: 860px;
+    }
+
+    td .btn,
+    .actions .btn,
+    .toolbar .btn {
+      white-space: nowrap;
+    }
+
+    td:last-child {
+      min-width: 180px;
+    }
+
+    .empty,
+    .empty-state {
+      border: 1px dashed rgba(148, 163, 184, .18);
+      background: rgba(15, 23, 42, .36);
+      color: rgba(241, 245, 249, .92);
+    }
+
+    .empty strong,
+    .empty-state strong {
+      color: rgba(248,250,252,.96);
+    }
+
+    .btn:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    .btn-danger,
+    .btn-red {
+      background: rgba(127,29,29,.46) !important;
+      color: #fecaca !important;
+      border: 1px solid rgba(248,113,113,.22) !important;
+    }
+
+    .btn-success,
+    .btn-green {
+      background: rgba(20,83,45,.42) !important;
+      color: #bbf7d0 !important;
+      border: 1px solid rgba(74,222,128,.20) !important;
+    }
+
+    .btn-soft,
+    .btn-secondary,
+    .btn-ghost {
+      border: 1px solid rgba(148,163,184,.18);
+    }
+
+    .check-item strong + small {
+      display: block;
+      margin-top: 3px;
+    }
+
+    .summary-strip.vertical-strip {
+      gap: 10px;
+    }
+
+    .login-badges span {
+      color: rgba(226,232,240,.78);
+    }
+
+    @media (max-width: 1240px) {
+      .grid-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .onboarding-grid, .about-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 980px) {
+      .sidebar {
+        max-height: 100vh;
+      }
+      .main {
+        padding-top: 72px;
+      }
+      .mobile-menu {
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 28;
+        backdrop-filter: blur(16px);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .main { padding: 82px 14px 18px; }
+      .topbar { gap: 14px; }
+      .topbar h2 { font-size: clamp(28px, 10vw, 42px); }
+      .grid-cards, .summary-strip, .filters-grid, .form-grid { grid-template-columns: 1fr !important; }
+      .content-panel, .card.panel, .metric, .login-card { border-radius: 20px; }
+      .modal { width: min(100%, calc(100vw - 18px)); max-height: calc(100vh - 18px); }
+      .modal-head { position: sticky; top: 0; z-index: 3; }
+      td:last-child { min-width: 220px; }
+    }
+
   </style>
 </head>
 <body>
@@ -2230,7 +2390,7 @@
       <nav class="nav nav-commercial">
         <span class="nav-section">Visão geral</span>
         <button data-view="dashboard" class="active">📊 Painel Executivo</button>
-        <button data-view="implantacao">✅ Implantação</button>
+        <button data-view="implantacao">✅ Preparação</button>
 
         <span class="nav-section">Base</span>
         <button data-view="associados">👥 Associados</button>
@@ -2247,11 +2407,11 @@
         <span class="nav-section">Gestão</span>
         <button data-view="financeiro">💰 Financeiro</button>
         <button data-view="relatorios">📈 Relatórios</button>
-        <button data-view="importacao">⬆️ Importação</button>
+        <button data-view="importacao">⬆️ Importar dados</button>
 
         <span class="nav-section">Administração</span>
         <button data-view="usuarios">👤 Usuários</button>
-        <button data-view="manutencao">🧰 Manutenção</button>
+        <button data-view="manutencao">🧰 Administração</button>
         <button data-view="sobre">⚙️ Sobre</button>
       </nav>
 
@@ -2263,7 +2423,7 @@
             <small id="userRole">Super Admin</small>
           </div>
         </div>
-        <small class="side-note" data-brand-footer-note>Ambiente gerencial</small>
+        <small class="side-note" data-brand-footer-note>Ambiente operacional</small>
         <button id="logoutBtn" class="btn btn-logout">Sair</button>
       </div>
     </aside>
@@ -2278,11 +2438,11 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const API_BASE = '/api/erp';
+    const Conexão_BASE = '/api/erp';
 
     /* =========================================================
        Identidade do sistema — ajuste este objeto para configurar o ambiente.
-       Não precisa mudar telas, lógica, banco ou API.
+       Não precisa mudar telas, lógica, banco ou Conexão.
     ========================================================= */
     const BRAND_CONFIG = {
       appName: 'Sistema Gerencial',
@@ -2295,7 +2455,7 @@
       loginTitle: 'Gestão operacional com visão centralizada.',
       loginDescription: 'Estrutura gerencial para organizar base, veículos, eventos, vistorias, compras, financeiro e relatórios.',
       loginBadges: ['Base configurável', 'Gestão integrada', 'Operação escalável'],
-      footerNote: 'Ambiente gerencial',
+      footerNote: 'Ambiente operacional',
       colors: {
         accent: '#8b98a7',
         accentStrong: '#cbd5e1',
@@ -2332,7 +2492,7 @@
       if (eyebrow) eyebrow.textContent = config.loginEyebrow || 'Plataforma gerencial';
       if (loginTitle) loginTitle.textContent = config.loginTitle || 'Gestão operacional com visão centralizada.';
       if (loginDescription) loginDescription.textContent = config.loginDescription || '';
-      if (footerNote) footerNote.textContent = config.footerNote || 'Ambiente gerencial';
+      if (footerNote) footerNote.textContent = config.footerNote || 'Ambiente operacional';
 
       if (Array.isArray(config.loginBadges)) {
         badges.forEach((el, index) => { if (config.loginBadges[index]) el.textContent = config.loginBadges[index]; });
@@ -2352,7 +2512,7 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.2.1';
+    const APP_VERSION = '0.2.2';
 
     const state = {
       user: null,
@@ -2395,7 +2555,7 @@
 
     const MODULE_LABELS = {
       dashboard: 'Painel Executivo',
-      implantacao: 'Implantação',
+      implantacao: 'Preparação',
       associados: 'Associados',
       veiculos: 'Veículos',
       consultores: 'Consultores',
@@ -2406,8 +2566,8 @@
       oficinas: 'Oficinas',
       kanban: 'Kanban',
       relatorios: 'Relatórios',
-      importacao: 'Importação',
-      manutencao: 'Manutenção',
+      importacao: 'Importar dados',
+      manutencao: 'Administração',
       usuarios: 'Usuários',
       sobre: 'Sobre'
     };
@@ -2526,25 +2686,25 @@
           try {
             data = JSON.parse(text);
           } catch (error) {
-            throw new Error('A API não retornou JSON válido. Tentando novamente...');
+            throw new Error('A conexão não retornou dados válidos. Tentando novamente...');
           }
-          if (!data.success) throw new Error(data.message || 'Erro na API.');
+          if (!data.success) throw new Error(data.message || 'Erro de conexão.');
           return data;
         } catch (error) {
           lastError = error;
           if (attempt < attempts) await delay(550 * attempt);
         }
       }
-      throw lastError || new Error('Erro de conexão com a API.');
+      throw lastError || new Error('Não foi possível conectar ao ambiente.');
     }
 
     async function apiGet(action, params = {}) {
       const query = new URLSearchParams({ action, token: state.token || '', _ts: String(Date.now()), ...params });
-      return fetchJsonWithRetry(`${API_BASE}?${query.toString()}`);
+      return fetchJsonWithRetry(`${Conexão_BASE}?${query.toString()}`);
     }
 
     async function apiPost(payload = {}) {
-      return fetchJsonWithRetry(API_BASE, {
+      return fetchJsonWithRetry(Conexão_BASE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: state.token || '', usuario: state.user?.email || 'Sistema', ...payload })
@@ -2711,7 +2871,7 @@
       const doneCount = steps.filter(s => s.done).length;
       const percent = Math.round((doneCount / steps.length) * 100);
 
-      els.viewRoot.innerHTML = topbar('Implantação', 'Checklist para configurar uma nova operação.', `
+      els.viewRoot.innerHTML = topbar('Preparação do Ambiente', 'Checklist inicial para preparar a operação.', `
         <button class="btn btn-secondary" onclick="renderView('sobre')">Sobre o sistema</button>
         <button class="btn btn-primary" onclick="renderView('importacao')">Importar dados</button>
       `) + `
@@ -2719,12 +2879,12 @@
           ${metric('Progresso', percent + '%', doneCount + ' de ' + steps.length + ' etapas')}
           ${metric('Usuários ativos', usuariosAtivos, 'Acessos autorizados')}
           ${metric('Base cadastrada', associados + veiculos, 'Associados + veículos')}
-          ${metric('Versão beta', APP_VERSION, 'Ambiente gerencial')}
+          ${metric('Versão', APP_VERSION, 'Ambiente operacional')}
         </div>
 
         <div class="onboarding-grid">
           <section class="card panel">
-            <div class="panel-head"><div><h3>Checklist de implantação</h3><p>Use esta lista para preparar o sistema antes de operar com dados reais.</p></div></div>
+            <div class="panel-head"><div><h3>Checklist inicial</h3><p>Use esta lista para preparar o ambiente antes de operar com dados reais.</p></div></div>
             <div class="checklist">
               ${steps.map(step => `
                 <div class="check-item ${step.done ? 'done' : ''}">
@@ -3859,7 +4019,7 @@
             <button class="btn btn-ghost btn-small" onclick="limparFiltrosFinanceiro()">Limpar filtros</button>
             <button class="btn btn-blue btn-small" onclick="exportFinanceiroCSV()">Exportar CSV</button>
           </div>
-          ${data.length ? financeiroTable(data) : emptyState('Nenhum lançamento financeiro.', 'Clique em “Novo lançamento” para criar o primeiro registro de mensalidade.')}
+          ${data.length ? financeiroTable(data) : emptyState('Nenhum lançamento financeiro encontrado.', 'Clique em “Novo lançamento” para criar o primeiro registro de mensalidade.')}
         </div>`;
     }
 
@@ -4018,7 +4178,7 @@
 
 
     async function renderReclamacoes(filter = '') {
-      els.viewRoot.innerHTML = topbar('Reclamações / SAC', 'Controle de reclamações, tratativas, responsáveis e prazos de resposta.', '<button class="btn btn-yellow" onclick="openReclamacaoModal()">+ Nova reclamação</button><button class="btn btn-ghost" onclick="renderReclamacoes()">Atualizar</button>') + loadingPanel('Carregando reclamações...');
+      els.viewRoot.innerHTML = topbar('Reclamações / Operação', 'Controle de reclamações, tratativas, responsáveis e prazos de resposta.', '<button class="btn btn-yellow" onclick="openReclamacaoModal()">+ Nova reclamação</button><button class="btn btn-ghost" onclick="renderReclamacoes()">Atualizar</button>') + loadingPanel('Carregando reclamações...');
       try {
         await Promise.all([ensureReclamacoesCache(true), ensureAssociadosCache(), ensureVeiculosCache(), ensureEventosCache()]);
         paintReclamacaoTable(filter);
@@ -4074,7 +4234,7 @@
       const categorias = uniqueValues(state.cache.reclamacoes.map(r => r.categoria).concat(['Atendimento', 'Demora no reparo', 'Financeiro', 'Oficina', 'Consultor', 'Rastreamento', 'Evento', 'Outros']));
 
       els.viewRoot.innerHTML = `
-        ${topbar('Reclamações / SAC', 'Controle de reclamações, tratativas, responsáveis e prazos de resposta.', '<button class="btn btn-yellow" onclick="openReclamacaoModal()">+ Nova reclamação</button><button class="btn btn-ghost" onclick="renderReclamacoes()">Atualizar</button>')}
+        ${topbar('Reclamações / Operação', 'Controle de reclamações, tratativas, responsáveis e prazos de resposta.', '<button class="btn btn-yellow" onclick="openReclamacaoModal()">+ Nova reclamação</button><button class="btn btn-ghost" onclick="renderReclamacoes()">Atualizar</button>')}
         <div class="content-panel">
           <div class="summary-strip">${summaryItem('Total', state.cache.reclamacoes.length)}${summaryItem('Abertas', abertas)}${summaryItem('Atenção', atencao)}${summaryItem('Atrasadas', atrasadas)}${summaryItem('Resolvidas/finalizadas', resolvidas)}</div>
           <div class="panel-head"><div><h3>Central de Reclamações</h3><p>${data.length} registro(s) encontrado(s).</p></div></div>
@@ -4086,7 +4246,7 @@
             <div class="field"><label>Prazo</label><select id="filtroSacPrazo" onchange="paintReclamacaoTable(document.getElementById('filtroSacBusca')?.value || '')"><option value="">Todos</option>${selectOptions(['No prazo','Atenção','Atrasada','Sem prazo','Encerrado'], prazoFiltro)}</select></div>
             <div class="field"><label>&nbsp;</label><button class="btn btn-ghost" type="button" onclick="limparFiltrosSac()">Limpar filtros</button></div>
           </div>
-          ${data.length ? reclamacaoTable(data) : emptyState('Nenhuma reclamação encontrada.', 'Clique em “Nova reclamação” para registrar a primeira tratativa de SAC.')}
+          ${data.length ? reclamacaoTable(data) : emptyState('Nenhuma reclamação encontrada.', 'Clique em “Nova reclamação” para registrar a primeira tratativa operacional.')}
         </div>`;
     }
 
@@ -4144,7 +4304,7 @@
         const prazo = getPrazoReclamacao(item);
         const veiculo = findVehicleByPlate(item.placa);
         const eventos = state.cache.eventos.filter(e => normalizeText(e.placa) === normalizeText(item.placa) || normalizeText(e.associado) === normalizeText(item.associado));
-        openCustomModal('Detalhes da reclamação / SAC', `
+        openCustomModal('Detalhes da reclamação / Operação', `
           <div class="detail-grid">
             ${detailCard('Protocolo', item.id_reclamacao)}${detailCard('Status', item.status)}${detailCard('Prioridade', item.prioridade)}
             ${detailCard('Associado', item.associado)}${detailCard('Telefone', item.telefone)}${detailCard('Placa', item.placa)}
@@ -5056,8 +5216,8 @@
 
     /* =========================================================
        IMPORTAÇÃO DE DADOS — v0.1.7
-       Importação CSV/TSV com pré-visualização e criação segura via API.
-       Não altera o banco e não exige mudança no Apps Script.
+       Importar dados CSV/TSV com pré-visualização e criação segura via Conexão.
+       Não altera o banco e não exige mudança no camada de conexão.
     ========================================================= */
 
     const IMPORT_TABLES = {
@@ -5137,7 +5297,7 @@
     function renderImportacao() {
       const options = Object.entries(IMPORT_TABLES).map(([key, cfg]) => `<option value="${escapeHtml(key)}" ${key === importState.tabela ? 'selected' : ''}>${escapeHtml(cfg.label)}</option>`).join('');
       els.viewRoot.innerHTML = `
-        ${topbar('Importação de Dados', 'Entrada rápida de dados por CSV/TSV para alimentar a base gerencial.', '<button class="btn btn-ghost" onclick="renderImportacao()">Limpar tela</button>')}
+        ${topbar('Importar dados de Dados', 'Entrada rápida de dados por CSV/TSV para alimentar a base gerencial.', '<button class="btn btn-ghost" onclick="renderImportacao()">Limpar tela</button>')}
         <div class="grid-2">
           <div class="content-panel">
             <div class="panel-head"><div><h3>Arquivo ou colagem</h3><p>Use CSV separado por ponto e vírgula, vírgula ou TAB. A primeira linha precisa conter os cabeçalhos.</p></div></div>
@@ -5318,7 +5478,7 @@
         if (progress) progress.textContent = `Processando ${i + 1}/${rows.length} • Sucesso: ${ok} • Falhas: ${fail}`;
       }
       invalidateCacheAfterImport(tabela);
-      toast(`Importação concluída. Sucesso: ${ok}. Falhas: ${fail}.`, fail ? 'error' : 'success');
+      toast(`Importar dados concluída. Sucesso: ${ok}. Falhas: ${fail}.`, fail ? 'error' : 'success');
       if (progress) progress.textContent = `Concluído. Sucesso: ${ok}. Falhas: ${fail}. Atualize os módulos para visualizar os dados.`;
     }
 
@@ -5383,7 +5543,7 @@
 
     async function renderManutencao() {
       if (!hasPermission('manutencao')) return renderBlocked('manutencao');
-      els.viewRoot.innerHTML = topbar('Manutenção', 'Backup, exportação geral, auditoria e saúde do ambiente.', '<button class="btn btn-ghost" onclick="renderManutencao()">Atualizar</button>') + skeletonDashboard();
+      els.viewRoot.innerHTML = topbar('Administração do Ambiente', 'Backup, exportações, auditoria e integridade do ambiente.', '<button class="btn btn-ghost" onclick="renderManutencao()">Atualizar</button>') + skeletonDashboard();
       try {
         const apiInfo = await apiGet('ping').catch(error => ({ success: false, message: error.message }));
         const resultados = await Promise.all(BACKUP_TABLES.map(item => carregarTabelaBackup(item.tabela)));
@@ -5416,22 +5576,22 @@
         `).join('') : '<tr><td colspan="5" class="muted">Nenhum log encontrado.</td></tr>';
 
         els.viewRoot.innerHTML = `
-          ${topbar('Manutenção', 'Backup, exportação geral, auditoria e saúde do ambiente.', `
-            <button class="btn btn-primary" onclick="exportarBackupJson()">Backup JSON</button>
-            <button class="btn btn-ghost" onclick="exportarTodosCSVs()">Exportar CSVs</button>
+          ${topbar('Administração do Ambiente', 'Backup, exportações, auditoria e integridade do ambiente.', `
+            <button class="btn btn-primary" onclick="exportarBackupJson()">Gerar backup</button>
+            <button class="btn btn-ghost" onclick="exportarTodosCSVs()">Exportar CSV</button>
             <button class="btn btn-ghost" onclick="renderManutencao()">Atualizar</button>
           `)}
 
           <div class="grid-cards">
-            ${metric('Status da API', apiInfo.success ? 'Online' : 'Falha', apiInfo.message || 'Ambiente conectado')}
-            ${metric('Tabelas OK', `${ok}/${BACKUP_TABLES.length}`, 'Bases consultadas')}
+            ${metric('Conexão do sistema', apiInfo.success ? 'Online' : 'Falha', apiInfo.message || 'Ambiente conectado')}
+            ${metric('Bases OK', `${ok}/${BACKUP_TABLES.length}`, 'Bases verificadas')}
             ${metric('Registros totais', String(totalRegistros), 'Soma de todas as tabelas')}
             ${metric('Inativos/cancelados', String(inativos), 'Registros encerrados')}
           </div>
 
           <div class="content-panel">
             <div class="panel-head">
-              <div><h3>Saúde do banco</h3><p>Contagem por tabela e exportação individual.</p></div>
+              <div><h3>Integridade dos dados</h3><p>Contagem por base e exportação individual.</p></div>
               <div class="actions"><button class="btn btn-soft" onclick="exportarResumoManutencao()">Exportar resumo</button></div>
             </div>
             <div class="data-table-wrap">
@@ -5457,7 +5617,7 @@
 
           <div class="content-panel">
             <div class="panel-head"><div><h3>Orientação de segurança</h3><p>Use esta tela antes de limpezas, migrações ou alterações estruturais.</p></div></div>
-            <div class="empty align-left"><strong>Boa prática</strong> Antes de excluir registros, importar bases grandes ou alterar o Apps Script, gere um Backup JSON e exporte os CSVs principais. Esta versão não executa limpeza automática para evitar perda acidental de dados.</div>
+            <div class="empty align-left"><strong>Boa prática</strong> Antes de excluir registros ou importar bases grandes, gere um Gerar backup e exporte os CSVs principais. Esta versão não executa limpeza automática para evitar perda acidental de dados.</div>
           </div>
         `;
       } catch (error) {
@@ -5484,7 +5644,7 @@
         toast('Gerando backup geral...');
         const backup = await obterBackupCompleto();
         downloadTextFile(`backup_sistema_${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(backup, null, 2), 'application/json;charset=utf-8');
-        toast('Backup JSON gerado com sucesso.');
+        toast('Gerar backup gerado com sucesso.');
       } catch (error) {
         toast(error.message, 'error');
       }
@@ -5556,14 +5716,14 @@
             </div>
             <div class="summary-strip compact-strip">
               ${summaryItem('Versão front-end', APP_VERSION)}
-              ${summaryItem('API', apiOk ? 'Online' : 'Atenção')}
+              ${summaryItem('Conexão', apiOk ? 'Online' : 'Atenção')}
               ${summaryItem('Usuário', user.nome || 'Usuário')}
               ${summaryItem('Perfil', user.perfil || 'Perfil')}
             </div>
           </div>
 
           <div class="content-panel">
-            <div class="panel-head"><div><h3>Configuração de marca</h3><p>Campos centrais usados pela identidade visual do sistema.</p></div></div>
+            <div class="panel-head"><div><h3>Identidade do ambiente</h3><p>Informações centrais usadas pela identidade visual do ambiente.</p></div></div>
             <div class="data-table-wrap">
               <table>
                 <tbody>
@@ -5578,13 +5738,13 @@
           </div>
 
           <div class="content-panel">
-            <div class="panel-head"><div><h3>Status técnico</h3><p>Resumo de conexão do ambiente atual.</p></div></div>
+            <div class="panel-head"><div><h3>Conexão do ambiente</h3><p>Resumo da conexão e versão do ambiente atual.</p></div></div>
             <div class="data-table-wrap">
               <table>
                 <tbody>
-                  <tr><td>Status da API</td><td>${statusBadge(apiOk ? 'Online' : 'Falha')}</td></tr>
+                  <tr><td>Conexão do sistema</td><td>${statusBadge(apiOk ? 'Online' : 'Falha')}</td></tr>
                   <tr><td>Mensagem</td><td>${escapeHtml(apiInfo?.message || '-')}</td></tr>
-                  <tr><td>Versão da API</td><td>${escapeHtml(apiInfo?.version || '-')}</td></tr>
+                  <tr><td>Versão da Conexão</td><td>${escapeHtml(apiInfo?.version || '-')}</td></tr>
                   <tr><td>Data/hora</td><td>${dateTimeBR(apiInfo?.timestamp || new Date())}</td></tr>
                 </tbody>
               </table>
@@ -5593,7 +5753,7 @@
 
           <div class="content-panel">
             <div class="panel-head"><div><h3>Resumo do ambiente</h3><p>Informações úteis para suporte e conferência operacional.</p></div></div>
-            <div class="empty align-left"><strong>Ambiente gerencial ativo</strong> Use esta tela para conferir versão, usuário logado, identidade visual e status da conexão.</div>
+            <div class="empty align-left"><strong>Ambiente operacional ativo</strong> Use esta tela para conferir versão, usuário logado, identidade visual e status da conexão.</div>
           </div>
         </div>
       `;
