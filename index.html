@@ -3484,6 +3484,41 @@
 
 
 
+    function podeExcluirDefinitivo() {
+      return normalizeText(state.user?.perfil) === 'super admin';
+    }
+
+    function invalidarCacheTabela(tabela) {
+      const mapa = {
+        Associados: 'associados',
+        Consultores_Regionais: 'consultores',
+        Oficinas: 'oficinas',
+        Eventos: 'eventos',
+        Vistorias_Regulacao: 'regulacoes',
+        Compras: 'compras',
+        Financeiro: 'financeiro',
+        Cotacoes: 'cotacoes'
+      };
+      const chave = mapa[tabela];
+      if (chave && state.cache[chave]) state.cache[chave] = [];
+      if (tabela === 'Eventos') state.cache.historico = [];
+    }
+
+    async function excluirRegistroDefinitivoUI(tabela, id, rotulo = 'registro') {
+      if (!podeExcluirDefinitivo()) return toast('Apenas Super Admin pode excluir definitivamente.', 'error');
+      confirmAction(
+        'Excluir definitivamente',
+        `Esta ação apagará ${rotulo} da base. Use somente para registros criados por engano ou testes. Deseja continuar?`,
+        'Excluir definitivamente',
+        async () => {
+          await apiPost({ action: 'excluir_definitivo', tabela, id });
+          invalidarCacheTabela(tabela);
+          toast('Registro excluído definitivamente com sucesso.');
+          await renderView(state.view);
+        }
+      );
+    }
+
     async function renderConsultores(filter = '') {
       if (!hasPermission('consultores')) return renderBlocked('consultores');
       els.viewRoot.innerHTML = topbar('Consultores e Regionais', 'Controle gerencial de consultores, regionais e cooperativas.', '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo consultor</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>') + loadingPanel('Carregando consultores...');
@@ -3514,7 +3549,7 @@
       return `<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Contato</th><th>Regional</th><th>Cooperativa</th><th>Tipo</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.cpf_cnpj || '')}</small></td><td>${escapeHtml(item.telefone || '-')}<br><small>${escapeHtml(item.email || '')}</small></td><td>${escapeHtml(item.regional || '-')}</td><td>${escapeHtml(item.cooperativa || '-')}</td><td>${escapeHtml(item.tipo || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_cadastro)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openConsultorDetails(${jsArg(item.id_consultor)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openConsultorModalById(${jsArg(item.id_consultor)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarConsultor(${jsArg(item.id_consultor)})">Inativar</button></div></td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openConsultorDetails(${jsArg(item.id_consultor)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openConsultorModalById(${jsArg(item.id_consultor)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarConsultor(${jsArg(item.id_consultor)})">Inativar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Consultores_Regionais', ${jsArg(item.id_consultor)}, 'este consultor/regional')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('consultores', pager)}</div>`;
     }
@@ -3567,7 +3602,8 @@
           </div>
           <div class="detail-section"><h4>Veículos relacionados</h4>${miniVeiculosTable(veiculos)}</div>
           <div class="detail-section"><h4>Eventos relacionados</h4>${miniEventosTable(eventos)}</div>
-          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>`, true);
+          <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
+          ${podeExcluirDefinitivo() ? `<div class="quick-actions"><button class="btn btn-danger" onclick="closeModal(); excluirRegistroDefinitivoUI('Consultores_Regionais', ${jsArg(item.id_consultor)}, 'este consultor/regional')">Excluir definitivamente</button></div>` : ''}`, true);
       } catch (error) { toast(error.message, 'error'); }
     }
 
@@ -3610,7 +3646,7 @@
       return `<div class="table-wrap"><table><thead><tr><th>Oficina</th><th>CNPJ</th><th>Contato</th><th>Cidade/UF</th><th>Responsável</th><th>Status</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.nome || '-')}</strong></td><td>${escapeHtml(item.cnpj || '-')}</td><td>${escapeHtml(item.telefone || '-')}<br><small>${escapeHtml(item.email || '')}</small></td><td>${escapeHtml([item.cidade, item.estado].filter(Boolean).join('/') || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.status)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openOficinaDetails(${jsArg(item.id_oficina)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openOficinaModalById(${jsArg(item.id_oficina)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarOficina(${jsArg(item.id_oficina)})">Inativar</button></div></td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openOficinaDetails(${jsArg(item.id_oficina)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openOficinaModalById(${jsArg(item.id_oficina)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarOficina(${jsArg(item.id_oficina)})">Inativar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Oficinas', ${jsArg(item.id_oficina)}, 'esta oficina')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('oficinas', pager)}</div>`;
     }
@@ -3854,7 +3890,7 @@
             <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.email || '')}</small></td>
             <td>${escapeHtml(item.cpf_cnpj || '-')}</td><td>${escapeHtml(item.telefone || '-')}</td><td>${escapeHtml([item.cidade, item.estado].filter(Boolean).join('/') || '-')}</td>
             <td>${statusBadge(item.status)}</td><td>${dateBR(item.data_cadastro)}</td>
-            <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openAssociadoDetails(${jsArg(item.id_associado)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openAssociadoModalById(${jsArg(item.id_associado)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarAssociado(${jsArg(item.id_associado)})">Inativar</button></div></td>
+            <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openAssociadoDetails(${jsArg(item.id_associado)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openAssociadoModalById(${jsArg(item.id_associado)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarAssociado(${jsArg(item.id_associado)})">Inativar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Associados', ${jsArg(item.id_associado)}, 'este associado')">Excluir</button>` : ''}</div></td>
           </tr>`).join('')}
         </tbody></table></div>`;
     }
@@ -3941,7 +3977,7 @@
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml([item.marca, item.modelo, item.ano_modelo].filter(Boolean).join(' ') || '-')}</td>
           <td>${money(item.valor_fipe)}</td><td>${money(item.mensalidade)}</td><td>${escapeHtml(item.consultor || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_entrada)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openVehicleDetails(${jsArg(item.id_veiculo)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openVehicleModalById(${jsArg(item.id_veiculo)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarVeiculo(${jsArg(item.id_veiculo)})">Inativar</button></div></td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openVehicleDetails(${jsArg(item.id_veiculo)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openVehicleModalById(${jsArg(item.id_veiculo)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarVeiculo(${jsArg(item.id_veiculo)})">Inativar</button>${podeExcluirVeiculo() ? `<button class="btn btn-danger btn-small" onclick="excluirVeiculoDefinitivo(${jsArg(item.id_veiculo)})">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table></div>`;
     }
@@ -4034,6 +4070,30 @@
       });
     }
 
+
+    function podeExcluirVeiculo() {
+      return roleKey() === 'super admin';
+    }
+
+    async function excluirVeiculoDefinitivo(id) {
+      const item = findVehicleById(id);
+      if (!item) return toast('Veículo não encontrado.', 'error');
+      if (!podeExcluirVeiculo()) return toast('Apenas Super Admin pode excluir veículos em definitivo.', 'error');
+
+      confirmAction(
+        'Excluir veículo definitivamente',
+        `Deseja excluir definitivamente o veículo ${item.placa || item.modelo || ''}? Esta ação não pode ser desfeita.`,
+        'Excluir definitivo',
+        async () => {
+          await apiPost({ action: 'excluir_definitivo', tabela: 'Veiculos', id });
+          state.cache.veiculos = [];
+          state.cache.cotacoes = [];
+          toast('Veículo excluído definitivamente.');
+          await renderVeiculos();
+        }
+      );
+    }
+
     async function openVehicleDetails(id) {
       try {
         await Promise.all([ensureVeiculosCache(), ensureAssociadosCache(true), ensureEventosCache(true), ensureFinanceiroCache(true)]);
@@ -4078,7 +4138,7 @@
       return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Tipo</th><th>Placa</th><th>Associado</th><th>Responsável</th><th>Etapa</th><th>Status</th><th>Abertura</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.numero_evento || item.id_evento || '-')}</strong></td><td>${escapeHtml(item.tipo_evento || '-')}</td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.etapa_kanban)}</td><td>${statusBadge(item.status_evento)}</td><td>${dateBR(item.data_abertura)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Central</button><button class="btn btn-ghost btn-small" onclick="openEventModalById(${jsArg(item.id_evento)})">Editar</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button><button class="btn btn-danger btn-small" onclick="cancelarEvento(${jsArg(item.id_evento)})">Cancelar</button></div></td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(item.id_evento)})">Central</button><button class="btn btn-ghost btn-small" onclick="openEventModalById(${jsArg(item.id_evento)})">Editar</button><button class="btn btn-yellow btn-small" onclick="openMoveEventModal(${jsArg(item.id_evento)})">Mover</button><button class="btn btn-danger btn-small" onclick="cancelarEvento(${jsArg(item.id_evento)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Eventos', ${jsArg(item.id_evento)}, 'este evento')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('eventos', pager)}</div>`;
     }
@@ -4109,7 +4169,7 @@
       return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Tipo</th><th>Responsável</th><th>Status</th><th>Entrada</th><th>Saída</th><th>Valor aprovado</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(eventLabel(item.id_evento))}</strong></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.tipo_vistoria || '-')}</td><td>${escapeHtml(item.responsavel || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_entrada)}</td><td>${dateBR(item.data_saida)}</td><td>${money(item.valor_aprovado || item.valor_orcado || 0)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openRegulacaoDetails(${jsArg(item.id_regulacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openRegulacaoModalById(${jsArg(item.id_regulacao)})">Editar</button><button class="btn btn-danger btn-small" onclick="cancelarRegulacao(${jsArg(item.id_regulacao)})">Cancelar</button></div></td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openRegulacaoDetails(${jsArg(item.id_regulacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openRegulacaoModalById(${jsArg(item.id_regulacao)})">Editar</button><button class="btn btn-danger btn-small" onclick="cancelarRegulacao(${jsArg(item.id_regulacao)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Vistorias_Regulacao', ${jsArg(item.id_regulacao)}, 'este registro técnico')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table></div>`;
     }
@@ -4150,7 +4210,7 @@
       return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Item</th><th>Fornecedor</th><th>Status</th><th>Valor aprovado</th><th>Solicitação</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(eventLabel(item.id_evento))}</strong></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.item || '-')}</td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${statusBadge(item.status_compra)}</td><td>${money(item.valor_aprovado || item.valor_cotado || 0)}</td><td>${dateBR(item.data_solicitacao)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(item.id_compra)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCompraModalById(${jsArg(item.id_compra)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarCompraEntregue(${jsArg(item.id_compra)})">Entregar</button><button class="btn btn-danger btn-small" onclick="cancelarCompra(${jsArg(item.id_compra)})">Cancelar</button></div></td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(item.id_compra)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCompraModalById(${jsArg(item.id_compra)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarCompraEntregue(${jsArg(item.id_compra)})">Entregar</button><button class="btn btn-danger btn-small" onclick="cancelarCompra(${jsArg(item.id_compra)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Compras', ${jsArg(item.id_compra)}, 'esta compra')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('compras', pager)}</div>`;
     }
@@ -4256,7 +4316,7 @@
           <td>${money(item.valor_fipe)}</td><td>${money(item.mensalidade_sugerida)}</td>
           <td>${escapeHtml(item.consultor || '-')}<br><small>${escapeHtml(item.regional || '')}</small></td>
           <td>${statusBadge(item.status_cotacao || 'Em análise')}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCotacaoDetails(${jsArg(item.id_cotacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button><button class="btn btn-yellow btn-small" onclick="converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter</button><button class="btn btn-danger btn-small" onclick="cancelarCotacao(${jsArg(item.id_cotacao)})">Cancelar</button></div></td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCotacaoDetails(${jsArg(item.id_cotacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button><button class="btn btn-yellow btn-small" onclick="converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter</button><button class="btn btn-danger btn-small" onclick="cancelarCotacao(${jsArg(item.id_cotacao)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Cotacoes', ${jsArg(item.id_cotacao)}, 'esta cotação')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('cotacoes', pager)}</div>`;
     }
@@ -4519,7 +4579,7 @@
       return `<div class="table-wrap"><table><thead><tr><th>Competência</th><th>Associado</th><th>Placa</th><th>Vencimento</th><th>Mensalidade</th><th>Pago</th><th>Status</th><th>Consultor/Regional</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.competencia || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${dateBR(item.data_vencimento)}</td><td>${money(item.valor_mensalidade)}</td><td>${money(item.valor_pago)}</td><td>${statusBadge(statusFinanceiroReal(item))}</td><td>${escapeHtml(item.consultor || '-')}<br><small>${escapeHtml(item.regional || '')}</small></td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openFinanceiroDetails(${jsArg(item.id_financeiro)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openFinanceiroModalById(${jsArg(item.id_financeiro)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarFinanceiroPago(${jsArg(item.id_financeiro)})">Pagar</button><button class="btn btn-danger btn-small" onclick="cancelarFinanceiro(${jsArg(item.id_financeiro)})">Cancelar</button></div></td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openFinanceiroDetails(${jsArg(item.id_financeiro)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openFinanceiroModalById(${jsArg(item.id_financeiro)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarFinanceiroPago(${jsArg(item.id_financeiro)})">Pagar</button><button class="btn btn-danger btn-small" onclick="cancelarFinanceiro(${jsArg(item.id_financeiro)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Financeiro', ${jsArg(item.id_financeiro)}, 'este lançamento financeiro')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('financeiro', pager)}</div>`;
     }
@@ -6380,6 +6440,8 @@
     window.openVehicleModalById = openVehicleModalById;
     window.openVehicleDetails = openVehicleDetails;
     window.inativarVeiculo = inativarVeiculo;
+    window.excluirVeiculoDefinitivo = excluirVeiculoDefinitivo;
+    window.excluirRegistroDefinitivoUI = excluirRegistroDefinitivoUI;
     window.openConsultorModal = openConsultorModal;
     window.openConsultorModalById = openConsultorModalById;
     window.openConsultorDetails = openConsultorDetails;
