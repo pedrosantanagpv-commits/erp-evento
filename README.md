@@ -54,3 +54,16 @@ Incluído `FIPE_CONFIG` no Apps Script para corrigir o erro `FIPE_CONFIG is not 
 - Validação também na conversão de cotação em veículo.
 - Normalização de placa antes da comparação.
 - Lock no cadastro de veículos para reduzir risco de duplicidade em requisições simultâneas.
+
+
+## Hotfix v0.2.4.5
+
+- Exclusão definitiva de veículos disponível apenas para Super Admin.
+- Backend valida o perfil pelo token, não apenas pela interface.
+- Bloqueia exclusão quando houver eventos ou lançamentos financeiros vinculados pelo ID do veículo.
+- Se o veículo veio de uma cotação, a exclusão desfaz o vínculo de conversão para evitar referência órfã.
+
+
+## Exclusão definitiva global — v0.2.4.5
+
+O Super Admin pode excluir definitivamente registros de Associados, Consultores/Regionais, Oficinas, Eventos, Vistorias/Regulação, Compras, Financeiro, Cotações, Veículos e Usuários. O backend valida vínculos antes de excluir e registra a ação na auditoria. Perfis não Super Admin continuam com inativação/cancelamento operacional.
