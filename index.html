@@ -2511,7 +2511,8 @@
         <span class="nav-section">Base</span>
         <button data-view="associados"><span class="nav-icon">◎</span>Associados</button>
         <button data-view="veiculos"><span class="nav-icon">◈</span>Veículos</button>
-        <button data-view="consultores"><span class="nav-icon">◔</span>Consultores</button>
+        <button data-view="cooperativas"><span class="nav-icon">▧</span>Cooperativas</button>
+        <button data-view="consultores"><span class="nav-icon">◔</span>Voluntários</button>
         <button data-view="oficinas"><span class="nav-icon">◫</span>Oficinas</button>
 
         <span class="nav-section">Operação</span>
@@ -2522,12 +2523,14 @@
 
         <span class="nav-section">Gestão</span>
         <button data-view="cotacoes"><span class="nav-icon">◇</span>Cotações</button>
+        <button data-view="planos"><span class="nav-icon">▱</span>Planos</button>
         <button data-view="financeiro"><span class="nav-icon">◍</span>Financeiro</button>
         <button data-view="relatorios"><span class="nav-icon">▥</span>Relatórios</button>
         <button data-view="importacao"><span class="nav-icon">↥</span>Importar dados</button>
 
         <span class="nav-section">Administração</span>
         <button data-view="usuarios"><span class="nav-icon">◉</span>Usuários</button>
+        <button data-view="grupos_permissao"><span class="nav-icon">⌘</span>Grupos de Permissão</button>
         <button data-view="manutencao"><span class="nav-icon">⛭</span>Administração</button>
         <button data-view="sobre"><span class="nav-icon">ⓘ</span>Sobre</button>
       </nav>
@@ -2629,7 +2632,7 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.2.4';
+    const APP_VERSION = '0.2.5.1';
 
     const state = {
       user: null,
@@ -2647,9 +2650,13 @@
         compras: [],
         financeiro: [],
         cotacoes: [],
+        planos: [],
         regulacoes: [],
         reclamacoes: [],
         consultores: [],
+        cooperativas: [],
+        gruposPermissao: [],
+        permissoesGrupo: [],
         oficinas: [],
         usuarios: [],
         kanban: null,
@@ -2678,11 +2685,13 @@
       implantacao: 'Preparação',
       associados: 'Associados',
       veiculos: 'Veículos',
-      consultores: 'Consultores',
+      consultores: 'Voluntários',
+      cooperativas: 'Cooperativas',
       eventos: 'Eventos',
       vistorias: 'Vistorias',
       compras: 'Compras',
       cotacoes: 'Cotações',
+      planos: 'Planos',
       financeiro: 'Financeiro',
       oficinas: 'Oficinas',
       kanban: 'Kanban',
@@ -2690,20 +2699,25 @@
       importacao: 'Importar dados',
       manutencao: 'Administração',
       usuarios: 'Usuários',
+      grupos_permissao: 'Grupos de Permissão',
       sobre: 'Sobre'
     };
 
     const ROLE_PERMISSIONS = {
-      'super admin': ['dashboard', 'implantacao', 'associados', 'veiculos', 'cotacoes', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
-      'administrativo': ['dashboard', 'implantacao', 'associados', 'veiculos', 'cotacoes', 'consultores', 'eventos', 'vistorias', 'compras', 'financeiro', 'oficinas', 'kanban', 'relatorios', 'importacao', 'manutencao', 'usuarios', 'sobre'],
-      'cadastro': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'consultores', 'eventos', 'kanban', 'relatorios', 'importacao', 'sobre'],
-      'eventos': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'consultores', 'eventos', 'vistorias', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
-      'regulacao': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'eventos', 'vistorias', 'oficinas', 'kanban', 'relatorios', 'sobre'],
-      'compras': ['dashboard', 'eventos', 'compras', 'oficinas', 'kanban', 'relatorios', 'sobre'],
-      'financeiro': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'consultores', 'financeiro', 'compras', 'relatorios', 'importacao', 'sobre'],
-      'consultor': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'eventos', 'kanban', 'sobre'],
-      'regional': ['dashboard', 'associados', 'veiculos', 'cotacoes', 'consultores', 'eventos', 'financeiro', 'kanban', 'relatorios', 'sobre'],
-      'oficina': ['dashboard', 'eventos', 'vistorias', 'compras', 'sobre']
+      'super admin': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','manutencao','sobre'],
+      'administrador': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','manutencao','sobre'],
+      'administrativo': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','manutencao','sobre'],
+      'cadastro': ['dashboard','associados','veiculos','cooperativas','consultores','oficinas','cotacoes','relatorios','importacao','sobre'],
+      'eventos': ['dashboard','associados','veiculos','eventos','vistorias','compras','oficinas','kanban','relatorios','sobre'],
+      'regulação': ['dashboard','associados','veiculos','eventos','vistorias','oficinas','kanban','relatorios','sobre'],
+      'regulacao': ['dashboard','associados','veiculos','eventos','vistorias','oficinas','kanban','relatorios','sobre'],
+      'compras': ['dashboard','eventos','compras','oficinas','kanban','relatorios','sobre'],
+      'financeiro': ['dashboard','associados','veiculos','compras','financeiro','relatorios','sobre'],
+      'gestor operacional': ['dashboard','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','oficinas','kanban','cotacoes','financeiro','relatorios','sobre'],
+      'consultor': ['dashboard','cotacoes','sobre'],
+      'gerente': ['dashboard','cooperativas','consultores','cotacoes','sobre'],
+      'regional': ['dashboard','cooperativas','consultores','cotacoes','sobre'],
+      'oficina': ['dashboard','eventos','vistorias','compras','sobre']
     };
 
     function roleKey() {
@@ -2927,11 +2941,13 @@
       if (view === 'implantacao') return renderImplantacao();
       if (view === 'associados') return renderAssociados();
       if (view === 'veiculos') return renderVeiculos();
+      if (view === 'cooperativas') return renderCooperativas();
       if (view === 'consultores') return renderConsultores();
       if (view === 'eventos') return renderEventos();
       if (view === 'vistorias') return renderVistorias();
       if (view === 'compras') return renderCompras();
       if (view === 'cotacoes') return renderCotacoes();
+      if (view === 'planos') return renderPlanos();
       if (view === 'financeiro') return renderFinanceiro();
       if (view === 'oficinas') return renderOficinas();
       if (view === 'kanban') return renderKanban();
@@ -2939,6 +2955,7 @@
       if (view === 'importacao') return renderImportacao();
       if (view === 'manutencao') return renderManutencao();
       if (view === 'usuarios') return renderUsuarios();
+      if (view === 'grupos_permissao') return renderGruposPermissao();
       if (view === 'sobre') return renderSobre();
     }
 
@@ -3037,7 +3054,7 @@
 
       const steps = [
         { label: 'Usuário administrador ativo', note: 'Garanta pelo menos um Super Admin ativo.', done: usuariosAtivos > 0, view: 'usuarios' },
-        { label: 'Consultores/regionais cadastrados', note: 'Base gerencial para vínculo com veículos e relatórios.', done: consultoresAtivos > 0, view: 'consultores' },
+        { label: 'Consultores/regionais cadastrados', note: 'Base de Voluntários para vínculo com veículos e relatórios.', done: consultoresAtivos > 0, view: 'consultores' },
         { label: 'Oficinas cadastradas', note: 'Base operacional para eventos e vistorias.', done: oficinasAtivas > 0, view: 'oficinas' },
         { label: 'Associados cadastrados/importados', note: 'Base principal da operação.', done: associados > 0, view: 'associados' },
         { label: 'Veículos cadastrados/importados', note: 'Carteira operacional e indicadores de FIPE/mensalidade.', done: veiculos > 0, view: 'veiculos' },
@@ -3087,6 +3104,7 @@
     }
 
     async function renderDashboard() {
+      if (isCommercialRole()) return renderCommercialDashboard();
       els.viewRoot.innerHTML = topbar('Painel Executivo', 'Visão consolidada da operação, alertas e indicadores gerenciais.') + skeletonDashboard();
       try {
         await Promise.all([
@@ -3244,7 +3262,7 @@
           </div>
           <div class="form-grid">
             <div class="field"><label>Busca geral</label><input id="dashSearch" value="${escapeHtml(f.search ? document.getElementById('dashSearch')?.value || '' : '')}" placeholder="Placa, associado, evento..." oninput="paintDashboardAvancado()" /></div>
-            <div class="field"><label>Regional</label><select id="dashRegional" onchange="paintDashboardAvancado()"><option value="">Todas</option>${optionListSelected(options.regionais, f.regional)}</select></div>
+            <div class="field"><label>Cooperativa</label><select id="dashRegional" onchange="paintDashboardAvancado()"><option value="">Todas</option>${optionListSelected(options.regionais, f.regional)}</select></div>
             <div class="field"><label>Consultor</label><select id="dashConsultor" onchange="paintDashboardAvancado()"><option value="">Todos</option>${optionListSelected(options.consultores, f.consultor)}</select></div>
             <div class="field"><label>Oficina</label><select id="dashOficina" onchange="paintDashboardAvancado()"><option value="">Todas</option>${optionListSelected(options.oficinas, f.oficina)}</select></div>
             <div class="field"><label>Status evento</label><select id="dashStatusEvento" onchange="paintDashboardAvancado()"><option value="">Todos</option>${optionListSelected(options.statusEventos, f.statusEvento)}</select></div>
@@ -3394,6 +3412,14 @@
       return state.cache.cotacoes;
     }
 
+
+    async function ensurePlanosCache(force = false) {
+      if (!force && state.cache.planos.length) return state.cache.planos;
+      const result = await apiGet('listar', { tabela: 'Planos' });
+      state.cache.planos = result.data || [];
+      return state.cache.planos;
+    }
+
     async function ensureRegulacoesCache(force = false) {
       if (!force && state.cache.regulacoes.length) return state.cache.regulacoes;
       const result = await apiGet('listar', { tabela: 'Vistorias_Regulacao' });
@@ -3473,6 +3499,18 @@
       return state.cache.consultores.find(c => String(c.id_consultor) === String(id));
     }
 
+    function findCooperativaById(id) {
+      return state.cache.cooperativas.find(c => String(c.id_cooperativa) === String(id));
+    }
+
+    function isCommercialRole() {
+      return ['consultor','gerente','regional'].includes(roleKey());
+    }
+
+    function canManageBase() {
+      return !isCommercialRole() && hasPermission('consultores');
+    }
+
     function findOficinaById(id) {
       return state.cache.oficinas.find(o => String(o.id_oficina) === String(id));
     }
@@ -3492,12 +3530,16 @@
       const mapa = {
         Associados: 'associados',
         Consultores_Regionais: 'consultores',
+        Cooperativas: 'cooperativas',
+        Grupos_Permissao: 'gruposPermissao',
+        Permissoes_Grupo: 'permissoesGrupo',
         Oficinas: 'oficinas',
         Eventos: 'eventos',
         Vistorias_Regulacao: 'regulacoes',
         Compras: 'compras',
         Financeiro: 'financeiro',
-        Cotacoes: 'cotacoes'
+        Cotacoes: 'cotacoes',
+        Planos: 'planos'
       };
       const chave = mapa[tabela];
       if (chave && state.cache[chave]) state.cache[chave] = [];
@@ -3519,11 +3561,78 @@
       );
     }
 
+
+    async function ensureCooperativasCache(force = false) {
+      if (!force && state.cache.cooperativas.length) return state.cache.cooperativas;
+      const result = await apiGet('listar', { tabela: 'Cooperativas' });
+      state.cache.cooperativas = result.data || [];
+      return state.cache.cooperativas;
+    }
+
+    async function ensureGruposPermissaoCache(force = false) {
+      if (!force && state.cache.gruposPermissao.length) return state.cache.gruposPermissao;
+      const [g,p] = await Promise.all([
+        apiGet('listar', { tabela: 'Grupos_Permissao' }),
+        apiGet('listar', { tabela: 'Permissoes_Grupo' })
+      ]);
+      state.cache.gruposPermissao = g.data || [];
+      state.cache.permissoesGrupo = p.data || [];
+      return state.cache.gruposPermissao;
+    }
+
+    async function renderCooperativas(filter = '') {
+      if (!hasPermission('cooperativas')) return renderBlocked('cooperativas');
+      els.viewRoot.innerHTML = topbar('Cooperativas', 'Bases comerciais, gerentes responsáveis, voluntários e carteira vinculada.', canManageBase() ? '<button class="btn btn-yellow" onclick="openCooperativaModal()">+ Nova Cooperativa</button><button class="btn btn-ghost" onclick="renderCooperativas()">Atualizar</button>' : '<button class="btn btn-ghost" onclick="renderCooperativas()">Atualizar</button>') + loadingPanel('Carregando Cooperativas...');
+      try {
+        await Promise.all([ensureCooperativasCache(true), ensureConsultoresCache(true), ensureVeiculosCache().catch(()=>[]), ensureCotacoesCache().catch(()=>[]), ensureEventosCache().catch(()=>[])]);
+        paintCooperativasTable(filter);
+      } catch (error) { renderError(error.message); }
+    }
+
+    function paintCooperativasTable(filter = '') {
+      const termo = normalizeText(filter);
+      const data = state.cache.cooperativas.filter(c => normalizeText(`${c.nome} ${c.sigla} ${c.gerente} ${c.cidade} ${c.estado} ${c.status}`).includes(termo));
+      const ativos = state.cache.cooperativas.filter(c => ['ativa','ativo'].includes(normalizeText(c.status))).length;
+      els.viewRoot.innerHTML = `${topbar('Cooperativas','Bases comerciais, gerentes responsáveis, voluntários e carteira vinculada.', canManageBase() ? '<button class="btn btn-yellow" onclick="openCooperativaModal()">+ Nova Cooperativa</button><button class="btn btn-ghost" onclick="renderCooperativas()">Atualizar</button>' : '<button class="btn btn-ghost" onclick="renderCooperativas()">Atualizar</button>')}<div class="content-panel"><div class="summary-strip">${summaryItem('Total',state.cache.cooperativas.length)}${summaryItem('Ativas',ativos)}${summaryItem('Filtradas',data.length)}</div><div class="panel-head"><div><h3>Base de Cooperativas</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por nome, sigla, gerente ou cidade..." value="${escapeHtml(filter)}" oninput="paintCooperativasTable(this.value)" /></div></div>${data.length ? cooperativasTable(data) : emptyState('Nenhuma Cooperativa cadastrada.','Cadastre a primeira base comercial.')}</div>`;
+    }
+
+    function cooperativasTable(data) {
+      const pager = paginateData('cooperativas', data); data = pager.items;
+      return `<div class="table-wrap"><table><thead><tr><th>Cooperativa</th><th>Gerente</th><th>Cidade/UF</th><th>Voluntários</th><th>Status</th><th>Ações</th></tr></thead><tbody>${data.map(c => { const vols=state.cache.consultores.filter(v => String(v.id_cooperativa||'')===String(c.id_cooperativa) || normalizeText(v.cooperativa||v.regional)===normalizeText(c.nome||c.sigla)); return `<tr><td><strong>${escapeHtml(c.nome||c.sigla||'-')}</strong><br><small>${escapeHtml(c.sigla||'')}</small></td><td>${escapeHtml(c.gerente||'-')}</td><td>${escapeHtml([c.cidade,c.estado].filter(Boolean).join('/'))}</td><td>${vols.length}</td><td>${statusBadge(c.status||'Ativa')}</td><td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCooperativaDetails(${jsArg(c.id_cooperativa)})">Detalhes</button>${canManageBase()?`<button class="btn btn-ghost btn-small" onclick="openCooperativaModalById(${jsArg(c.id_cooperativa)})">Editar</button>`:''}${podeExcluirDefinitivo()?`<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Cooperativas',${jsArg(c.id_cooperativa)},'esta Cooperativa')">Excluir</button>`:''}</div></td></tr>`; }).join('')}</tbody></table>${paginationHtml('cooperativas',pager)}</div>`;
+    }
+
+    async function openCooperativaModalById(id) { await ensureCooperativasCache(); const item=findCooperativaById(id); if(!item)return toast('Cooperativa não encontrada.','error'); openCooperativaModal(item); }
+    function openCooperativaModal(item=null) {
+      if (!canManageBase()) return toast('Seu perfil não pode alterar Cooperativas.','error');
+      const isEdit=Boolean(item?.id_cooperativa);
+      openModal(isEdit?'Editar Cooperativa':'Nova Cooperativa',`<div class="form-grid">${field('nome','Nome da Cooperativa','Ex.: Base Comercial João Silva','',item?.nome||'')}${field('sigla','Sigla / Código','Ex.: PE.140','',item?.sigla||'')}${field('cpf_cnpj','CPF/CNPJ','Documento da base','',item?.cpf_cnpj||'')}${field('gerente','Gerente responsável','Nome do responsável','',item?.gerente||'')}${field('telefone','Telefone','(00) 00000-0000','',item?.telefone||'')}${field('email','E-mail','email@dominio.com','',item?.email||'')}${field('cidade','Cidade','Cidade','',item?.cidade||'')}${field('estado','UF','PE','',item?.estado||'')}${selectField('status','Status',['Ativa','Inativa'],item?.status||'Ativa')}${textareaField('observacoes','Observações','Informações da base comercial','full',item?.observacoes||'')}</div>`,isEdit?'Salvar alterações':'Criar Cooperativa',async data=>{ const payload={action:isEdit?'editar':'criar',tabela:'Cooperativas',dados:data}; if(isEdit)payload.id=item.id_cooperativa; await apiPost(payload); state.cache.cooperativas=[]; toast(isEdit?'Cooperativa atualizada.':'Cooperativa criada.'); await renderCooperativas(); });
+    }
+
+    async function openCooperativaDetails(id) {
+      await Promise.all([ensureCooperativasCache(),ensureConsultoresCache(),ensureVeiculosCache().catch(()=>[]),ensureCotacoesCache().catch(()=>[]),ensureEventosCache().catch(()=>[])]);
+      const c=findCooperativaById(id); if(!c)return toast('Cooperativa não encontrada.','error');
+      const match=x=>String(x.id_cooperativa||'')===String(id)||normalizeText(x.cooperativa||x.regional)===normalizeText(c.nome||c.sigla);
+      const vols=state.cache.consultores.filter(match); const veics=state.cache.veiculos.filter(match); const cots=state.cache.cotacoes.filter(match); const placas=new Set(veics.map(v=>normalizePlate(v.placa))); const evs=state.cache.eventos.filter(e=>placas.has(normalizePlate(e.placa)));
+      const fipe=veics.reduce((s,v)=>s+parseMoneyBR(v.valor_fipe),0); const mensal=veics.reduce((s,v)=>s+parseMoneyBR(v.mensalidade),0);
+      openCustomModal('Detalhes da Cooperativa',`<div class="detail-grid">${detailCard('Cooperativa',c.nome||c.sigla)}${detailCard('Sigla',c.sigla)}${detailCard('Gerente',c.gerente)}${detailCard('Cidade/UF',[c.cidade,c.estado].filter(Boolean).join('/'))}${detailCard('Voluntários',vols.length)}${detailCard('Veículos',veics.length)}${detailCard('FIPE da carteira',money(fipe))}${detailCard('Mensalidade prevista',money(mensal))}${detailCard('Cotações',cots.length)}${detailCard('Eventos abertos',evs.filter(e=>!['finalizado','recusado','cancelado'].includes(normalizeText(e.status_evento))).length)}</div><div class="detail-section"><h4>Voluntários</h4>${vols.length?`<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Função</th><th>Status</th></tr></thead><tbody>${vols.map(v=>`<tr><td>${escapeHtml(v.nome||'-')}</td><td>${escapeHtml(v.tipo||'-')}</td><td>${statusBadge(v.status)}</td></tr>`).join('')}</tbody></table></div>`:emptyState('Nenhum Voluntário vinculado.','')}</div>`,true);
+    }
+
+    async function renderGruposPermissao() {
+      if (!hasPermission('grupos_permissao')) return renderBlocked('grupos_permissao');
+      els.viewRoot.innerHTML=topbar('Grupos de Permissão','Estrutura de acesso separada entre Comercial e Operacional.')+loadingPanel('Carregando grupos...');
+      try { await ensureGruposPermissaoCache(true); const grupos=state.cache.gruposPermissao; els.viewRoot.innerHTML=`${topbar('Grupos de Permissão','Estrutura de acesso separada entre Comercial e Operacional.')}<div class="content-panel"><div class="panel-head"><div><h3>Grupos configurados</h3><p>${grupos.length} grupo(s) disponíveis.</p></div></div><div class="grid-cards">${grupos.map(g=>`<div class="card panel"><h3>${escapeHtml(g.nome_grupo||'-')}</h3><p>${escapeHtml(g.descricao||'')}</p><div class="detail-grid">${detailCard('Tipo',g.tipo_acesso)}${detailCard('Escopo',g.escopo_dados)}${detailCard('Status',g.status)}</div></div>`).join('')}</div></div>`; } catch(error){renderError(error.message);}
+    }
+
+    async function renderCommercialDashboard() {
+      els.viewRoot.innerHTML=topbar('Painel Comercial','Cotações e indicadores dentro do seu escopo de acesso.')+loadingPanel('Carregando painel comercial...');
+      try { await Promise.all([ensureCotacoesCache(true),ensureConsultoresCache(true),ensureCooperativasCache(true)]); const cots=state.cache.cotacoes; const convertidas=cots.filter(c=>normalizeText(c.status_cotacao)==='convertida').length; const abertas=cots.filter(c=>!['convertida','cancelada','recusada','expirada'].includes(normalizeText(statusCotacaoReal(c)))).length; const fipe=cots.reduce((s,c)=>s+parseMoneyBR(c.valor_fipe),0); const mensal=cots.reduce((s,c)=>s+parseMoneyBR(c.mensalidade_final||c.mensalidade_sugerida),0); els.viewRoot.innerHTML=`${topbar('Painel Comercial',roleKey()==='consultor'?'Visão das suas próprias cotações.':'Visão da sua Cooperativa e produção comercial.','<button class="btn btn-yellow" onclick="openCotacaoModal()">+ Nova cotação</button>')}<div class="grid-cards">${metric('Cotações',cots.length,'Dentro do seu escopo')}${metric('Em andamento',abertas,'Aguardando conclusão')}${metric('Convertidas',convertidas,'Conversões realizadas')}${metric('FIPE cotada',money(fipe),'Soma das propostas')}${metric('Mensalidade projetada',money(mensal),'Valor das cotações')}${metric('Voluntários visíveis',state.cache.consultores.length,'Equipe comercial no escopo')}</div>`; } catch(error){renderError(error.message);}
+    }
+
     async function renderConsultores(filter = '') {
       if (!hasPermission('consultores')) return renderBlocked('consultores');
-      els.viewRoot.innerHTML = topbar('Consultores e Regionais', 'Controle gerencial de consultores, regionais e cooperativas.', '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo consultor</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>') + loadingPanel('Carregando consultores...');
+      els.viewRoot.innerHTML = topbar('Voluntários', 'Consultores e Gerentes vinculados às Cooperativas.', canManageBase() ? '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo Voluntário</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>' : '<button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>') + loadingPanel('Carregando Voluntários...');
       try {
-        await ensureConsultoresCache(true);
+        await Promise.all([ensureConsultoresCache(true), ensureCooperativasCache(true).catch(()=>[])]);
         paintConsultorTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -3533,85 +3642,93 @@
       const data = state.cache.consultores.filter(item => `${item.nome} ${item.cpf_cnpj} ${item.telefone} ${item.email} ${item.regional} ${item.cooperativa} ${item.tipo} ${item.status}`.toLowerCase().includes(termo));
       const ativos = state.cache.consultores.filter(item => normalizeText(item.status) === 'ativo').length;
       const inativos = state.cache.consultores.filter(item => normalizeText(item.status) === 'inativo').length;
-      const regionais = uniqueValues(state.cache.consultores.map(item => item.regional)).length;
+      const cooperativas = uniqueValues(state.cache.consultores.map(item => item.cooperativa || item.regional)).length;
       els.viewRoot.innerHTML = `
-        ${topbar('Consultores e Regionais', 'Controle gerencial de consultores, regionais e cooperativas.', '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo consultor</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>')}
+        ${topbar('Voluntários', 'Consultores e Gerentes vinculados às Cooperativas.', canManageBase() ? '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo Voluntário</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>' : '<button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>')}
         <div class="content-panel">
-          <div class="summary-strip">${summaryItem('Total', state.cache.consultores.length)}${summaryItem('Ativos', ativos)}${summaryItem('Inativos', inativos)}${summaryItem('Regionais', regionais)}${summaryItem('Filtrados', data.length)}</div>
-          <div class="panel-head"><div><h3>Base gerencial</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por nome, regional, cooperativa..." value="${escapeHtml(filter)}" oninput="paintConsultorTable(this.value)" /></div></div>
-          ${data.length ? consultorTable(data) : emptyState('Nenhum consultor cadastrado.', 'Clique em “Novo consultor” para criar o primeiro registro.')}
+          <div class="summary-strip">${summaryItem('Total', state.cache.consultores.length)}${summaryItem('Ativos', ativos)}${summaryItem('Inativos', inativos)}${summaryItem('Cooperativas', cooperativas)}${summaryItem('Filtrados', data.length)}</div>
+          <div class="panel-head"><div><h3>Base de Voluntários</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por nome, função ou Cooperativa..." value="${escapeHtml(filter)}" oninput="paintConsultorTable(this.value)" /></div></div>
+          ${data.length ? consultorTable(data) : emptyState('Nenhum Voluntário cadastrado.', 'Clique em “Novo Voluntário” para criar o primeiro registro.')}
         </div>`;
     }
 
     function consultorTable(data) {
       const pager = paginateData('consultores', data);
       data = pager.items;
-      return `<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Contato</th><th>Regional</th><th>Cooperativa</th><th>Tipo</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>
+      return `<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Contato</th><th>Cooperativa</th><th>Função</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
-          <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.cpf_cnpj || '')}</small></td><td>${escapeHtml(item.telefone || '-')}<br><small>${escapeHtml(item.email || '')}</small></td><td>${escapeHtml(item.regional || '-')}</td><td>${escapeHtml(item.cooperativa || '-')}</td><td>${escapeHtml(item.tipo || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_cadastro)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openConsultorDetails(${jsArg(item.id_consultor)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openConsultorModalById(${jsArg(item.id_consultor)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarConsultor(${jsArg(item.id_consultor)})">Inativar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Consultores_Regionais', ${jsArg(item.id_consultor)}, 'este consultor/regional')">Excluir</button>` : ''}</div></td>
+          <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.cpf_cnpj || '')}</small></td><td>${escapeHtml(item.telefone || '-')}<br><small>${escapeHtml(item.email || '')}</small></td><td>${escapeHtml(item.cooperativa || item.regional || '-')}</td><td>${escapeHtml(item.tipo || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_cadastro)}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openConsultorDetails(${jsArg(item.id_consultor)})">Detalhes</button>${canManageBase()?`<button class="btn btn-ghost btn-small" onclick="openConsultorModalById(${jsArg(item.id_consultor)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarConsultor(${jsArg(item.id_consultor)})">Inativar</button>`:''}${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Consultores_Regionais', ${jsArg(item.id_consultor)}, 'este Voluntário')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('consultores', pager)}</div>`;
     }
 
     function openConsultorModalById(id) {
       const item = findConsultorById(id);
-      if (!item) return toast('Consultor não encontrado na tela atual.', 'error');
+      if (!item) return toast('Voluntário não encontrado na tela atual.', 'error');
       openConsultorModal(item);
+    }
+
+    function cooperativaSelectField(selectedId = '', selectedName = '') {
+      const options = ['<option value="">Selecionar Cooperativa...</option>'].concat((state.cache.cooperativas || []).filter(c=>['ativa','ativo'].includes(normalizeText(c.status||'Ativa'))).map(c => `<option value="${escapeHtml(c.id_cooperativa)}" data-nome="${escapeHtml(c.nome||c.sigla||'')}" ${String(c.id_cooperativa)===String(selectedId)||(!selectedId&&normalizeText(c.nome||c.sigla)===normalizeText(selectedName))?'selected':''}>${escapeHtml([c.sigla,c.nome,c.cidade].filter(Boolean).join(' — '))}</option>`)).join('');
+      return `<div class="field"><label>Cooperativa</label><select name="id_cooperativa" id="coopSelect">${options}</select><input type="hidden" name="cooperativa" value="${escapeHtml(selectedName||'')}" /></div>`;
     }
 
     function openConsultorModal(item = null) {
       const isEdit = !!item;
-      const tipos = ['Consultor', 'Regional', 'Líder', 'Cooperativa', 'Parceiro'];
+      ensureCooperativasCache().catch(()=>{});
+      const tipos = ['Consultor', 'Gerente'];
       const statuses = ['Ativo', 'Inativo', 'Pendente'];
-      openModal(isEdit ? 'Editar consultor/regional' : 'Novo consultor/regional', `
+      openModal(isEdit ? 'Editar Voluntário' : 'Novo Voluntário', `
         <div class="form-grid">
           ${field('nome', 'Nome', 'Nome completo', '', item?.nome || '')}
           ${field('cpf_cnpj', 'CPF/CNPJ', '000.000.000-00', '', item?.cpf_cnpj || '')}
           ${field('telefone', 'Telefone', '81999999999', '', item?.telefone || '')}
           ${field('email', 'E-mail', 'email@dominio.com', '', item?.email || '')}
-          ${field('regional', 'Regional', 'Caruaru', '', item?.regional || '')}
-          ${field('cooperativa', 'Cooperativa', 'Ex.: Regional A', '', item?.cooperativa || '')}
-          ${selectField('tipo', 'Tipo', tipos, item?.tipo || 'Consultor')}
+          ${cooperativaSelectField(item?.id_cooperativa || '', item?.cooperativa || item?.regional || '')}
+          ${selectField('tipo', 'Função', ['Consultor','Gerente'], item?.tipo || 'Consultor')}
           ${selectField('status', 'Status', statuses, item?.status || 'Ativo')}
           ${textareaField('observacoes', 'Observações', 'Observações internas...', 'span-2', item?.observacoes || '')}
         </div>`, isEdit ? 'Salvar alterações' : 'Cadastrar', async data => {
+          const coop = data.id_cooperativa ? findCooperativaById(data.id_cooperativa) : null;
+          if (coop) { data.cooperativa = coop.nome || coop.sigla || ''; data.regional = data.cooperativa; }
           const payload = isEdit ? { action: 'editar', tabela: 'Consultores_Regionais', id: item.id_consultor, dados: data } : { action: 'criar', tabela: 'Consultores_Regionais', dados: data };
           await apiPost(payload);
-          toast(isEdit ? 'Consultor atualizado com sucesso.' : 'Consultor cadastrado com sucesso.');
+          toast(isEdit ? 'Voluntário atualizado com sucesso.' : 'Voluntário cadastrado com sucesso.');
           await renderConsultores();
         });
     }
 
     async function openConsultorDetails(id) {
       try {
-        await Promise.all([ensureConsultoresCache(), ensureVeiculosCache(), ensureEventosCache()]);
+        if (isCommercialRole()) await ensureConsultoresCache();
+        else await Promise.all([ensureConsultoresCache(), ensureVeiculosCache(), ensureEventosCache()]);
         const item = findConsultorById(id);
-        if (!item) return toast('Consultor não encontrado.', 'error');
-        const veiculos = state.cache.veiculos.filter(v => normalizeText(v.consultor) === normalizeText(item.nome) || normalizeText(v.regional) === normalizeText(item.regional));
+        if (!item) return toast('Voluntário não encontrado.', 'error');
+        const veiculos = isCommercialRole() ? [] : state.cache.veiculos.filter(v => normalizeText(v.voluntario || v.consultor) === normalizeText(item.nome) || normalizeText(v.cooperativa || v.regional) === normalizeText(item.cooperativa || item.regional));
         const placas = new Set(veiculos.map(v => normalizePlate(v.placa)));
-        const eventos = state.cache.eventos.filter(e => placas.has(normalizePlate(e.placa)) || normalizeText(e.responsavel) === normalizeText(item.nome));
+        const eventos = isCommercialRole() ? [] : state.cache.eventos.filter(e => placas.has(normalizePlate(e.placa)) || normalizeText(e.responsavel) === normalizeText(item.nome));
         const fipeCarteira = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.valor_fipe), 0);
         const mensalidadeCarteira = veiculos.reduce((sum, v) => sum + parseMoneyBR(v.mensalidade), 0);
-        openCustomModal('Detalhes do consultor/regional', `
+        openCustomModal('Detalhes do Voluntário', `
           <div class="detail-grid">
             ${detailCard('Nome', item.nome)}${detailCard('Tipo', item.tipo)}${detailCard('Status', item.status)}
             ${detailCard('CPF/CNPJ', item.cpf_cnpj)}${detailCard('Telefone', item.telefone)}${detailCard('E-mail', item.email)}
-            ${detailCard('Regional', item.regional)}${detailCard('Cooperativa', item.cooperativa)}${detailCard('Cadastro', dateBR(item.data_cadastro))}
+            ${detailCard('Cooperativa', item.cooperativa || item.regional)}${detailCard('Cadastro', dateBR(item.data_cadastro))}
             ${detailCard('Veículos na carteira', veiculos.length)}${detailCard('FIPE da carteira', money(fipeCarteira))}${detailCard('Mensalidade prevista', money(mensalidadeCarteira))}
           </div>
           <div class="detail-section"><h4>Veículos relacionados</h4>${miniVeiculosTable(veiculos)}</div>
           <div class="detail-section"><h4>Eventos relacionados</h4>${miniEventosTable(eventos)}</div>
           <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
-          ${podeExcluirDefinitivo() ? `<div class="quick-actions"><button class="btn btn-danger" onclick="closeModal(); excluirRegistroDefinitivoUI('Consultores_Regionais', ${jsArg(item.id_consultor)}, 'este consultor/regional')">Excluir definitivamente</button></div>` : ''}`, true);
+          ${podeExcluirDefinitivo() ? `<div class="quick-actions"><button class="btn btn-danger" onclick="closeModal(); excluirRegistroDefinitivoUI('Consultores_Regionais', ${jsArg(item.id_consultor)}, 'este Voluntário')">Excluir definitivamente</button></div>` : ''}`, true);
       } catch (error) { toast(error.message, 'error'); }
     }
 
     async function inativarConsultor(id) {
       const item = findConsultorById(id);
-      confirmAction('Inativar consultor/regional', `Deseja inativar ${item?.nome || 'este registro'}?`, 'Inativar', async () => {
+      confirmAction('Inativar Voluntário', `Deseja inativar ${item?.nome || 'este registro'}?`, 'Inativar', async () => {
         await apiPost({ action: 'editar', tabela: 'Consultores_Regionais', id, dados: { status: 'Inativo' } });
-        toast('Consultor/regional inativado com sucesso.');
+        toast('Voluntário inativado com sucesso.');
         await renderConsultores();
       });
     }
@@ -3761,22 +3878,31 @@
       openUsuarioModal(item);
     }
 
-    function openUsuarioModal(item = null) {
+    async function openUsuarioModal(item = null) {
       if (!hasPermission('usuarios')) return renderBlocked('usuarios');
       const isEdit = Boolean(item?.id_usuario);
-      const perfis = parseOptions('perfis_usuario', ['Super Admin', 'Administrativo', 'Cadastro', 'Eventos', 'Regulação', 'Compras', 'Financeiro', 'Consultor', 'Regional', 'Oficina']);
-      const setores = ['Administração', 'Cadastro', 'Eventos', 'Regulação', 'Compras', 'Financeiro', 'Comercial', 'Oficina', 'Regional'];
+      await Promise.all([ensureConsultoresCache(true).catch(()=>{}), ensureCooperativasCache(true).catch(()=>{})]);
+      const perfis = parseOptions('perfis_usuario', ['Super Admin','Administrador','Cadastro','Eventos','Regulação','Compras','Financeiro','Gestor Operacional','Consultor','Gerente','Oficina']);
+      const setores = ['Administração','Cadastro','Eventos','Regulação','Compras','Financeiro','Comercial','Operações','Oficina'];
       const status = ['Ativo', 'Inativo'];
       openModal(isEdit ? 'Editar usuário' : 'Novo usuário', `
         <div class="form-grid">
           ${field('nome', 'Nome', 'Nome do usuário', '', item?.nome || '')}${field('email', 'E-mail de acesso', 'usuario@empresa.com', '', item?.email || '')}
-          ${selectField('perfil', 'Perfil', perfis, item?.perfil || 'Administrativo')}${selectField('setor', 'Setor', setores, item?.setor || 'Administração')}
+          ${selectField('perfil', 'Perfil', perfis, item?.perfil || 'Administrador')}${selectField('setor', 'Setor', setores, item?.setor || 'Administração')}
           ${selectField('status', 'Status', status, item?.status || 'Ativo')}${field('senha', isEdit ? 'Nova senha (opcional)' : 'Senha inicial', isEdit ? 'Deixe em branco para manter' : 'Ex.: 123456', '', '')}
+          ${selectConsultorField(item?.nome || '', item?.id_voluntario || '')}${cooperativaSelectField(item?.id_cooperativa || '', item?.cooperativa || '')}
           ${textareaField('observacoes_usuario', 'Observações internas', 'Controle interno de acesso', 'full', '')}
         </div>`, isEdit ? 'Salvar usuário' : 'Criar usuário', async (data) => {
           if (!data.nome || !data.email) throw new Error('Informe nome e e-mail.');
           if (!isEdit && !data.senha) throw new Error('Informe uma senha inicial.');
           delete data.observacoes_usuario;
+          if (data._consultor_ref) {
+            const vol=findConsultorById(data._consultor_ref); if(vol){ data.id_voluntario=vol.id_consultor; if(!data.id_cooperativa)data.id_cooperativa=vol.id_cooperativa||''; if(!data.cooperativa)data.cooperativa=vol.cooperativa||vol.regional||''; }
+          }
+          if (data.id_cooperativa) { const coop=findCooperativaById(data.id_cooperativa); if(coop) data.cooperativa=coop.nome||coop.sigla||data.cooperativa||''; }
+          delete data._consultor_ref;
+          const p=normalizeText(data.perfil); data.tipo_acesso=['consultor','gerente','regional'].includes(p)?'COMERCIAL':'OPERACIONAL'; data.escopo_dados=p==='consultor'?'PROPRIO':(['gerente','regional'].includes(p)?'COOPERATIVA':'GLOBAL');
+          data.grupo_permissao=p==='consultor'?'GRP-CONSULTOR':(['gerente','regional'].includes(p)?'GRP-GERENTE':(p==='super admin'?'GRP-SUPER-ADMIN':'GRP-ADMIN'));
           if (isEdit && !data.senha) delete data.senha;
           const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Usuarios', dados: data };
           if (isEdit) payload.id = item.id_usuario;
@@ -3793,7 +3919,7 @@
       openCustomModal('Detalhes do usuário', `
         <div class="detail-grid">
           ${detailCard('Nome', item.nome)}${detailCard('E-mail', item.email)}${detailCard('Perfil', item.perfil)}
-          ${detailCard('Setor', item.setor)}${detailCard('Status', item.status)}${detailCard('Criado em', dateTimeBR(item.data_criacao))}
+          ${detailCard('Setor', item.setor)}${detailCard('Status', item.status)}${detailCard('Tipo de acesso', item.tipo_acesso || (['consultor','gerente','regional'].includes(normalizeText(item.perfil))?'COMERCIAL':'OPERACIONAL'))}${detailCard('Cooperativa', item.cooperativa || '-')}${detailCard('Criado em', dateTimeBR(item.data_criacao))}
           ${detailCard('Último login', dateTimeBR(item.ultimo_login))}${detailCard('ID', item.id_usuario)}${detailCard('Sessão', String(item.id_usuario) === String(state.user?.id_usuario) ? 'Usuário logado' : 'Outro usuário')}
         </div>
         <div class="quick-actions"><button class="btn btn-ghost" onclick="closeModal(); openUsuarioModalById(${jsArg(item.id_usuario)})">Editar</button><button class="btn btn-yellow" onclick="closeModal(); resetSenhaUsuario(${jsArg(item.id_usuario)})">Trocar senha</button>${normalizeText(item.status) === 'ativo' ? `<button class="btn btn-danger" onclick="closeModal(); inativarUsuario(${jsArg(item.id_usuario)})">Inativar</button>` : `<button class="btn btn-blue" onclick="closeModal(); ativarUsuario(${jsArg(item.id_usuario)})">Ativar</button>`}${podeExcluirUsuario(item) ? `<button class="btn btn-danger" onclick="closeModal(); excluirUsuarioDefinitivo(${jsArg(item.id_usuario)})">Excluir definitivo</button>` : ''}</div>
@@ -3973,10 +4099,10 @@
     }
 
     function vehicleTable(data) {
-      return `<div class="table-wrap"><table><thead><tr><th>Placa</th><th>Associado</th><th>Veículo</th><th>FIPE</th><th>Mensalidade</th><th>Consultor</th><th>Status</th><th>Entrada</th><th>Ações</th></tr></thead><tbody>
+      return `<div class="table-wrap"><table><thead><tr><th>Placa</th><th>Associado</th><th>Veículo</th><th>FIPE</th><th>Mensalidade</th><th>Voluntário</th><th>Status</th><th>Entrada</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml([item.marca, item.modelo, item.ano_modelo].filter(Boolean).join(' ') || '-')}</td>
-          <td>${money(item.valor_fipe)}</td><td>${money(item.mensalidade)}</td><td>${escapeHtml(item.consultor || '-')}</td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_entrada)}</td>
+          <td>${money(item.valor_fipe)}</td><td>${money(item.mensalidade)}</td><td>${escapeHtml(item.voluntario || item.consultor || '-')}<br><small>${escapeHtml(item.cooperativa || item.regional || '')}</small></td><td>${statusBadge(item.status)}</td><td>${dateBR(item.data_entrada)}</td>
           <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openVehicleDetails(${jsArg(item.id_veiculo)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openVehicleModalById(${jsArg(item.id_veiculo)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarVeiculo(${jsArg(item.id_veiculo)})">Inativar</button>${podeExcluirVeiculo() ? `<button class="btn btn-danger btn-small" onclick="excluirVeiculoDefinitivo(${jsArg(item.id_veiculo)})">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table></div>`;
@@ -3996,15 +4122,14 @@
       const associadosAtivos = state.cache.associados.filter(a => normalizeText(a.status || 'Ativo') === 'ativo');
       const consultoresAtivos = state.cache.consultores.filter(c => normalizeText(c.status || 'Ativo') === 'ativo');
       const associadoHtml = associadosAtivos.length ? `${selectAssociadoField(item?.id_associado || '')}${field('associado', 'Associado manual', 'Use apenas se não estiver cadastrado', '', item?.associado || '')}` : field('associado', 'Associado', 'Nome do associado', '', item?.associado || '');
-      const consultorHtml = consultoresAtivos.length ? selectConsultorField(item?.consultor || '') : field('consultor', 'Consultor', 'Nome do consultor', '', item?.consultor || '');
+      const consultorHtml = consultoresAtivos.length ? selectConsultorField(item?.voluntario || item?.consultor || '', item?.id_voluntario || '') : field('consultor', 'Consultor', 'Nome do consultor', '', item?.consultor || '');
       openModal(isEdit ? 'Editar veículo' : 'Novo veículo', `
         <div class="form-grid">
           ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || '')}${associadoHtml}
           ${field('marca', 'Marca', 'Fiat, Chevrolet, Honda...', '', item?.marca || '')}${field('modelo', 'Modelo', 'Onix, Kwid, HB20...', '', item?.modelo || '')}
           ${field('ano_modelo', 'Ano/modelo', '2024', '', item?.ano_modelo || '')}${selectField('tipo_combustivel', 'Combustível', combustiveis, item?.tipo_combustivel || 'Flex')}
           ${field('valor_fipe', 'Valor FIPE', '65000', '', item?.valor_fipe || '')}${field('mensalidade', 'Mensalidade', '189.90', '', item?.mensalidade || '')}
-          ${consultorHtml}${field('regional', 'Regional', 'Preenchida pelo consultor/regional', '', item?.regional || '')}
-          ${field('cooperativa', 'Cooperativa', 'Preenchida pelo consultor/regional', '', item?.cooperativa || '')}${selectField('status', 'Status', status, item?.status || 'Ativo')}
+          ${consultorHtml}${hiddenField('id_cooperativa', item?.id_cooperativa || '')}${field('cooperativa', 'Cooperativa', 'Preenchida automaticamente pelo Voluntário', '', item?.cooperativa || item?.regional || '')}${hiddenField('regional', item?.regional || item?.cooperativa || '')}${selectField('status', 'Status', status, item?.status || 'Ativo')}
           ${field('rastreador', 'Rastreador', 'Sim/Não', '', item?.rastreador || '')}${textareaField('observacoes', 'Observações', 'Informações adicionais', 'full', item?.observacoes || '')}
         </div>`, isEdit ? 'Salvar alterações' : 'Salvar veículo', async (data) => {
           data.placa = String(data.placa || '').toUpperCase().trim();
@@ -4015,9 +4140,12 @@
           if (data._consultor_ref) {
             const consultorSelecionado = findConsultorById(data._consultor_ref);
             if (consultorSelecionado) {
-              data.consultor = consultorSelecionado.nome || data.consultor;
-              data.regional = consultorSelecionado.regional || data.regional;
-              data.cooperativa = consultorSelecionado.cooperativa || data.cooperativa;
+              data.id_voluntario = consultorSelecionado.id_consultor || data.id_voluntario;
+              data.voluntario = consultorSelecionado.nome || data.voluntario;
+              data.consultor = data.voluntario;
+              data.id_cooperativa = consultorSelecionado.id_cooperativa || data.id_cooperativa;
+              data.cooperativa = consultorSelecionado.cooperativa || consultorSelecionado.regional || data.cooperativa;
+              data.regional = data.cooperativa;
             }
           }
           delete data._consultor_ref;
@@ -4036,14 +4164,15 @@
       return `<div class="field"><label>Associado cadastrado</label><select name="id_associado">${options}</select></div>`;
     }
 
-    function selectConsultorField(selectedName = '') {
-      const consultores = state.cache.consultores.filter(item => normalizeText(item.status || 'Ativo') === 'ativo');
-      const options = ['<option value="">Selecionar consultor/regional...</option>'].concat(consultores.map(item => {
-        const selected = normalizeText(item.nome) === normalizeText(selectedName) ? 'selected' : '';
-        const label = [item.nome || 'Sem nome', item.regional, item.cooperativa].filter(Boolean).join(' — ');
-        return `<option value="${escapeHtml(item.id_consultor)}" data-nome="${escapeHtml(item.nome || '')}" data-regional="${escapeHtml(item.regional || '')}" data-cooperativa="${escapeHtml(item.cooperativa || '')}" ${selected}>${escapeHtml(label)}</option>`;
+    function selectConsultorField(selectedName = '', selectedId = '') {
+      const voluntariosBase = state.cache.consultores.filter(item => normalizeText(item.status || 'Ativo') === 'ativo');
+      const voluntarios = isCommercialRole() ? voluntariosBase.filter(item => String(item.id_consultor||'')===String(state.user?.id_voluntario||'') || normalizeText(item.nome)===normalizeText(state.user?.nome)) : voluntariosBase;
+      const options = ['<option value="">Selecionar Voluntário...</option>'].concat(voluntarios.map(item => {
+        const selected = String(item.id_consultor)===String(selectedId) || (!selectedId && normalizeText(item.nome) === normalizeText(selectedName)) ? 'selected' : '';
+        const label = [item.nome || 'Sem nome', item.tipo, item.cooperativa || item.regional].filter(Boolean).join(' — ');
+        return `<option value="${escapeHtml(item.id_consultor)}" data-nome="${escapeHtml(item.nome || '')}" data-cooperativa-id="${escapeHtml(item.id_cooperativa || '')}" data-cooperativa="${escapeHtml(item.cooperativa || item.regional || '')}" ${selected}>${escapeHtml(label)}</option>`;
       })).join('');
-      return `<div class="field"><label>Consultor/Regional cadastrado</label><select name="_consultor_ref" id="vehicleConsultorSelect">${options}</select><input type="hidden" name="consultor" value="${escapeHtml(selectedName || '')}" /></div>`;
+      return `<div class="field"><label>Voluntário</label><select name="_consultor_ref" id="vehicleConsultorSelect">${options}</select><input type="hidden" name="id_voluntario" value="${escapeHtml(selectedId || '')}" /><input type="hidden" name="voluntario" value="${escapeHtml(selectedName || '')}" /><input type="hidden" name="consultor" value="${escapeHtml(selectedName || '')}" /></div>`;
     }
 
     function attachVehicleConsultorSelect() {
@@ -4052,9 +4181,12 @@
       const fill = () => {
         const opt = select.options[select.selectedIndex];
         if (!opt) return;
+        setFormValue('id_voluntario', select.value || '');
+        setFormValue('voluntario', opt.dataset.nome || '');
         setFormValue('consultor', opt.dataset.nome || '');
-        setFormValue('regional', opt.dataset.regional || '');
+        setFormValue('id_cooperativa', opt.dataset.cooperativaId || '');
         setFormValue('cooperativa', opt.dataset.cooperativa || '');
+        setFormValue('regional', opt.dataset.cooperativa || '');
       };
       select.addEventListener('change', fill);
       if (select.value) fill();
@@ -4105,9 +4237,9 @@
         openCustomModal('Detalhes do veículo', `
           <div class="detail-grid">
             ${detailCard('Placa', item.placa)}${detailCard('Veículo', [item.marca, item.modelo, item.ano_modelo].filter(Boolean).join(' '))}${detailCard('Status', item.status)}
-            ${detailCard('Associado', item.associado)}${detailCard('Telefone', associado?.telefone || '-')}${detailCard('Regional', item.regional)}
+            ${detailCard('Associado', item.associado)}${detailCard('Telefone', associado?.telefone || '-')}${detailCard('Cooperativa', item.cooperativa || item.regional)}
             ${detailCard('FIPE', money(item.valor_fipe))}${detailCard('Mensalidade', money(item.mensalidade))}${detailCard('Rastreador', item.rastreador)}
-            ${detailCard('Consultor', item.consultor)}${detailCard('Cooperativa', item.cooperativa)}${detailCard('Entrada', dateBR(item.data_entrada))}
+            ${detailCard('Voluntário', item.voluntario || item.consultor)}${detailCard('Cooperativa', item.cooperativa)}${detailCard('Entrada', dateBR(item.data_entrada))}
           </div>
           <div class="detail-section"><h4>Eventos do veículo</h4>${miniEventosTable(eventos)}</div>
           <div class="detail-section"><h4>Financeiro do veículo</h4>${miniFinanceiroTable(financeiro)}</div>
@@ -4207,9 +4339,9 @@
     function compraTable(data) {
       const pager = paginateData('compras', data);
       data = pager.items;
-      return `<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Item</th><th>Fornecedor</th><th>Status</th><th>Valor aprovado</th><th>Solicitação</th><th>Ações</th></tr></thead><tbody>
+      return `<div class="table-wrap"><table><thead><tr><th>Origem</th><th>Evento / Finalidade</th><th>Item</th><th>Fornecedor</th><th>Status</th><th>Valor aprovado</th><th>Solicitação</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
-          <td><strong>${escapeHtml(eventLabel(item.id_evento))}</strong></td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.item || '-')}</td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${statusBadge(item.status_compra)}</td><td>${money(item.valor_aprovado || item.valor_cotado || 0)}</td><td>${dateBR(item.data_solicitacao)}</td>
+          <td>${statusBadge(item.origem_compra || (item.id_evento?'Evento':'Financeiro / Administrativo'))}</td><td><strong>${escapeHtml(item.id_evento ? eventLabel(item.id_evento) : (item.descricao_finalidade || '-'))}</strong><br><small>${escapeHtml(item.placa || item.categoria_compra || '')}</small></td><td>${escapeHtml(item.item || '-')}</td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${statusBadge(item.status_compra)}</td><td>${money(item.valor_aprovado || item.valor_cotado || 0)}</td><td>${dateBR(item.data_solicitacao)}</td>
           <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(item.id_compra)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCompraModalById(${jsArg(item.id_compra)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarCompraEntregue(${jsArg(item.id_compra)})">Entregar</button><button class="btn btn-danger btn-small" onclick="cancelarCompra(${jsArg(item.id_compra)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Compras', ${jsArg(item.id_compra)}, 'esta compra')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('compras', pager)}</div>`;
@@ -4265,13 +4397,140 @@
     }
 
     function cotacaoStatusOptions(selected = 'Em análise') {
-      return selectOptions(parseOptions('status_cotacao', ['Em análise','Aprovada','Recusada','Convertida','Cancelada']), selected || 'Em análise');
+      return selectOptions(parseOptions('status_cotacao', ['Em análise','Aguardando decisão','Aguardando vistoria','Aprovada','Recusada','Expirada','Convertida','Cancelada']), selected || 'Em análise');
+    }
+
+    function statusCotacaoReal(item) {
+      const atual = String(item?.status_cotacao || 'Em análise');
+      const encerrados = ['aprovada','recusada','convertida','cancelada','expirada'];
+      if (encerrados.includes(normalizeText(atual))) return atual;
+      if (!item?.data_validade) return atual;
+      const validade = new Date(item.data_validade);
+      const hoje = new Date(); hoje.setHours(0,0,0,0);
+      if (!Number.isNaN(validade.getTime()) && validade < hoje) return 'Expirada';
+      return atual;
+    }
+
+    function diasRestantesCotacao(item) {
+      if (!item?.data_validade) return null;
+      const validade = new Date(item.data_validade);
+      if (Number.isNaN(validade.getTime())) return null;
+      const hoje = new Date(); hoje.setHours(0,0,0,0);
+      validade.setHours(0,0,0,0);
+      return Math.ceil((validade - hoje) / 86400000);
+    }
+
+    function cotacaoValidadeLabel(item) {
+      const status = normalizeText(statusCotacaoReal(item));
+      if (['convertida','cancelada','recusada','expirada'].includes(status)) return status === 'expirada' ? 'Expirada' : 'Encerrada';
+      const dias = diasRestantesCotacao(item);
+      if (dias === null) return 'Sem validade';
+      if (dias < 0) return `Expirada há ${Math.abs(dias)} dia(s)`;
+      if (dias === 0) return 'Expira hoje';
+      if (dias === 1) return 'Expira amanhã';
+      return `${dias} dia(s) restantes`;
+    }
+
+    async function renderPlanos(filter = '') {
+      if (!hasPermission('planos')) return renderBlocked('planos');
+      els.viewRoot.innerHTML = topbar('Planos Comerciais', 'Regras configuráveis de cálculo, adesão, rastreador e desconto.', '<button class="btn btn-yellow" onclick="openPlanoModal()">+ Novo plano</button><button class="btn btn-ghost" onclick="renderPlanos()">Atualizar</button>') + loadingPanel('Carregando planos...');
+      try {
+        await ensurePlanosCache(true);
+        paintPlanosTable(filter);
+      } catch (error) { renderError(error.message); }
+    }
+
+    function paintPlanosTable(filter = '') {
+      const termo = String(filter || '').toLowerCase();
+      const data = state.cache.planos.filter(item => `${item.nome} ${item.descricao} ${item.tipo_veiculo} ${item.status}`.toLowerCase().includes(termo));
+      const ativos = state.cache.planos.filter(item => normalizeText(item.status) === 'ativo').length;
+      els.viewRoot.innerHTML = `
+        ${topbar('Planos Comerciais', 'Regras configuráveis de cálculo, adesão, rastreador e desconto.', '<button class="btn btn-yellow" onclick="openPlanoModal()">+ Novo plano</button><button class="btn btn-ghost" onclick="renderPlanos()">Atualizar</button>')}
+        <div class="content-panel">
+          <div class="summary-strip">${summaryItem('Total', state.cache.planos.length)}${summaryItem('Ativos', ativos)}${summaryItem('Inativos', state.cache.planos.length - ativos)}${summaryItem('Filtrados', data.length)}</div>
+          <div class="panel-head"><div><h3>Regras comerciais</h3><p>${data.length} plano(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por plano, tipo ou status..." value="${escapeHtml(filter)}" oninput="paintPlanosTable(this.value)" /></div></div>
+          ${data.length ? planosTable(data) : emptyState('Nenhum plano cadastrado.', 'Crie um plano para aplicar regras automáticas nas cotações.')}
+        </div>`;
+    }
+
+    function planosTable(data) {
+      const pager = paginateData('planos', data);
+      data = pager.items;
+      return `<div class="table-wrap"><table><thead><tr><th>Plano</th><th>Tipo</th><th>Percentual</th><th>Mínimo</th><th>Adesão</th><th>Rastreador</th><th>Desconto máx.</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+        ${data.map(item => `<tr>
+          <td><strong>${escapeHtml(item.nome || '-')}</strong><br><small>${escapeHtml(item.descricao || '')}</small></td>
+          <td>${escapeHtml(cotacaoTipoLabel(item.tipo_veiculo || 'cars'))}</td>
+          <td>${escapeHtml(item.percentual || '0')}%</td>
+          <td>${money(item.mensalidade_minima)}</td>
+          <td>${money(item.valor_adesao)}</td>
+          <td>${escapeHtml(item.rastreador_obrigatorio || 'Não')}<br><small>${money(item.valor_rastreador)}</small></td>
+          <td>${escapeHtml(item.desconto_maximo || '0')}%</td>
+          <td>${statusBadge(item.status || 'Ativo')}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openPlanoDetails(${jsArg(item.id_plano)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openPlanoModalById(${jsArg(item.id_plano)})">Editar</button><button class="btn btn-danger btn-small" onclick="inativarPlano(${jsArg(item.id_plano)})">Inativar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Planos', ${jsArg(item.id_plano)}, 'este plano')">Excluir</button>` : ''}</div></td>
+        </tr>`).join('')}
+      </tbody></table>${paginationHtml('planos', pager)}</div>`;
+    }
+
+    async function openPlanoModalById(id) {
+      await ensurePlanosCache();
+      const item = state.cache.planos.find(p => String(p.id_plano) === String(id));
+      if (!item) return toast('Plano não encontrado.', 'error');
+      openPlanoModal(item);
+    }
+
+    function openPlanoModal(item = null) {
+      const isEdit = Boolean(item?.id_plano);
+      openModal(isEdit ? 'Editar plano comercial' : 'Novo plano comercial', `
+        <div class="form-grid">
+          ${field('nome', 'Nome do plano', 'Ex.: Completo', '', item?.nome || '')}
+          <div class="field"><label>Tipo de veículo</label><select name="tipo_veiculo">${cotacaoTipoOptions(item?.tipo_veiculo || 'cars')}</select></div>
+          ${field('percentual', 'Percentual sobre FIPE (%)', '0,28', '', item?.percentual || '0,28')}
+          ${field('mensalidade_minima', 'Mensalidade mínima', 'R$ 120,00', '', item?.mensalidade_minima || '')}
+          ${field('valor_adesao', 'Valor de adesão', 'R$ 250,00', '', item?.valor_adesao || '')}
+          ${field('fipe_minima', 'FIPE mínima', 'R$ 0,00', '', item?.fipe_minima || '')}
+          ${field('fipe_maxima', 'FIPE máxima', 'R$ 300.000,00', '', item?.fipe_maxima || '')}
+          ${selectField('rastreador_obrigatorio', 'Rastreador obrigatório', ['Não','Sim'], item?.rastreador_obrigatorio || 'Não')}
+          ${field('valor_rastreador', 'Valor do rastreador', 'R$ 35,00', '', item?.valor_rastreador || '')}
+          ${field('desconto_maximo', 'Desconto máximo (%)', '10', '', item?.desconto_maximo || '0')}
+          ${selectField('status', 'Status', ['Ativo','Inativo'], item?.status || 'Ativo')}
+          ${textareaField('descricao', 'Descrição', 'Resumo das regras e coberturas do plano...', 'full', item?.descricao || '')}
+        </div>`, isEdit ? 'Salvar plano' : 'Criar plano', async data => {
+          const payload = isEdit ? { action: 'editar', tabela: 'Planos', id: item.id_plano, dados: data } : { action: 'criar', tabela: 'Planos', dados: data };
+          await apiPost(payload);
+          state.cache.planos = [];
+          toast(isEdit ? 'Plano atualizado.' : 'Plano criado.');
+          await renderPlanos();
+        });
+    }
+
+    async function openPlanoDetails(id) {
+      await ensurePlanosCache();
+      const item = state.cache.planos.find(p => String(p.id_plano) === String(id));
+      if (!item) return toast('Plano não encontrado.', 'error');
+      openCustomModal('Detalhes do plano', `
+        <div class="detail-grid">
+          ${detailCard('Plano', item.nome)}${detailCard('Tipo', cotacaoTipoLabel(item.tipo_veiculo))}${detailCard('Status', item.status)}
+          ${detailCard('Percentual', `${item.percentual || '0'}%`)}${detailCard('Mensalidade mínima', money(item.mensalidade_minima))}${detailCard('Adesão', money(item.valor_adesao))}
+          ${detailCard('FIPE mínima', money(item.fipe_minima))}${detailCard('FIPE máxima', money(item.fipe_maxima))}${detailCard('Rastreador obrigatório', item.rastreador_obrigatorio)}
+          ${detailCard('Valor rastreador', money(item.valor_rastreador))}${detailCard('Desconto máximo', `${item.desconto_maximo || '0'}%`)}${detailCard('Cadastro', dateBR(item.data_criacao))}
+        </div>
+        <div class="detail-section"><h4>Descrição</h4><p>${escapeHtml(item.descricao || 'Sem descrição.')}</p></div>`, true);
+    }
+
+    async function inativarPlano(id) {
+      const item = state.cache.planos.find(p => String(p.id_plano) === String(id));
+      confirmAction('Inativar plano', `Deseja inativar ${item?.nome || 'este plano'}?`, 'Inativar', async () => {
+        await apiPost({ action: 'editar', tabela: 'Planos', id, dados: { status: 'Inativo' } });
+        state.cache.planos = [];
+        toast('Plano inativado.');
+        await renderPlanos();
+      });
     }
 
     async function renderCotacoes(filter = '') {
-      els.viewRoot.innerHTML = topbar('Cotações', 'Consulta FIPE, cálculo de mensalidade e conversão para veículo.', '<button class="btn btn-yellow" onclick="openCotacaoModal()">+ Nova cotação</button><button class="btn btn-ghost" onclick="renderCotacoes()">Atualizar</button>') + loadingPanel('Carregando cotações...');
+      els.viewRoot.innerHTML = topbar('Cotações', 'Consulta FIPE, regras comerciais, proposta e conversão para veículo.', '<button class="btn btn-yellow" onclick="openCotacaoModal()">+ Nova cotação</button><button class="btn btn-ghost" onclick="renderCotacoes()">Atualizar</button>') + loadingPanel('Carregando cotações...');
       try {
-        await Promise.all([ensureCotacoesCache(true), ensureVeiculosCache(true), ensureConsultoresCache(true)]);
+        await Promise.all([ensureCotacoesCache(true), ensureConsultoresCache(true), ensurePlanosCache(true), isCommercialRole() ? Promise.resolve([]) : ensureVeiculosCache(true)]);
         paintCotacoesTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -4279,44 +4538,42 @@
     function calcularResumoCotacoes(data) {
       return {
         total: data.length,
-        analise: data.filter(c => ['em análise','em analise'].includes(normalizeText(c.status_cotacao))).length,
-        convertidas: data.filter(c => normalizeText(c.status_cotacao) === 'convertida').length,
+        analise: data.filter(c => ['em análise','em analise','aguardando decisão','aguardando vistoria'].includes(normalizeText(statusCotacaoReal(c)))).length,
+        convertidas: data.filter(c => normalizeText(statusCotacaoReal(c)) === 'convertida').length,
+        expiradas: data.filter(c => normalizeText(statusCotacaoReal(c)) === 'expirada').length,
         fipe: data.reduce((sum, item) => sum + parseMoneyBR(item.valor_fipe), 0),
-        mensalidade: data.reduce((sum, item) => sum + parseMoneyBR(item.mensalidade_sugerida), 0)
+        mensalidade: data.reduce((sum, item) => sum + parseMoneyBR(item.mensalidade_final || item.mensalidade_sugerida), 0)
       };
     }
 
     function paintCotacoesTable(filter = '') {
       const termo = String(filter || '').toLowerCase();
       const statusFiltro = document.getElementById('filtroCotStatus')?.value || '';
-      let data = state.cache.cotacoes.filter(item => `${item.id_cotacao} ${item.associado} ${item.telefone} ${item.marca} ${item.modelo} ${item.ano_modelo} ${item.codigo_fipe} ${item.consultor} ${item.regional} ${item.status_cotacao}`.toLowerCase().includes(termo));
-      if (statusFiltro) data = data.filter(item => String(item.status_cotacao || '') === statusFiltro);
+      let data = state.cache.cotacoes.filter(item => `${item.id_cotacao} ${item.associado} ${item.telefone} ${item.marca} ${item.modelo} ${item.ano_modelo} ${item.codigo_fipe} ${item.plano} ${item.consultor} ${item.regional} ${statusCotacaoReal(item)}`.toLowerCase().includes(termo));
+      if (statusFiltro) data = data.filter(item => String(statusCotacaoReal(item)) === statusFiltro);
       const resumo = calcularResumoCotacoes(data);
       els.viewRoot.innerHTML = `
-        ${topbar('Cotações', 'Consulta FIPE, cálculo de mensalidade e conversão para veículo.', '<button class="btn btn-yellow" onclick="openCotacaoModal()">+ Nova cotação</button><button class="btn btn-ghost" onclick="renderCotacoes()">Atualizar</button>')}
+        ${topbar('Cotações', 'Consulta FIPE, regras comerciais, proposta e conversão para veículo.', '<button class="btn btn-yellow" onclick="openCotacaoModal()">+ Nova cotação</button><button class="btn btn-ghost" onclick="renderCotacoes()">Atualizar</button>')}
         <div class="content-panel">
-          <div class="summary-strip">${summaryItem('Total', resumo.total)}${summaryItem('Em análise', resumo.analise)}${summaryItem('Convertidas', resumo.convertidas)}${summaryItem('FIPE cotada', money(resumo.fipe))}${summaryItem('Mensalidade sugerida', money(resumo.mensalidade))}</div>
-          <div class="panel-head"><div><h3>Histórico de cotações</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por associado, modelo, FIPE..." value="${escapeHtml(filter)}" oninput="paintCotacoesTable(this.value)" /></div></div>
-          <div class="toolbar" style="margin-bottom:14px; flex-wrap:wrap;">
-            <select id="filtroCotStatus" onchange="paintCotacoesTable('${escapeHtml(filter)}')"><option value="">Todos os status</option>${cotacaoStatusOptions(statusFiltro)}</select>
-            <button class="btn btn-ghost btn-small" onclick="limparFiltrosCotacoes()">Limpar filtros</button>
-          </div>
-          ${data.length ? cotacoesTable(data) : emptyState('Nenhuma cotação encontrada.', 'Clique em “Nova cotação” para consultar a FIPE e calcular uma mensalidade sugerida.')}
+          <div class="summary-strip">${summaryItem('Total', resumo.total)}${summaryItem('Em andamento', resumo.analise)}${summaryItem('Convertidas', resumo.convertidas)}${summaryItem('Expiradas', resumo.expiradas)}${summaryItem('Mensalidade final', money(resumo.mensalidade))}</div>
+          <div class="panel-head"><div><h3>Histórico de cotações</h3><p>${data.length} registro(s) encontrado(s).</p></div><div class="toolbar"><input class="search" placeholder="Buscar por associado, modelo, plano, FIPE..." value="${escapeHtml(filter)}" oninput="paintCotacoesTable(this.value)" /></div></div>
+          <div class="toolbar" style="margin-bottom:14px; flex-wrap:wrap;"><select id="filtroCotStatus" onchange="paintCotacoesTable('${escapeHtml(filter)}')"><option value="">Todos os status</option>${cotacaoStatusOptions(statusFiltro)}</select><button class="btn btn-ghost btn-small" onclick="limparFiltrosCotacoes()">Limpar filtros</button></div>
+          ${data.length ? cotacoesTable(data) : emptyState('Nenhuma cotação encontrada.', 'Clique em “Nova cotação” para consultar a FIPE e aplicar uma regra comercial.')}
         </div>`;
     }
 
     function cotacoesTable(data) {
       const pager = paginateData('cotacoes', data);
       data = pager.items;
-      return `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Veículo</th><th>Associado</th><th>FIPE</th><th>Mensalidade</th><th>Consultor/Regional</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+      return `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Veículo</th><th>Plano</th><th>FIPE</th><th>Mensalidade final</th><th>Validade</th><th>Status</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td>${dateBR(item.data_cotacao)}</td>
           <td><strong>${escapeHtml([item.marca, item.modelo].filter(Boolean).join(' ') || '-')}</strong><br><small>${escapeHtml([item.ano_modelo, item.combustivel, item.codigo_fipe].filter(Boolean).join(' • '))}</small></td>
-          <td>${escapeHtml(item.associado || '-')}<br><small>${escapeHtml(item.telefone || '')}</small></td>
-          <td>${money(item.valor_fipe)}</td><td>${money(item.mensalidade_sugerida)}</td>
-          <td>${escapeHtml(item.consultor || '-')}<br><small>${escapeHtml(item.regional || '')}</small></td>
-          <td>${statusBadge(item.status_cotacao || 'Em análise')}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCotacaoDetails(${jsArg(item.id_cotacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button><button class="btn btn-yellow btn-small" onclick="converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter</button><button class="btn btn-danger btn-small" onclick="cancelarCotacao(${jsArg(item.id_cotacao)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Cotacoes', ${jsArg(item.id_cotacao)}, 'esta cotação')">Excluir</button>` : ''}</div></td>
+          <td>${escapeHtml(item.plano || '-')}<br><small>${escapeHtml(item.associado || '')}</small></td>
+          <td>${money(item.valor_fipe)}</td><td>${money(item.mensalidade_final || item.mensalidade_sugerida)}</td>
+          <td>${escapeHtml(cotacaoValidadeLabel(item))}<br><small>${dateBR(item.data_validade)}</small></td>
+          <td>${statusBadge(statusCotacaoReal(item))}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCotacaoDetails(${jsArg(item.id_cotacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="imprimirPropostaCotacao(${jsArg(item.id_cotacao)})">Proposta</button><button class="btn btn-ghost btn-small" onclick="openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button>${!isCommercialRole()?`<button class="btn btn-yellow btn-small" onclick="converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter</button>`:''}<button class="btn btn-danger btn-small" onclick="cancelarCotacao(${jsArg(item.id_cotacao)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Cotacoes', ${jsArg(item.id_cotacao)}, 'esta cotação')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('cotacoes', pager)}</div>`;
     }
@@ -4328,26 +4585,50 @@
       openCotacaoModal(item);
     }
 
+    function planosCompativeisCotacao(tipo, valorFipe) {
+      return state.cache.planos.filter(plano => {
+        if (normalizeText(plano.status) !== 'ativo') return false;
+        const tipoOk = !plano.tipo_veiculo || normalizeText(plano.tipo_veiculo) === normalizeText(tipo) || normalizeText(cotacaoTipoLabel(plano.tipo_veiculo)) === normalizeText(cotacaoTipoLabel(tipo));
+        const min = parseMoneyBR(plano.fipe_minima);
+        const max = parseMoneyBR(plano.fipe_maxima);
+        const faixaOk = (!min || valorFipe >= min) && (!max || valorFipe <= max);
+        return tipoOk && faixaOk;
+      });
+    }
+
+    function planoCotacaoOptions(selected = '', tipo = 'cars', valorFipe = 0) {
+      const planos = planosCompativeisCotacao(tipo, valorFipe);
+      return `<option value="">Selecione o plano</option>` + planos.map(p => `<option value="${escapeHtml(p.id_plano)}" ${String(p.id_plano) === String(selected) ? 'selected' : ''}>${escapeHtml(p.nome)}</option>`).join('');
+    }
+
     async function openCotacaoModal(item = null) {
       const isEdit = Boolean(item?.id_cotacao);
-      await ensureConsultoresCache(true).catch(() => {});
+      await Promise.all([ensureConsultoresCache(true).catch(() => {}), ensureCooperativasCache(true).catch(() => {}), ensurePlanosCache(true).catch(() => {})]);
       const percentualPadrao = state.options.percentual_cotacao_padrao || '0,28';
+      const validadePadrao = state.options.validade_cotacao_padrao || '5';
       openModal(isEdit ? 'Editar cotação' : 'Nova cotação', `
         <div class="form-grid">
-          <div class="field"><label>Tipo de veículo</label><select name="tipo_veiculo" id="cotTipo" onchange="cotacaoCarregarMarcas()">${cotacaoTipoOptions(item?.tipo_veiculo || 'cars')}</select></div>
+          <div class="field"><label>Tipo de veículo</label><select name="tipo_veiculo" id="cotTipo" onchange="cotacaoTipoAlterado()">${cotacaoTipoOptions(item?.tipo_veiculo || 'cars')}</select></div>
           <div class="field"><label>Marca</label><select name="codigo_marca" id="cotMarca" onchange="cotacaoCarregarModelos()"><option value="${escapeHtml(item?.codigo_marca || '')}">${escapeHtml(item?.marca || 'Selecione o tipo para carregar')}</option></select></div>
           <div class="field full"><label>Modelo</label><select name="codigo_modelo" id="cotModelo" onchange="cotacaoCarregarAnos()"><option value="${escapeHtml(item?.codigo_modelo || '')}">${escapeHtml(item?.modelo || 'Selecione a marca')}</option></select></div>
           <div class="field"><label>Ano/combustível</label><select name="codigo_ano" id="cotAno" onchange="cotacaoConsultarValor()"><option value="${escapeHtml(item?.codigo_ano || '')}">${escapeHtml(item?.ano_modelo || 'Selecione o modelo')}</option></select></div>
           ${field('codigo_fipe', 'Código FIPE', '000000-0', '', item?.codigo_fipe || '')}${field('valor_fipe', 'Valor FIPE', 'R$ 0,00', '', item?.valor_fipe || '')}
-          ${field('combustivel', 'Combustível', 'Flex', '', item?.combustivel || '')}${field('percentual', 'Percentual sobre FIPE (%)', '0,28', '', item?.percentual || percentualPadrao)}
-          ${field('mensalidade_sugerida', 'Mensalidade sugerida', 'R$ 0,00', '', item?.mensalidade_sugerida || '')}${field('valor_adesao', 'Valor adesão', 'R$ 0,00', '', item?.valor_adesao || '')}
-          ${selectField('rastreador', 'Rastreador', parseOptions('rastreador_cotacao', ['Sim','Não','A definir']), item?.rastreador || 'A definir')}${selectField('plano', 'Plano', parseOptions('planos_cotacao', ['Básico','Completo','Premium','Personalizado']), item?.plano || 'Completo')}
+          ${field('combustivel', 'Combustível', 'Flex', '', item?.combustivel || '')}
+          <div class="field"><label>Plano comercial</label><select name="id_plano" id="cotPlano" onchange="aplicarPlanoNaCotacao()">${planoCotacaoOptions(item?.id_plano || '', item?.tipo_veiculo || 'cars', parseMoneyBR(item?.valor_fipe))}</select></div>
+          ${field('plano', 'Nome do plano', 'Plano selecionado', '', item?.plano || '')}${field('percentual', 'Percentual base (%)', '0,28', '', item?.percentual || item?.percentual_base || percentualPadrao)}
+          ${field('mensalidade_base', 'Mensalidade base', 'R$ 0,00', '', item?.mensalidade_base || '')}${field('adicional_categoria', 'Adicional de categoria', 'R$ 0,00', '', item?.adicional_categoria || '')}
+          ${selectField('rastreador', 'Rastreador', parseOptions('rastreador_cotacao', ['Sim','Não','A definir']), item?.rastreador || 'A definir')}${field('valor_rastreador', 'Valor do rastreador', 'R$ 0,00', '', item?.valor_rastreador || '')}
+          ${field('desconto_percentual', 'Desconto (%)', '0', '', item?.desconto_percentual || '0')}${field('desconto_valor', 'Valor do desconto', 'R$ 0,00', '', item?.desconto_valor || '')}
+          ${field('mensalidade_final', 'Mensalidade final', 'R$ 0,00', '', item?.mensalidade_final || item?.mensalidade_sugerida || '')}${field('valor_adesao', 'Valor adesão', 'R$ 0,00', '', item?.valor_adesao || '')}
+          ${field('validade_dias', 'Validade (dias)', '5', '', item?.validade_dias || validadePadrao)}${field('data_validade', 'Data de validade', 'AAAA-MM-DD', '', item?.data_validade ? String(item.data_validade).slice(0,10) : '')}
           ${field('associado', 'Nome / associado', 'Nome do interessado', '', item?.associado || '')}${field('telefone', 'Telefone', '(00) 00000-0000', '', item?.telefone || '')}
-          ${selectConsultorField(item?.consultor || '')}${field('regional', 'Regional', 'Regional', '', item?.regional || '')}
+          ${selectConsultorField(item?.voluntario || item?.consultor || '', item?.id_voluntario || '')}${hiddenField('id_cooperativa', item?.id_cooperativa || '')}${field('cooperativa', 'Cooperativa', 'Preenchida automaticamente pelo Voluntário', '', item?.cooperativa || item?.regional || '')}${hiddenField('regional', item?.regional || item?.cooperativa || '')}
           <div class="field"><label>Status</label><select name="status_cotacao">${cotacaoStatusOptions(item?.status_cotacao || 'Em análise')}</select></div>
           ${textareaField('observacoes', 'Observações', 'Condições comerciais, observações da cotação...', 'full', item?.observacoes || '')}
         </div>
-        <div class="lookup-note">A consulta usa provedor FIPE gratuito. Se a consulta oscilar, preencha o valor manualmente e salve a cotação.</div>
+        ${hiddenField('referencia_fipe', item?.referencia_fipe || '')}${hiddenField('veiculo_zero_km', item?.veiculo_zero_km || '')}
+        <div class="lookup-note" id="cotFipeReferencia">${item?.referencia_fipe ? `Referência FIPE: ${escapeHtml(item.referencia_fipe)} • ${normalizeText(item.veiculo_zero_km)==='sim'?'Veículo 0 km':'Veículo usado'}` : 'Selecione marca, modelo e ano para consultar a referência FIPE.'}</div>
+        <div class="lookup-note" id="cotPlanoResumo">Selecione o veículo e um plano para aplicar as regras comerciais automaticamente.</div>
       `, isEdit ? 'Salvar cotação' : 'Criar cotação', async data => {
         const marcaSelect = document.getElementById('cotMarca');
         const modeloSelect = document.getElementById('cotModelo');
@@ -4358,12 +4639,24 @@
         const consultorSelect = document.getElementById('vehicleConsultorSelect');
         if (consultorSelect?.value) {
           const opt = consultorSelect.options[consultorSelect.selectedIndex];
-          data.consultor = opt?.dataset?.nome || data.consultor || '';
-          data.regional = opt?.dataset?.regional || data.regional || '';
+          data.id_voluntario = consultorSelect.value || data.id_voluntario || '';
+          data.voluntario = opt?.dataset?.nome || data.voluntario || '';
+          data.consultor = data.voluntario;
+          data.id_cooperativa = opt?.dataset?.cooperativaId || data.id_cooperativa || '';
+          data.cooperativa = opt?.dataset?.cooperativa || data.cooperativa || '';
+          data.regional = data.cooperativa;
         }
         delete data._consultor_ref;
+        if (!data.codigo_ano) throw new Error('Selecione o ano/combustível antes de salvar.');
         if (!data.valor_fipe) throw new Error('Informe ou consulte o valor FIPE.');
-        if (!data.mensalidade_sugerida) atualizarCalculoCotacao();
+        atualizarCalculoCotacao();
+        data.percentual_base = data.percentual;
+        data.mensalidade_sugerida = data.mensalidade_final || data.mensalidade_sugerida;
+        if (!data.data_validade && data.validade_dias) {
+          const base = item?.data_cotacao ? new Date(item.data_cotacao) : new Date();
+          base.setDate(base.getDate() + Number(data.validade_dias || 0));
+          data.data_validade = base.toISOString();
+        }
         if (!isEdit) data.data_cotacao = new Date().toISOString();
         const payload = { action: isEdit ? 'editar' : 'criar', tabela: 'Cotacoes', dados: data };
         if (isEdit) payload.id = item.id_cotacao;
@@ -4374,22 +4667,73 @@
       });
       attachCotacaoEvents();
       attachVehicleConsultorSelect();
+      atualizarResumoPlanoCotacao();
     }
 
     function attachCotacaoEvents() {
-      const valor = els.modalRoot.querySelector('[name="valor_fipe"]');
-      const percentual = els.modalRoot.querySelector('[name="percentual"]');
-      if (valor) valor.addEventListener('input', atualizarCalculoCotacao);
-      if (percentual) percentual.addEventListener('input', atualizarCalculoCotacao);
-      atualizarCalculoCotacao();
+      ['valor_fipe','percentual','adicional_categoria','valor_rastreador','desconto_percentual','validade_dias'].forEach(name => {
+        const el = els.modalRoot.querySelector(`[name="${name}"]`);
+        if (el) el.addEventListener('input', () => { atualizarCalculoCotacao(); if (name === 'validade_dias') atualizarDataValidadeCotacao(); });
+      });
+      const rastreador = els.modalRoot.querySelector('[name="rastreador"]');
+      if (rastreador) rastreador.addEventListener('change', atualizarCalculoCotacao);
     }
 
     function selectedOptionText(select, fallback = '') {
-      if (!select) return fallback || '';
-      const option = select.options[select.selectedIndex];
-      const text = option?.textContent || fallback || '';
-      if (['Selecione o tipo para carregar','Selecione a marca','Selecione o modelo'].includes(text)) return fallback || '';
+      if (!select || !select.value) return fallback || '';
+      const text = select.options[select.selectedIndex]?.text || '';
+      if (['Selecione a marca','Selecione o modelo'].includes(text)) return fallback || '';
       return text;
+    }
+
+    async function cotacaoTipoAlterado() {
+      await cotacaoCarregarMarcas();
+      atualizarPlanosCompativeisCotacao();
+    }
+
+    function atualizarPlanosCompativeisCotacao() {
+      const tipo = document.getElementById('cotTipo')?.value || 'cars';
+      const valor = parseMoneyBR(els.modalRoot.querySelector('[name="valor_fipe"]')?.value || 0);
+      const select = document.getElementById('cotPlano');
+      if (!select) return;
+      const selecionado = select.value;
+      select.innerHTML = planoCotacaoOptions(selecionado, tipo, valor);
+      if (selecionado && !select.value) {
+        setFormValue('plano', '');
+        setFormValue('id_plano', '');
+      }
+    }
+
+    function planoSelecionadoCotacao() {
+      const id = document.getElementById('cotPlano')?.value || '';
+      return state.cache.planos.find(p => String(p.id_plano) === String(id)) || null;
+    }
+
+    function aplicarPlanoNaCotacao() {
+      const plano = planoSelecionadoCotacao();
+      if (!plano) {
+        atualizarResumoPlanoCotacao();
+        atualizarCalculoCotacao();
+        return;
+      }
+      setFormValue('plano', plano.nome || '');
+      setFormValue('percentual', plano.percentual || '');
+      setFormValue('valor_adesao', plano.valor_adesao || '');
+      setFormValue('valor_rastreador', plano.valor_rastreador || '');
+      if (normalizeText(plano.rastreador_obrigatorio) === 'sim') setFormValue('rastreador', 'Sim');
+      atualizarResumoPlanoCotacao();
+      atualizarCalculoCotacao();
+    }
+
+    function atualizarResumoPlanoCotacao() {
+      const plano = planoSelecionadoCotacao();
+      const note = document.getElementById('cotPlanoResumo');
+      if (!note) return;
+      if (!plano) {
+        note.textContent = 'Selecione um plano compatível para aplicar percentual, adesão, rastreador e limites automaticamente.';
+        return;
+      }
+      note.textContent = `${plano.nome}: ${plano.percentual || 0}% da FIPE • mínimo ${money(plano.mensalidade_minima)} • adesão ${money(plano.valor_adesao)} • desconto máximo do plano ${plano.desconto_maximo || 0}%.`;
     }
 
     async function cotacaoCarregarMarcas() {
@@ -4403,7 +4747,7 @@
       if (ano) ano.innerHTML = '<option value="">Selecione o modelo</option>';
       try {
         const result = await apiGet('fipe_marcas', { tipo });
-        marca.innerHTML = '<option value="">Selecione a marca</option>' + (result.data || []).map(item => `<option value="${escapeHtml(item.codigo)}">${escapeHtml(item.nome)}</option>`).join('');
+        marca.innerHTML = '<option value="">Selecione a marca</option>' + (result.data || []).map(item => `<option value="${escapeHtml(item.codigo)}">${escapeHtml(String(item.nome || '').replace(/^32000(?=\s|$)/, '0 km'))}</option>`).join('');
       } catch (error) { marca.innerHTML = '<option value="">Erro ao carregar</option>'; toast(error.message, 'error'); }
     }
 
@@ -4446,38 +4790,81 @@
         setFormValue('codigo_fipe', data.codigo_fipe || '');
         setFormValue('valor_fipe', data.valor_fipe || '');
         setFormValue('combustivel', data.combustivel || '');
+        setFormValue('referencia_fipe', data.referencia || '');
+        setFormValue('veiculo_zero_km', data.zero_km ? 'Sim' : 'Não');
+        const ref = document.getElementById('cotFipeReferencia');
+        if (ref) ref.textContent = `Referência FIPE: ${data.referencia || 'não informada'} • ${data.zero_km ? 'Veículo 0 km' : 'Veículo usado'}`;
+        atualizarPlanosCompativeisCotacao();
         atualizarCalculoCotacao();
         toast('Valor FIPE carregado.');
       } catch (error) { toast(error.message, 'error'); }
     }
 
+    function atualizarDataValidadeCotacao() {
+      const dias = Number(parseMoneyBR(els.modalRoot.querySelector('[name="validade_dias"]')?.value || 0));
+      const input = els.modalRoot.querySelector('[name="data_validade"]');
+      if (!input || !dias) return;
+      const data = new Date(); data.setDate(data.getDate() + dias);
+      input.value = data.toISOString().slice(0,10);
+    }
+
     function atualizarCalculoCotacao() {
-      const valorInput = els.modalRoot.querySelector('[name="valor_fipe"]');
-      const percentualInput = els.modalRoot.querySelector('[name="percentual"]');
-      const mensalidadeInput = els.modalRoot.querySelector('[name="mensalidade_sugerida"]');
-      if (!valorInput || !percentualInput || !mensalidadeInput) return;
-      const valor = parseMoneyBR(valorInput.value);
-      const percentual = parseMoneyBR(percentualInput.value);
-      if (valor > 0 && percentual > 0) mensalidadeInput.value = money(valor * percentual / 100);
+      const valor = parseMoneyBR(els.modalRoot.querySelector('[name="valor_fipe"]')?.value || 0);
+      const percentual = parseMoneyBR(els.modalRoot.querySelector('[name="percentual"]')?.value || 0);
+      const adicional = parseMoneyBR(els.modalRoot.querySelector('[name="adicional_categoria"]')?.value || 0);
+      const rastreadorStatus = normalizeText(els.modalRoot.querySelector('[name="rastreador"]')?.value || '');
+      const valorRastreador = rastreadorStatus === 'sim' ? parseMoneyBR(els.modalRoot.querySelector('[name="valor_rastreador"]')?.value || 0) : 0;
+      const descontoPct = parseMoneyBR(els.modalRoot.querySelector('[name="desconto_percentual"]')?.value || 0);
+      const plano = planoSelecionadoCotacao();
+      let base = valor > 0 && percentual > 0 ? valor * percentual / 100 : 0;
+      const minimo = parseMoneyBR(plano?.mensalidade_minima || 0);
+      if (minimo && base < minimo) base = minimo;
+      const subtotal = base + adicional + valorRastreador;
+      const descontoValor = subtotal * descontoPct / 100;
+      const final = Math.max(0, subtotal - descontoValor);
+      setFormValue('mensalidade_base', base ? money(base) : '');
+      setFormValue('desconto_valor', descontoValor ? money(descontoValor) : '');
+      setFormValue('mensalidade_final', final ? money(final) : '');
     }
 
     async function openCotacaoDetails(id) {
-      await ensureCotacoesCache(true);
+      await Promise.all([ensureCotacoesCache(true), ensurePlanosCache(true), isCommercialRole() ? Promise.resolve([]) : ensureVeiculosCache(true)]);
       const item = findCotacaoById(id);
       if (!item) return toast('Cotação não encontrada.', 'error');
       const veiculoConvertido = item.id_veiculo_convertido ? findVehicleById(item.id_veiculo_convertido) : null;
       openCustomModal('Detalhes da cotação', `
         <div class="detail-grid">
-          ${detailCard('Status', item.status_cotacao)}${detailCard('Data', dateBR(item.data_cotacao))}${detailCard('Tipo', cotacaoTipoLabel(item.tipo_veiculo))}
+          ${detailCard('Status', statusCotacaoReal(item))}${detailCard('Data', dateBR(item.data_cotacao))}${detailCard('Validade', cotacaoValidadeLabel(item))}
           ${detailCard('Veículo', [item.marca, item.modelo, item.ano_modelo].filter(Boolean).join(' '))}${detailCard('Código FIPE', item.codigo_fipe)}${detailCard('Combustível', item.combustivel)}
-          ${detailCard('Valor FIPE', money(item.valor_fipe))}${detailCard('Percentual', `${item.percentual || '-'}%`)}${detailCard('Mensalidade sugerida', money(item.mensalidade_sugerida))}
-          ${detailCard('Adesão', money(item.valor_adesao))}${detailCard('Plano', item.plano)}${detailCard('Rastreador', item.rastreador)}
-          ${detailCard('Associado/interessado', item.associado)}${detailCard('Telefone', item.telefone)}${detailCard('Consultor', item.consultor)}
-          ${detailCard('Regional', item.regional)}${detailCard('Convertido em veículo', veiculoConvertido?.placa || item.id_veiculo_convertido || '-')}${detailCard('Conversão', dateBR(item.data_conversao))}
+          ${detailCard('Valor FIPE', money(item.valor_fipe))}${detailCard('Plano', item.plano)}${detailCard('Percentual', `${item.percentual || item.percentual_base || '-'}%`)}
+          ${detailCard('Mensalidade base', money(item.mensalidade_base))}${detailCard('Adicional', money(item.adicional_categoria))}${detailCard('Rastreador', `${item.rastreador || '-'} • ${money(item.valor_rastreador)}`)}
+          ${detailCard('Desconto', `${item.desconto_percentual || 0}% • ${money(item.desconto_valor)}`)}${detailCard('Mensalidade final', money(item.mensalidade_final || item.mensalidade_sugerida))}${detailCard('Adesão', money(item.valor_adesao))}
+          ${detailCard('Associado/interessado', item.associado)}${detailCard('Telefone', item.telefone)}${detailCard('Voluntário', item.voluntario || item.consultor)}
+          ${detailCard('Cooperativa', item.cooperativa || item.regional)}${detailCard('Referência FIPE', item.referencia_fipe || '-')}${detailCard('Convertido em veículo', veiculoConvertido?.placa || item.id_veiculo_convertido || '-')}${detailCard('Conversão', dateBR(item.data_conversao))}
         </div>
         <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
-        <div class="quick-actions"><button class="btn btn-ghost" onclick="closeModal(); openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button><button class="btn btn-yellow" onclick="closeModal(); converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter em veículo</button></div>
+        <div class="quick-actions"><button class="btn btn-ghost" onclick="imprimirPropostaCotacao(${jsArg(item.id_cotacao)})">Imprimir proposta</button><button class="btn btn-blue" onclick="alterarStatusCotacao(${jsArg(item.id_cotacao)}, 'Aprovada')">Aprovar</button><button class="btn btn-ghost" onclick="closeModal(); openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button>${!isCommercialRole()?`<button class="btn btn-yellow" onclick="closeModal(); converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter em veículo</button>`:''}</div>
       `, true);
+    }
+
+    async function alterarStatusCotacao(id, status) {
+      await apiPost({ action: 'editar', tabela: 'Cotacoes', id, dados: { status_cotacao: status } });
+      state.cache.cotacoes = [];
+      closeModal();
+      toast(`Cotação marcada como ${status}.`);
+      if (state.view === 'cotacoes') await renderCotacoes();
+    }
+
+    async function imprimirPropostaCotacao(id) {
+      await ensureCotacoesCache(true);
+      const item = findCotacaoById(id);
+      if (!item) return toast('Cotação não encontrada.', 'error');
+      const w = window.open('', '_blank', 'width=900,height=900');
+      if (!w) return toast('Permita pop-ups para imprimir a proposta.', 'error');
+      const marca = BRAND_CONFIG?.appName || 'Sistema Gerencial';
+      const subtitulo = BRAND_CONFIG?.appSubtitle || 'Operação Veicular';
+      w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Proposta ${escapeHtml(item.id_cotacao || '')}</title><style>body{font-family:Arial,sans-serif;color:#111827;margin:0;padding:40px;background:#fff}h1{margin:0;font-size:28px}.sub{color:#64748b;margin-top:6px}.box{border:1px solid #d1d5db;border-radius:14px;padding:20px;margin-top:22px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.item{padding:12px;background:#f8fafc;border-radius:10px}.item span{display:block;font-size:11px;text-transform:uppercase;color:#64748b;font-weight:700}.item strong{display:block;margin-top:6px;font-size:18px}.total{font-size:30px}.footer{margin-top:28px;color:#64748b;font-size:12px}@media print{button{display:none}}</style></head><body><h1>${escapeHtml(marca)}</h1><div class="sub">${escapeHtml(subtitulo)} • Proposta ${escapeHtml(item.id_cotacao || '')}</div><div class="box"><div class="grid"><div class="item"><span>Veículo</span><strong>${escapeHtml([item.marca,item.modelo,item.ano_modelo].filter(Boolean).join(' '))}</strong></div><div class="item"><span>Valor FIPE</span><strong>${money(item.valor_fipe)}</strong></div><div class="item"><span>Plano</span><strong>${escapeHtml(item.plano || '-')}</strong></div><div class="item"><span>Mensalidade final</span><strong class="total">${money(item.mensalidade_final || item.mensalidade_sugerida)}</strong></div><div class="item"><span>Adesão</span><strong>${money(item.valor_adesao)}</strong></div><div class="item"><span>Rastreador</span><strong>${escapeHtml(item.rastreador || '-')}</strong></div><div class="item"><span>Interessado</span><strong>${escapeHtml(item.associado || '-')}</strong></div><div class="item"><span>Validade</span><strong>${escapeHtml(cotacaoValidadeLabel(item))}</strong></div><div class="item"><span>Voluntário</span><strong>${escapeHtml(item.voluntario || item.consultor || '-')}</strong></div><div class="item"><span>Cooperativa</span><strong>${escapeHtml(item.cooperativa || item.regional || '-')}</strong></div></div></div><div class="footer">Documento gerado pelo sistema em ${new Date().toLocaleString('pt-BR')}.</div><script>window.onload=()=>window.print()<\/script></body></html>`);
+      w.document.close();
     }
 
     async function converterCotacaoEmVeiculo(id) {
@@ -4486,39 +4873,15 @@
       if (!item) return toast('Cotação não encontrada.', 'error');
       if (normalizeText(item.status_cotacao) === 'convertida' && item.id_veiculo_convertido) return toast('Esta cotação já foi convertida.', 'error');
       openModal('Converter cotação em veículo', `
-        <div class="form-grid">
-          ${field('placa', 'Placa', 'ABC1D23', '', '')}${selectField('status', 'Status inicial', ['Pendente','Ativo'], 'Pendente')}
-          ${selectField('rastreador', 'Rastreador', ['Sim','Não','A definir'], item.rastreador || 'A definir')}${textareaField('observacoes', 'Observações do veículo', 'Gerado a partir de cotação...', 'full', `Criado a partir da cotação ${item.id_cotacao || ''}`)}
-        </div>`, 'Converter', async data => {
+        <div class="form-grid">${field('placa', 'Placa', 'ABC1D23', '', '')}${selectField('status', 'Status inicial', ['Pendente','Ativo'], 'Pendente')}${selectField('rastreador', 'Rastreador', ['Sim','Não','A definir'], item.rastreador || 'A definir')}${textareaField('observacoes', 'Observações do veículo', 'Gerado a partir de cotação...', 'full', `Criado a partir da cotação ${item.id_cotacao || ''}`)}</div>`, 'Converter', async data => {
           if (!data.placa) throw new Error('Informe a placa para criar o veículo.');
-
           const placaNormalizada = String(data.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
           const placaJaExiste = state.cache.veiculos.some(v => String(v.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '') === placaNormalizada);
-
-          if (placaJaExiste) {
-            throw new Error(`Já existe um veículo cadastrado com a placa ${placaNormalizada}.`);
-          }
-
-          const veiculo = {
-            placa: data.placa,
-            associado: item.associado || '',
-            marca: item.marca || '',
-            modelo: item.modelo || '',
-            ano_modelo: item.ano_modelo || '',
-            tipo_combustivel: item.combustivel || '',
-            codigo_fipe: item.codigo_fipe || '',
-            valor_fipe: item.valor_fipe || '',
-            mensalidade: item.mensalidade_sugerida || '',
-            consultor: item.consultor || '',
-            regional: item.regional || '',
-            status: data.status || 'Pendente',
-            rastreador: data.rastreador || item.rastreador || '',
-            observacoes: data.observacoes || ''
-          };
+          if (placaJaExiste) throw new Error(`Já existe um veículo cadastrado com a placa ${placaNormalizada}.`);
+          const veiculo = { placa: data.placa, associado: item.associado || '', marca: item.marca || '', modelo: item.modelo || '', ano_modelo: item.ano_modelo || '', tipo_combustivel: item.combustivel || '', codigo_fipe: item.codigo_fipe || '', valor_fipe: item.valor_fipe || '', mensalidade: item.mensalidade_final || item.mensalidade_sugerida || '', consultor: item.consultor || '', regional: item.regional || '', status: data.status || 'Pendente', rastreador: data.rastreador || item.rastreador || '', observacoes: data.observacoes || '' };
           const result = await apiPost({ action: 'criar', tabela: 'Veiculos', dados: veiculo });
           await apiPost({ action: 'editar', tabela: 'Cotacoes', id, dados: { status_cotacao: 'Convertida', data_conversao: new Date().toISOString(), id_veiculo_convertido: result.id || '' } });
-          state.cache.veiculos = [];
-          state.cache.cotacoes = [];
+          state.cache.veiculos = []; state.cache.cotacoes = [];
           toast('Cotação convertida em veículo.');
           await renderCotacoes();
         });
@@ -4576,9 +4939,9 @@
     function financeiroTable(data) {
       const pager = paginateData('financeiro', data);
       data = pager.items;
-      return `<div class="table-wrap"><table><thead><tr><th>Competência</th><th>Associado</th><th>Placa</th><th>Vencimento</th><th>Mensalidade</th><th>Pago</th><th>Status</th><th>Consultor/Regional</th><th>Ações</th></tr></thead><tbody>
+      return `<div class="table-wrap"><table><thead><tr><th>Competência</th><th>Associado</th><th>Placa</th><th>Vencimento</th><th>Mensalidade</th><th>Pago</th><th>Status</th><th>Voluntário</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
-          <td><strong>${escapeHtml(item.competencia || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${dateBR(item.data_vencimento)}</td><td>${money(item.valor_mensalidade)}</td><td>${money(item.valor_pago)}</td><td>${statusBadge(statusFinanceiroReal(item))}</td><td>${escapeHtml(item.consultor || '-')}<br><small>${escapeHtml(item.regional || '')}</small></td>
+          <td><strong>${escapeHtml(item.competencia || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${dateBR(item.data_vencimento)}</td><td>${money(item.valor_mensalidade)}</td><td>${money(item.valor_pago)}</td><td>${statusBadge(statusFinanceiroReal(item))}</td><td>${escapeHtml(item.voluntario || item.consultor || '-')}<br><small>${escapeHtml(item.cooperativa || item.regional || '')}</small></td>
           <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openFinanceiroDetails(${jsArg(item.id_financeiro)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openFinanceiroModalById(${jsArg(item.id_financeiro)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarFinanceiroPago(${jsArg(item.id_financeiro)})">Pagar</button><button class="btn btn-danger btn-small" onclick="cancelarFinanceiro(${jsArg(item.id_financeiro)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Financeiro', ${jsArg(item.id_financeiro)}, 'este lançamento financeiro')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('financeiro', pager)}</div>`;
@@ -4614,7 +4977,7 @@
           ${field('valor_mensalidade', 'Valor mensalidade', '180,00', '', item?.valor_mensalidade || '')}${field('valor_pago', 'Valor pago', '0,00', '', item?.valor_pago || '')}
           ${field('data_pagamento', 'Data pagamento', '2026-06-10', '', item?.data_pagamento || '')}${selectField('status_financeiro', 'Status', status, item?.status_financeiro || 'Aberto')}
           ${selectField('forma_pagamento', 'Forma de pagamento', formas, item?.forma_pagamento || 'Pix')}${field('consultor', 'Consultor', 'Nome do consultor', '', item?.consultor || '')}
-          ${field('regional', 'Regional', 'Regional', '', item?.regional || '')}
+          ${field('regional', 'Cooperativa (legado)', 'Cooperativa', '', item?.cooperativa || item?.regional || '')}
           ${textareaField('observacoes', 'Observações', 'Observações financeiras internas...', 'full', item?.observacoes || '')}
         </div>`, isEdit ? 'Salvar lançamento' : 'Criar lançamento', async data => {
           if (!data.associado && !data.placa) throw new Error('Informe associado ou placa.');
@@ -4668,7 +5031,7 @@
           ${detailCard('Competência', item.competencia)}${detailCard('Status', statusFinanceiroReal(item))}${detailCard('Vencimento', dateBR(item.data_vencimento))}
           ${detailCard('Associado', item.associado)}${detailCard('Placa', item.placa)}${detailCard('Veículo', veiculo ? [veiculo.marca, veiculo.modelo, veiculo.ano_modelo].filter(Boolean).join(' ') : '-')}
           ${detailCard('Mensalidade', money(item.valor_mensalidade))}${detailCard('Valor pago', money(item.valor_pago))}${detailCard('Data pagamento', dateBR(item.data_pagamento))}
-          ${detailCard('Forma', item.forma_pagamento)}${detailCard('Consultor', item.consultor)}${detailCard('Regional', item.regional)}
+          ${detailCard('Forma', item.forma_pagamento)}${detailCard('Voluntário', item.voluntario || item.consultor)}${detailCard('Cooperativa', item.cooperativa || item.regional)}
         </div>
         <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
         <div class="quick-actions"><button class="btn btn-ghost" onclick="closeModal(); openFinanceiroModalById(${jsArg(item.id_financeiro)})">Editar</button><button class="btn btn-yellow" onclick="closeModal(); marcarFinanceiroPago(${jsArg(item.id_financeiro)})">Marcar como pago</button>${veiculo ? `<button class="btn btn-blue" onclick="closeModal(); openVehicleDetails(${jsArg(veiculo.id_veiculo)})">Abrir veículo</button>` : ''}</div>
@@ -4959,7 +5322,7 @@
             </div>
             <div class="form-grid">
               <div class="field"><label>Busca geral</label><input id="reportSearch" placeholder="Placa, associado, evento, fornecedor..." oninput="paintRelatorios()" /></div>
-              <div class="field"><label>Regional</label><select id="reportRegional" onchange="paintRelatorios()"><option value="">Todas</option>${optionList(regionais)}</select></div>
+              <div class="field"><label>Cooperativa</label><select id="reportRegional" onchange="paintRelatorios()"><option value="">Todas</option>${optionList(regionais)}</select></div>
               <div class="field"><label>Consultor</label><select id="reportConsultor" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(consultores)}</select></div>
               <div class="field"><label>Status do veículo</label><select id="reportStatusVeiculo" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(statusVeiculos)}</select></div>
               <div class="field"><label>Combustível</label><select id="reportCombustivel" onchange="paintRelatorios()"><option value="">Todos</option>${optionList(combustiveis)}</select></div>
@@ -5116,7 +5479,7 @@
         </div>
 
         <div class="content-panel">
-          <div class="panel-head"><div><h3>Carteira por consultor/regional</h3><p>Visão gerencial cruzando consultores, veículos, FIPE e mensalidade prevista.</p></div></div>
+          <div class="panel-head"><div><h3>Carteira por Voluntário</h3><p>Visão gerencial cruzando consultores, veículos, FIPE e mensalidade prevista.</p></div></div>
           ${reportConsultorCarteiraTable(veiculos)}
         </div>
 
@@ -5185,7 +5548,7 @@
       });
       const rows = Array.from(map.values()).sort((a, b) => b.total - a.total || b.fipe - a.fipe).slice(0, 20);
       if (!rows.length) return emptyState('Nenhuma carteira encontrada.', 'Cadastre veículos vinculados a consultores para gerar este relatório.');
-      return `<div class="table-wrap"><table><thead><tr><th>Consultor</th><th>Regional</th><th>Veículos</th><th>Ativos</th><th>FIPE</th><th>Mensalidade</th></tr></thead><tbody>
+      return `<div class="table-wrap"><table><thead><tr><th>Voluntário</th><th>Cooperativa</th><th>Veículos</th><th>Ativos</th><th>FIPE</th><th>Mensalidade</th></tr></thead><tbody>
         ${rows.map(row => `<tr><td><strong>${escapeHtml(row.consultor)}</strong></td><td>${escapeHtml(row.regional || '-')}</td><td>${row.total}</td><td>${row.ativos}</td><td>${money(row.fipe)}</td><td>${money(row.mensalidade)}</td></tr>`).join('')}
       </tbody></table></div>`;
     }
@@ -5235,7 +5598,7 @@
     function reportVehicleTable(veiculos) {
       const data = veiculos.slice(0, 30);
       if (!data.length) return emptyState('Nenhum veículo encontrado.', 'Ajuste os filtros para visualizar a base.');
-      return `<div class="table-wrap"><table><thead><tr><th>Placa</th><th>Associado</th><th>Modelo</th><th>Regional</th><th>Consultor</th><th>Status</th><th>FIPE</th><th>Mensalidade</th><th>Ação</th></tr></thead><tbody>
+      return `<div class="table-wrap"><table><thead><tr><th>Placa</th><th>Associado</th><th>Modelo</th><th>Cooperativa</th><th>Voluntário</th><th>Status</th><th>FIPE</th><th>Mensalidade</th><th>Ação</th></tr></thead><tbody>
         ${data.map(item => `<tr><td><strong>${escapeHtml(item.placa || '-')}</strong></td><td>${escapeHtml(item.associado || '-')}</td><td>${escapeHtml(`${item.marca || ''} ${item.modelo || ''}`.trim() || '-')}</td><td>${escapeHtml(item.regional || '-')}</td><td>${escapeHtml(item.consultor || '-')}</td><td>${statusBadge(item.status)}</td><td>${money(item.valor_fipe || 0)}</td><td>${money(item.mensalidade || 0)}</td><td><button class="btn btn-blue btn-small" onclick="openVehicleDetails(${jsArg(item.id_veiculo)})">Abrir</button></td></tr>`).join('')}
       </tbody></table></div>${veiculos.length > 30 ? `<div class="hint">Mostrando os 30 primeiros de ${veiculos.length} veículo(s) filtrado(s).</div>` : ''}`;
     }
@@ -5506,42 +5869,42 @@
       const isEdit = Boolean(item);
       const selectedEventId = item?.id_evento || eventId || '';
       const evento = selectedEventId ? findEventById(selectedEventId) : null;
-      const statusCompra = parseOptions('status_compra', ['Solicitado', 'Em cotação', 'Aguardando aprovação', 'Aprovado', 'Comprado', 'Entregue', 'Cancelado']);
-      const title = isEdit ? 'Editar compra' : 'Criar solicitação de compra';
-      const eventContext = selectedEventId && evento
-        ? `<div class="lookup-note full">Evento: <strong>${escapeHtml(evento.numero_evento || evento.id_evento)}</strong> • Placa: <strong>${escapeHtml(evento.placa || '-')}</strong></div>${hiddenField('id_evento', selectedEventId)}`
-        : eventSelectField(selectedEventId);
-
-      openModal(title, `
-        ${eventContext}
+      const statusCompra = parseOptions('status_compra', ['Solicitado','Em cotação','Aguardando aprovação','Aprovado','Comprado','Entregue','Cancelado']);
+      const origemPadrao = item?.origem_compra || (selectedEventId ? 'Evento' : (roleKey()==='eventos' ? 'Evento' : 'Financeiro / Administrativo'));
+      openModal(isEdit ? 'Editar compra' : 'Criar solicitação de compra', `
         <div class="form-grid">
-          ${field('placa', 'Placa', 'ABC1D23', '', item?.placa || evento?.placa || '')}${field('item', 'Item / peça', 'Ex.: para-choque dianteiro', '', item?.item || '')}
-          ${field('fornecedor', 'Fornecedor', 'Nome do fornecedor', '', item?.fornecedor || '')}${field('valor_cotado', 'Valor cotado', '0', '', item?.valor_cotado || '')}
-          ${field('valor_aprovado', 'Valor aprovado', '0', '', item?.valor_aprovado || '')}${selectField('status_compra', 'Status da compra', statusCompra, item?.status_compra || 'Solicitado')}
-          ${field('responsavel', 'Responsável', 'Nome do responsável', '', item?.responsavel || evento?.responsavel || state.user?.nome || '')}${field('data_entrega', 'Data de entrega', 'YYYY-MM-DD', '', item?.data_entrega || '')}
-          ${textareaField('observacoes', 'Observações', 'Detalhes da cotação ou compra', 'full', item?.observacoes || '')}
-        </div>`, isEdit ? 'Salvar compra' : 'Criar compra', async (data) => {
-          if (!String(data.item || '').trim()) throw new Error('Informe o item/peça.');
-          const ev = data.id_evento ? findEventById(data.id_evento) : null;
-          const dados = {
-            ...data,
-            placa: data.placa || ev?.placa || '',
-            data_solicitacao: item?.data_solicitacao || new Date().toISOString()
-          };
-          const payload = isEdit
-            ? { action: 'editar', tabela: 'Compras', id: item.id_compra, dados }
-            : { action: 'criar', tabela: 'Compras', dados };
+          ${selectField('origem_compra','Origem da compra',['Evento','Financeiro / Administrativo'],origemPadrao)}
+          ${selectField('categoria_compra','Categoria',parseOptions('categorias_compra',['Peças','Serviços','Equipamentos','Estrutura','Marketing','Tecnologia','Administrativo','Outro']),item?.categoria_compra||'Peças')}
+          <div class="field full" id="compraEventoWrap">${eventSelectField(selectedEventId)}</div>
+          <div class="field full" id="compraFinalidadeWrap">${textareaField('descricao_finalidade','Finalidade da compra','Descreva claramente do que se trata esta compra...','full',item?.descricao_finalidade||'')}</div>
+          ${field('placa','Placa','Preenchida pelo evento quando aplicável','',item?.placa||evento?.placa||'')}${field('item','Item / serviço','Ex.: para-choque, notebook, material gráfico...','',item?.item||'')}
+          ${field('quantidade','Quantidade','1','',item?.quantidade||'1')}${field('fornecedor','Fornecedor','Nome do fornecedor','',item?.fornecedor||'')}
+          ${field('valor_estimado','Valor estimado','0','',item?.valor_estimado||'')}${field('valor_cotado','Valor cotado','0','',item?.valor_cotado||'')}
+          ${field('valor_aprovado','Valor aprovado','0','',item?.valor_aprovado||'')}${field('valor_pago','Valor pago','0','',item?.valor_pago||'')}
+          ${selectField('status_compra','Status da compra',statusCompra,item?.status_compra||'Solicitado')}${selectField('status_financeiro','Status financeiro',['Pendente','Pago','Cancelado'],item?.status_financeiro||'Pendente')}
+          ${field('responsavel_solicitacao','Solicitante','Nome do solicitante','',item?.responsavel_solicitacao||item?.responsavel||state.user?.nome||'')}${field('responsavel_compra','Responsável pela compra','Nome do comprador','',item?.responsavel_compra||'')}
+          ${field('data_pagamento','Data de pagamento','AAAA-MM-DD','',item?.data_pagamento?String(item.data_pagamento).slice(0,10):'')}${field('data_entrega','Data de entrega','AAAA-MM-DD','',item?.data_entrega?String(item.data_entrega).slice(0,10):'')}
+          ${field('forma_pagamento','Forma de pagamento','PIX, Boleto...','',item?.forma_pagamento||'')}${textareaField('observacoes','Observações','Detalhes adicionais','full',item?.observacoes||'')}
+        </div>`, isEdit ? 'Salvar compra' : 'Criar compra', async data => {
+          if (!String(data.item||'').trim()) throw new Error('Informe o item ou serviço.');
+          const origem = normalizeText(data.origem_compra);
+          if (origem==='evento' && !data.id_evento) throw new Error('Selecione o evento vinculado.');
+          if (origem!=='evento' && !String(data.descricao_finalidade||'').trim()) throw new Error('Descreva a finalidade da compra financeira/administrativa.');
+          if (origem!=='evento') { data.id_evento=''; data.numero_evento=''; }
+          const ev=data.id_evento?findEventById(data.id_evento):null;
+          if(ev){ data.numero_evento=ev.numero_evento||''; data.placa=ev.placa||data.placa||''; data.associado=ev.associado||''; }
+          data.responsavel=data.responsavel_solicitacao||data.responsavel||state.user?.nome||'';
+          data.data_solicitacao=item?.data_solicitacao||new Date().toISOString();
+          const payload=isEdit?{action:'editar',tabela:'Compras',id:item.id_compra,dados:data}:{action:'criar',tabela:'Compras',dados:data};
           await apiPost(payload);
-          if (!isEdit && dados.id_evento) {
-            await apiPost({ action: 'mover_evento_kanban', id_evento: dados.id_evento, nova_etapa: 'Compras', novo_status: 'Em compras', comentario: `Compra criada: ${dados.item || 'item não informado'}.` });
-          }
-          state.cache.compras = [];
-          state.cache.eventos = [];
-          state.cache.historico = [];
-          toast(isEdit ? 'Compra atualizada com sucesso.' : 'Solicitação de compra criada.');
-          if (state.view === 'compras') await renderCompras();
-          else if (dados.id_evento) setTimeout(() => openEventDetails(dados.id_evento), 120);
+          if(!isEdit&&data.id_evento) await apiPost({action:'mover_evento_kanban',id_evento:data.id_evento,nova_etapa:'Compras',novo_status:'Em compras',comentario:`Compra criada: ${data.item||'item não informado'}.`});
+          state.cache.compras=[]; state.cache.eventos=[]; state.cache.historico=[];
+          toast(isEdit?'Compra atualizada com sucesso.':'Solicitação de compra criada.');
+          if(state.view==='compras') await renderCompras(); else if(data.id_evento)setTimeout(()=>openEventDetails(data.id_evento),120);
         });
+      const origemSelect=els.modalRoot.querySelector('[name="origem_compra"]');
+      const toggle=()=>{ const evento=normalizeText(origemSelect?.value)==='evento'; document.getElementById('compraEventoWrap')?.classList.toggle('hidden',!evento); document.getElementById('compraFinalidadeWrap')?.classList.toggle('hidden',evento); };
+      origemSelect?.addEventListener('change',toggle); toggle();
     }
 
     function openCompraAvulsaModal() {
@@ -5562,7 +5925,7 @@
       const evento = findEventById(item.id_evento);
       openCustomModal('Detalhes da compra', `
         <div class="detail-grid">
-          ${detailCard('Evento', eventLabel(item.id_evento))}${detailCard('Placa', item.placa || evento?.placa || '-')}${detailCard('Status', item.status_compra || '-')}
+          ${detailCard('Origem', item.origem_compra || (item.id_evento?'Evento':'Financeiro / Administrativo'))}${detailCard('Evento', item.id_evento ? eventLabel(item.id_evento) : '-')}${detailCard('Status', item.status_compra || '-')}${detailCard('Finalidade', item.descricao_finalidade || '-')}
           ${detailCard('Item / peça', item.item || '-')}${detailCard('Fornecedor', item.fornecedor || '-')}${detailCard('Responsável', item.responsavel || '-')}
           ${detailCard('Valor cotado', money(item.valor_cotado || 0))}${detailCard('Valor aprovado', money(item.valor_aprovado || 0))}${detailCard('Solicitação', dateBR(item.data_solicitacao))}
           ${detailCard('Aprovação', dateBR(item.data_aprovacao))}${detailCard('Entrega', dateBR(item.data_entrega))}${detailCard('Associado', evento?.associado || '-')}
@@ -5787,7 +6150,7 @@
         label: 'Veículos',
         idField: 'id_veiculo',
         fields: ['id_veiculo','placa','id_associado','associado','marca','modelo','ano_modelo','tipo_combustivel','codigo_fipe','valor_fipe','mensalidade','consultor','regional','cooperativa','status','rastreador','data_entrada','observacoes'],
-        sample: ['','ABC1D23','','João Exemplo','Fiat','Argo','2022','Flex','001267-0','65000','180','Consultor Exemplo','Regional Exemplo','Cooperativa Exemplo','Ativo','Sim','','Importado via CSV']
+        sample: ['','ABC1D23','','João Exemplo','Fiat','Argo','2022','Flex','001267-0','65000','180','Consultor Exemplo','Cooperativa Exemplo','Cooperativa Exemplo','Ativo','Sim','','Importado via CSV']
       },
       Eventos: {
         label: 'Eventos',
@@ -5799,13 +6162,13 @@
         label: 'Financeiro',
         idField: 'id_financeiro',
         fields: ['id_financeiro','id_associado','associado','id_veiculo','placa','competencia','data_vencimento','valor_mensalidade','valor_pago','data_pagamento','status_financeiro','forma_pagamento','consultor','regional','observacoes','data_criacao'],
-        sample: ['','','João Exemplo','','ABC1D23','2026-07','2026-07-10','180','0','','Aberto','Boleto','Consultor Exemplo','Regional Exemplo','Importado via CSV','']
+        sample: ['','','João Exemplo','','ABC1D23','2026-07','2026-07-10','180','0','','Aberto','Boleto','Consultor Exemplo','Cooperativa Exemplo','Importado via CSV','']
       },
       Consultores_Regionais: {
         label: 'Consultores / Regionais',
         idField: 'id_consultor',
         fields: ['id_consultor','nome','cpf_cnpj','telefone','email','regional','cooperativa','tipo','status','data_cadastro','observacoes'],
-        sample: ['','Consultor Exemplo','000.000.000-00','81999999999','consultor@exemplo.com','Regional Exemplo','Cooperativa Exemplo','Consultor','Ativo','','Importado via CSV']
+        sample: ['','Consultor Exemplo','000.000.000-00','81999999999','consultor@exemplo.com','Cooperativa Exemplo','Cooperativa Exemplo','Consultor','Ativo','','Importado via CSV']
       },
       Oficinas: {
         label: 'Oficinas',
@@ -6041,7 +6404,10 @@
     function invalidateCacheAfterImport(tabela) {
       const map = {
         Associados: 'associados', Veiculos: 'veiculos', Eventos: 'eventos', Financeiro: 'financeiro',
-        Consultores_Regionais: 'consultores', Oficinas: 'oficinas', Compras: 'compras', Vistorias_Regulacao: 'regulacoes'
+        Consultores_Regionais: 'consultores',
+        Cooperativas: 'cooperativas',
+        Grupos_Permissao: 'gruposPermissao',
+        Permissoes_Grupo: 'permissoesGrupo', Oficinas: 'oficinas', Compras: 'compras', Vistorias_Regulacao: 'regulacoes'
       };
       const key = map[tabela];
       if (key && Array.isArray(state.cache[key])) state.cache[key] = [];
@@ -6081,6 +6447,8 @@
       { tabela: 'Vistorias_Regulacao', label: 'Vistorias / Regulação' },
       { tabela: 'Compras', label: 'Compras' },
       { tabela: 'Financeiro', label: 'Financeiro' },
+      { tabela: 'Cotacoes', label: 'Cotações' },
+      { tabela: 'Planos', label: 'Planos comerciais' },
       { tabela: 'Consultores_Regionais', label: 'Consultores / Regionais' },
       { tabela: 'Oficinas', label: 'Oficinas' },
       { tabela: 'Usuarios', label: 'Usuários' },
@@ -6381,6 +6749,17 @@
     }
 
     window.closeModal = closeModal;
+    window.renderPlanos = renderPlanos;
+    window.paintPlanosTable = paintPlanosTable;
+    window.openPlanoModal = openPlanoModal;
+    window.openPlanoModalById = openPlanoModalById;
+    window.openPlanoDetails = openPlanoDetails;
+    window.inativarPlano = inativarPlano;
+    window.renderCooperativas = renderCooperativas;
+    window.openCooperativaModal = openCooperativaModal;
+    window.openCooperativaModalById = openCooperativaModalById;
+    window.openCooperativaDetails = openCooperativaDetails;
+    window.renderGruposPermissao = renderGruposPermissao;
     window.renderCotacoes = renderCotacoes;
     window.openCotacaoModal = openCotacaoModal;
     window.openCotacaoModalById = openCotacaoModalById;
@@ -6392,6 +6771,10 @@
     window.cotacaoCarregarAnos = cotacaoCarregarAnos;
     window.cotacaoConsultarValor = cotacaoConsultarValor;
     window.atualizarCalculoCotacao = atualizarCalculoCotacao;
+    window.aplicarPlanoNaCotacao = aplicarPlanoNaCotacao;
+    window.cotacaoTipoAlterado = cotacaoTipoAlterado;
+    window.imprimirPropostaCotacao = imprimirPropostaCotacao;
+    window.alterarStatusCotacao = alterarStatusCotacao;
     window.paintCotacoesTable = paintCotacoesTable;
     window.limparFiltrosCotacoes = limparFiltrosCotacoes;
     window.renderDashboard = renderDashboard;
