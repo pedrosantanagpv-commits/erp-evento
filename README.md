@@ -1,10 +1,10 @@
-# Sistema Gerencial — v0.2.4.1
+# Sistema Gerencial — v0.2.5.1
 
-Versão com módulo de **Cotações** e consulta FIPE gratuita.
+Versão com **Planos Comerciais e Cotações Avançadas**.
 
 ## Atualização no GitHub
 
-Substitua estes arquivos no repositório:
+Substitua estes arquivos:
 
 - `index.html`
 - `api/erp.js`
@@ -13,57 +13,54 @@ Substitua estes arquivos no repositório:
 
 ## Atualização no Apps Script
 
-Esta versão precisa atualizar o Apps Script para criar a aba `Cotacoes` e habilitar a consulta FIPE.
-
 1. Abra o Apps Script.
-2. Substitua o conteúdo do `Code.gs` pelo arquivo `APPS_SCRIPT_V024_COMPLETO.gs`.
+2. Substitua todo o `Code.gs` pelo arquivo `APPS_SCRIPT_V025_COMPLETO.gs`.
 3. Salve.
-4. Execute apenas a função:
+4. Execute apenas `migrarBancoV025`.
+5. Confirme que a aba `Planos` foi criada e que `Cotacoes` recebeu as novas colunas.
+6. Publique uma **New version** do deploy.
 
-```txt
-migrarBancoV024
-```
-
-5. Faça novo deploy do Apps Script em **New version**.
-6. Aguarde a Vercel publicar o front-end.
-
-Não rode `setupBancoERP`.
+Não execute `setupBancoERP`.
 
 ## O que entrou
 
-- Novo menu `Cotações`.
-- Consulta de marcas, modelos, anos e valor FIPE usando provedor gratuito.
-- Cálculo de mensalidade por percentual sobre FIPE.
-- Histórico de cotações.
-- Conversão de cotação em veículo.
-- Nova aba `Cotacoes`.
+- Novo módulo `Planos Comerciais`.
+- Percentual por plano.
+- Mensalidade mínima.
+- Adesão por plano.
+- Faixa mínima e máxima de FIPE.
+- Regra de rastreador obrigatório e valor adicional.
+- Limite de desconto por plano e por perfil.
+- Cálculo de mensalidade base, adicionais, rastreador, desconto e mensalidade final.
+- Validade da cotação e status de expiração visual.
+- Proposta comercial pronta para impressão.
+- Aprovação de cotação e conversão usando a mensalidade final.
+- Validações de duplicidade para e-mail de usuário, CPF/CNPJ de associado e consultor/regional e CNPJ de oficina.
+- Backup administrativo inclui Cotações e Planos.
 
-## Observação
+## Teste recomendado
 
-O provedor gratuito pode ter limites e oscilações. Para operação comercial em volume, a estrutura já permite trocar o provedor no Apps Script sem alterar o módulo inteiro.
-
-
-## Correção v0.2.4.1
-
-Incluído `FIPE_CONFIG` no Apps Script para corrigir o erro `FIPE_CONFIG is not defined` ao carregar marcas/modelos da FIPE.
-
-
-## Hotfix v0.2.4.3 — Placa única
-
-- Bloqueio de placa duplicada no backend.
-- Validação também na conversão de cotação em veículo.
-- Normalização de placa antes da comparação.
-- Lock no cadastro de veículos para reduzir risco de duplicidade em requisições simultâneas.
-
-
-## Hotfix v0.2.4.5
-
-- Exclusão definitiva de veículos disponível apenas para Super Admin.
-- Backend valida o perfil pelo token, não apenas pela interface.
-- Bloqueia exclusão quando houver eventos ou lançamentos financeiros vinculados pelo ID do veículo.
-- Se o veículo veio de uma cotação, a exclusão desfaz o vínculo de conversão para evitar referência órfã.
+1. Execute `migrarBancoV025`.
+2. Crie um plano comercial.
+3. Abra uma nova cotação e consulte a FIPE.
+4. Selecione o plano.
+5. Teste desconto, rastreador e mensalidade final.
+6. Salve e abra os detalhes.
+7. Use `Proposta` para imprimir.
+8. Aprove e converta em veículo.
 
 
-## Exclusão definitiva global — v0.2.4.5
+## v0.2.5.1 — Cooperativas, Voluntários, Perfis e Compras multi-origem
 
-O Super Admin pode excluir definitivamente registros de Associados, Consultores/Regionais, Oficinas, Eventos, Vistorias/Regulação, Compras, Financeiro, Cotações, Veículos e Usuários. O backend valida vínculos antes de excluir e registra a ação na auditoria. Perfis não Super Admin continuam com inativação/cancelamento operacional.
+- FIPE: exibe `32000` como `0 km`, guarda referência e diferencia 0 km/usado.
+- Cooperativas: entidade própria de base comercial, com gerente, Voluntários e indicadores.
+- Voluntários: funções Consultor ou Gerente, vinculados a uma Cooperativa.
+- Cotações: registram Voluntário e Cooperativa separadamente, herdando o vínculo.
+- Perfil Comercial separado do Operacional: Consultor vê apenas suas cotações; Gerente vê somente a própria Cooperativa.
+- Grupos de Permissão: estrutura base com escopo PRÓPRIO, COOPERATIVA ou GLOBAL.
+- Compras: origem Evento ou Financeiro/Administrativo; Evento exige vínculo e compra administrativa exige finalidade.
+- Compatibilidade: campos legados `consultor` e `regional` são preservados durante a transição.
+
+### Migração
+
+No Apps Script, substitua pelo `APPS_SCRIPT_V0251_COMPLETO.gs`, salve, execute **somente** `migrarBancoV0251` e publique uma New version do deployment. Não execute `setupBancoERP`.
