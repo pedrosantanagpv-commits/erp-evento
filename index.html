@@ -4431,6 +4431,14 @@
           ${selectField('rastreador', 'Rastreador', ['Sim','Não','A definir'], item.rastreador || 'A definir')}${textareaField('observacoes', 'Observações do veículo', 'Gerado a partir de cotação...', 'full', `Criado a partir da cotação ${item.id_cotacao || ''}`)}
         </div>`, 'Converter', async data => {
           if (!data.placa) throw new Error('Informe a placa para criar o veículo.');
+
+          const placaNormalizada = String(data.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+          const placaJaExiste = state.cache.veiculos.some(v => String(v.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '') === placaNormalizada);
+
+          if (placaJaExiste) {
+            throw new Error(`Já existe um veículo cadastrado com a placa ${placaNormalizada}.`);
+          }
+
           const veiculo = {
             placa: data.placa,
             associado: item.associado || '',
