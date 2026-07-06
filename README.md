@@ -46,3 +46,11 @@ O provedor gratuito pode ter limites e oscilações. Para operação comercial e
 ## Correção v0.2.4.1
 
 Incluído `FIPE_CONFIG` no Apps Script para corrigir o erro `FIPE_CONFIG is not defined` ao carregar marcas/modelos da FIPE.
+
+
+## Hotfix v0.2.4.3 — Placa única
+
+- Bloqueio de placa duplicada no backend.
+- Validação também na conversão de cotação em veículo.
+- Normalização de placa antes da comparação.
+- Lock no cadastro de veículos para reduzir risco de duplicidade em requisições simultâneas.
