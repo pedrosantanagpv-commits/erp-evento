@@ -1,6 +1,6 @@
 {
   "name": "sistema-gerencial-white-label",
-  "version": "0.2.4.5",
+  "version": "0.2.5.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,5 +9,5 @@
   },
   "dependencies": {},
   "devDependencies": {},
-  "description": "Sistema gerencial white label - v0.2.2"
+  "description": "Sistema gerencial white label - v0.2.5.1 com Cooperativas, Voluntários, perfis comerciais e compras multi-origem"
 }
