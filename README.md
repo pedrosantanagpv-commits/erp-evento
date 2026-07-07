@@ -1,56 +1,85 @@
-# Sistema Gerencial — v0.2.6
+# Sistema Gerencial — v0.2.7
 
-Versão focada em **performance, tempo de resposta e responsividade percebida**, mantendo a estrutura funcional da v0.2.5.2.
+Versão focada em **Configurações e Parâmetros Gerenciais**, permitindo alterar regras e listas do ERP sem editar o código a cada mudança operacional.
 
 ## O que entrou
 
-### Cache no Apps Script
-- cache de Configurações, Planos, Cooperativas, Voluntários, Oficinas e Grupos de Permissão;
-- invalidação automática do cache após criar, editar, inativar ou excluir registros;
-- cache das consultas FIPE para marcas, modelos, anos e valores;
-- cache curto do resumo do Dashboard.
+### Novo módulo Configurações
+Disponível para perfis administrativos autorizados.
 
-### Bootstrap de inicialização
-Após o login, o ERP busca em uma chamada agrupada:
-- opções/configurações;
-- Planos;
-- Cooperativas;
+O módulo foi dividido em quatro blocos:
+
+- Comercial
+- Operação
+- Financeiro
+- Sistema
+
+As alterações são gravadas na aba `Configuracoes`, atualizam o cache do backend e ficam registradas em `Logs_Sistema`.
+
+### Parâmetros comerciais
+- validade padrão da cotação;
+- percentual FIPE padrão;
+- mensalidade mínima padrão;
+- taxa de adesão padrão;
+- desconto máximo do Consultor;
+- desconto máximo Administrativo;
+- opções de rastreador;
+- status de Cotação.
+
+### Parâmetros operacionais
+- tipos de Evento;
+- etapas do Kanban;
+- status de Evento;
+- prioridades;
+- categorias de Compra;
+- status de Compra;
+- tipos de Vistoria / Regulação;
+- status técnico.
+
+### Parâmetros financeiros
+- formas de pagamento;
+- status financeiro;
+- categorias de despesa;
+- centros de custo;
+- valor de referência para atenção gerencial em Compras.
+
+### Parâmetros de sistema
+- perfis de usuário;
+- funções de Voluntário;
+- origens de Compra;
+- prefixo de Evento;
+- obrigatoriedade de telefone em nova Cotação.
+
+### Integrações dinâmicas
+A v0.2.7 passa a consumir as configurações em formulários importantes, incluindo:
+
+- Cotações;
+- Eventos;
+- Kanban;
+- Compras;
+- Financeiro;
+- Vistorias / Regulação;
 - Voluntários;
-- Oficinas;
-- Grupos de Permissão;
-- Permissões dos grupos.
-
-Isso reduz chamadas repetidas durante a navegação inicial.
-
-### Cache inteligente no front-end
-- cache local com validade curta;
-- reutilização imediata de dados já carregados;
-- atualização em segundo plano quando o cache vence;
-- deduplicação de requisições GET simultâneas;
-- invalidação automática após gravações.
-
-### Proteção contra clique duplo
-Requisições POST idênticas que ainda estão em andamento são reutilizadas, reduzindo risco de cadastros duplicados por múltiplos cliques.
-
-### Dashboard em duas etapas
-- primeiro carrega um resumo rápido de indicadores;
-- gráficos, alertas e dados detalhados são atualizados em seguida.
-
-### Preparação para escala
-Foi adicionada a rota `listar_paginado`, que prepara a API para paginação real no backend em bases maiores.
+- Usuários.
 
 ## Atualização no GitHub
 Substitua:
+
 - `index.html`
 - `api/erp.js`
 - `package.json`
 - `README.md`
 
 ## Atualização no Apps Script
-1. Substitua todo o `Code.gs` pelo arquivo `APPS_SCRIPT_V026_COMPLETO.gs`.
-2. Salve.
-3. Publique uma **New version** do deployment.
 
-Não há migração de banco nesta versão.
+1. Substitua todo o conteúdo atual do `Code.gs` pelo arquivo `APPS_SCRIPT_V027_COMPLETO.gs`.
+2. Salve.
+3. Execute somente a função `migrarBancoV027`.
+4. Aguarde a execução terminar com sucesso.
+5. Confira a aba `Configuracoes`.
+6. Publique uma **New version** do deployment.
+7. Atualize o ERP com `Ctrl + F5`.
+
+A migração cria apenas parâmetros ausentes e não apaga os valores já existentes.
 
 **Não execute `setupBancoERP`.**
