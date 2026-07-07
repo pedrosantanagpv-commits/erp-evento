@@ -991,6 +991,181 @@
 
 
 
+
+    .settings-shell {
+      display: grid;
+      gap: 18px;
+    }
+
+    .settings-overview {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .settings-overview-card {
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, .14);
+      background: linear-gradient(180deg, rgba(20, 29, 41, .92), rgba(13, 20, 30, .94));
+    }
+
+    .settings-overview-card span {
+      display: block;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 8px;
+    }
+
+    .settings-overview-card strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .settings-overview-card small {
+      display: block;
+      color: #64748b;
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .settings-section {
+      border: 1px solid rgba(148, 163, 184, .14);
+      background: rgba(18, 24, 33, .88);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+
+    .settings-section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 20px 22px;
+      border-bottom: 1px solid rgba(148, 163, 184, .12);
+      background: rgba(15, 23, 42, .42);
+    }
+
+    .settings-section-head h3 {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+
+    .settings-section-head p {
+      margin: 0;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .settings-section-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, .10);
+      border: 1px solid rgba(148, 163, 184, .12);
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .settings-fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      padding: 22px;
+    }
+
+    .settings-field {
+      min-width: 0;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, .12);
+      background: rgba(11, 17, 24, .62);
+    }
+
+    .settings-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .settings-field label {
+      display: block;
+      font-weight: 800;
+      color: #e5e7eb;
+      margin-bottom: 7px;
+    }
+
+    .settings-field small {
+      display: block;
+      color: #64748b;
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
+    .settings-field input,
+    .settings-field textarea,
+    .settings-field select {
+      width: 100%;
+      border: 1px solid #273444;
+      border-radius: 14px;
+      background: #0b1118;
+      color: #e5e7eb;
+      padding: 12px 13px;
+      font: inherit;
+    }
+
+    .settings-field textarea {
+      min-height: 90px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .settings-field input:focus,
+    .settings-field textarea:focus,
+    .settings-field select:focus {
+      outline: none;
+      border-color: #94a3b8;
+      box-shadow: 0 0 0 4px rgba(148, 163, 184, .14);
+    }
+
+    .settings-save-bar {
+      position: sticky;
+      bottom: 16px;
+      z-index: 12;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, .18);
+      background: rgba(7, 11, 17, .94);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .34);
+      backdrop-filter: blur(14px);
+    }
+
+    .settings-save-bar p {
+      margin: 0;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 1080px) {
+      .settings-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .settings-fields, .settings-overview { grid-template-columns: 1fr; }
+      .settings-field.full { grid-column: auto; }
+      .settings-save-bar { align-items: stretch; flex-direction: column; }
+      .settings-save-bar .btn { width: 100%; }
+    }
+
     .permission-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -2676,6 +2851,7 @@
         <span class="nav-section">Administração</span>
         <button data-view="usuarios"><span class="nav-icon">◉</span>Usuários</button>
         <button data-view="grupos_permissao"><span class="nav-icon">⌘</span>Grupos de Permissão</button>
+        <button data-view="configuracoes"><span class="nav-icon">◧</span>Configurações</button>
         <button data-view="manutencao"><span class="nav-icon">⛭</span>Administração</button>
         <button data-view="sobre"><span class="nav-icon">ⓘ</span>Sobre</button>
       </nav>
@@ -2777,7 +2953,7 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.2.6';
+    const APP_VERSION = '0.2.7';
 
     const state = {
       user: null,
@@ -2849,13 +3025,14 @@
       manutencao: 'Administração',
       usuarios: 'Usuários',
       grupos_permissao: 'Grupos de Permissão',
+      configuracoes: 'Configurações',
       sobre: 'Sobre'
     };
 
     const ROLE_PERMISSIONS = {
-      'super admin': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','manutencao','sobre'],
-      'administrador': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','manutencao','sobre'],
-      'administrativo': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','manutencao','sobre'],
+      'super admin': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','configuracoes','manutencao','sobre'],
+      'administrador': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','configuracoes','manutencao','sobre'],
+      'administrativo': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','configuracoes','manutencao','sobre'],
       'cadastro': ['dashboard','associados','veiculos','cooperativas','consultores','oficinas','cotacoes','relatorios','importacao','sobre'],
       'eventos': ['dashboard','associados','veiculos','eventos','vistorias','compras','oficinas','kanban','relatorios','sobre'],
       'regulação': ['dashboard','associados','veiculos','eventos','vistorias','oficinas','kanban','relatorios','sobre'],
@@ -3304,6 +3481,7 @@
       if (view === 'manutencao') return renderManutencao();
       if (view === 'usuarios') return renderUsuarios();
       if (view === 'grupos_permissao') return renderGruposPermissao();
+      if (view === 'configuracoes') return renderConfiguracoes();
       if (view === 'sobre') return renderSobre();
     }
 
@@ -3954,6 +4132,117 @@
       openCustomModal('Detalhes da Cooperativa',`<div class="detail-grid">${detailCard('Cooperativa',c.nome||c.sigla)}${detailCard('Sigla',c.sigla)}${detailCard('Gerente',c.gerente)}${detailCard('Cidade/UF',[c.cidade,c.estado].filter(Boolean).join('/'))}${detailCard('Voluntários',vols.length)}${detailCard('Veículos',veics.length)}${detailCard('FIPE da carteira',money(fipe))}${detailCard('Mensalidade prevista',money(mensal))}${detailCard('Cotações',cots.length)}${detailCard('Eventos abertos',evs.filter(e=>!['finalizado','recusado','cancelado'].includes(normalizeText(e.status_evento))).length)}</div><div class="detail-section"><h4>Voluntários</h4>${vols.length?`<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Função</th><th>Status</th></tr></thead><tbody>${vols.map(v=>`<tr><td>${escapeHtml(v.nome||'-')}</td><td>${escapeHtml(v.tipo||'-')}</td><td>${statusBadge(v.status)}</td></tr>`).join('')}</tbody></table></div>`:emptyState('Nenhum Voluntário vinculado.','')}</div>`,true);
     }
 
+
+    const SETTINGS_SECTIONS = [
+      {
+        id: 'comercial',
+        title: 'Comercial',
+        subtitle: 'Regras padrão usadas nas cotações e nos cálculos comerciais.',
+        tag: 'Cotações',
+        fields: [
+          { key:'validade_cotacao_padrao', label:'Validade padrão da cotação', help:'Quantidade de dias sugerida em novas propostas.', type:'integer', suffix:'dias' },
+          { key:'percentual_cotacao_padrao', label:'Percentual FIPE padrão', help:'Usado quando a cotação não estiver vinculada a um plano com percentual próprio.', type:'decimal', suffix:'%' },
+          { key:'mensalidade_minima_padrao', label:'Mensalidade mínima padrão', help:'Piso de referência quando o plano não tiver mensalidade mínima própria.', type:'money' },
+          { key:'taxa_adesao_padrao', label:'Taxa de adesão padrão', help:'Valor sugerido para novas cotações sem regra específica no plano.', type:'money' },
+          { key:'desconto_maximo_consultor', label:'Desconto máximo do Consultor', help:'Percentual máximo permitido para o perfil comercial Consultor.', type:'decimal', suffix:'%' },
+          { key:'desconto_maximo_administrativo', label:'Desconto máximo Administrativo', help:'Percentual máximo permitido para perfis administrativos.', type:'decimal', suffix:'%' },
+          { key:'rastreador_cotacao', label:'Opções de rastreador', help:'Separe as opções por vírgula.', type:'list', full:true },
+          { key:'status_cotacao', label:'Status de cotação', help:'Fluxo de status disponível para propostas comerciais.', type:'list', full:true }
+        ]
+      },
+      {
+        id: 'operacional',
+        title: 'Operação',
+        subtitle: 'Catálogos e fluxos usados pelos módulos de Eventos, Compras e Regulação.',
+        tag: 'Fluxos',
+        fields: [
+          { key:'tipo_evento', label:'Tipos de Evento', help:'Opções exibidas na abertura de Evento.', type:'list', full:true },
+          { key:'etapas_kanban_evento', label:'Etapas do Kanban', help:'Ordem operacional usada para movimentação dos Eventos.', type:'list', full:true },
+          { key:'status_evento', label:'Status de Evento', help:'Status disponíveis no acompanhamento operacional.', type:'list', full:true },
+          { key:'prioridades', label:'Prioridades', help:'Níveis de prioridade usados no sistema.', type:'list' },
+          { key:'categorias_compra', label:'Categorias de Compra', help:'Categorias disponíveis para solicitações de compra.', type:'list', full:true },
+          { key:'status_compra', label:'Status de Compra', help:'Etapas do fluxo de solicitação até entrega.', type:'list', full:true },
+          { key:'tipo_vistoria', label:'Tipos de Vistoria / Regulação', help:'Tipos de registros técnicos disponíveis.', type:'list', full:true },
+          { key:'status_vistoria', label:'Status técnico', help:'Status disponíveis para vistoria e regulação.', type:'list', full:true }
+        ]
+      },
+      {
+        id: 'financeiro',
+        title: 'Financeiro',
+        subtitle: 'Padronização de pagamentos, despesas, centros de custo e referência de aprovação.',
+        tag: 'Gestão',
+        fields: [
+          { key:'formas_pagamento', label:'Formas de pagamento', help:'Opções disponíveis nos lançamentos e compras.', type:'list', full:true },
+          { key:'status_financeiro', label:'Status financeiro', help:'Status disponíveis para lançamentos financeiros.', type:'list' },
+          { key:'categorias_despesa', label:'Categorias de despesa', help:'Classificações gerenciais para relatórios futuros.', type:'list', full:true },
+          { key:'centros_custo', label:'Centros de custo', help:'Centros usados para organização gerencial.', type:'list', full:true },
+          { key:'limite_aprovacao_compra', label:'Referência para aprovação de compra', help:'Valor de referência exibido no fluxo de Compras para atenção gerencial.', type:'money' }
+        ]
+      },
+      {
+        id: 'sistema',
+        title: 'Sistema',
+        subtitle: 'Parâmetros estruturais usados por usuários, Voluntários e rotinas gerais.',
+        tag: 'Estrutura',
+        fields: [
+          { key:'perfis_usuario', label:'Perfis de usuário', help:'Perfis disponíveis no cadastro de usuários.', type:'list', full:true },
+          { key:'funcoes_voluntario', label:'Funções de Voluntário', help:'Funções comerciais permitidas.', type:'list' },
+          { key:'origem_compra', label:'Origens de Compra', help:'Origens disponíveis na abertura de uma compra.', type:'list' },
+          { key:'prefixo_evento', label:'Prefixo de Evento', help:'Identificador de referência para numeração operacional.', type:'text' },
+          { key:'exigir_telefone_cotacao', label:'Exigir telefone na Cotação', help:'Quando ativo, novas cotações não podem ser salvas sem telefone.', type:'boolean' }
+        ]
+      }
+    ];
+
+    function settingsFieldHtml(field) {
+      const value = state.options[field.key] ?? '';
+      const classes = `settings-field${field.full ? ' full' : ''}`;
+      let control = '';
+      if (field.type === 'list') {
+        control = `<textarea data-config-key="${escapeHtml(field.key)}" rows="3">${escapeHtml(value)}</textarea>`;
+      } else if (field.type === 'boolean') {
+        control = `<select data-config-key="${escapeHtml(field.key)}"><option value="Sim" ${normalizeText(value)==='sim'?'selected':''}>Sim</option><option value="Não" ${normalizeText(value)==='nao'?'selected':''}>Não</option></select>`;
+      } else {
+        const inputMode = ['integer','decimal','money'].includes(field.type) ? 'decimal' : 'text';
+        control = `<input data-config-key="${escapeHtml(field.key)}" inputmode="${inputMode}" value="${escapeHtml(value)}" />`;
+      }
+      return `<div class="${classes}"><label>${escapeHtml(field.label)}</label><small>${escapeHtml(field.help || '')}</small>${control}</div>`;
+    }
+
+    function settingsSectionHtml(section) {
+      return `<section class="settings-section"><div class="settings-section-head"><div><h3>${escapeHtml(section.title)}</h3><p>${escapeHtml(section.subtitle)}</p></div><span class="settings-section-tag">${escapeHtml(section.tag)}</span></div><div class="settings-fields">${section.fields.map(settingsFieldHtml).join('')}</div></section>`;
+    }
+
+    async function renderConfiguracoes() {
+      if (!hasPermission('configuracoes')) return renderBlocked('configuracoes');
+      els.viewRoot.innerHTML = topbar('Configurações', 'Parâmetros gerenciais usados pelas regras e dropdowns do sistema.') + loadingPanel('Carregando parâmetros...');
+      try {
+        await loadOptions();
+        const total = SETTINGS_SECTIONS.reduce((sum, section) => sum + section.fields.length, 0);
+        els.viewRoot.innerHTML = `${topbar('Configurações', 'Parâmetros gerenciais usados pelas regras e dropdowns do sistema.', '<button class="btn btn-ghost" onclick="renderConfiguracoes()">Recarregar</button><button class="btn btn-yellow" onclick="salvarConfiguracoesGerenciaisUI()">Salvar alterações</button>')}<div class="settings-shell"><div class="settings-overview"><div class="settings-overview-card"><span>Blocos</span><strong>${SETTINGS_SECTIONS.length}</strong><small>Comercial, Operação, Financeiro e Sistema.</small></div><div class="settings-overview-card"><span>Parâmetros</span><strong>${total}</strong><small>Regras editáveis sem alteração de código.</small></div><div class="settings-overview-card"><span>Aplicação</span><strong>Dinâmica</strong><small>Novas telas e dropdowns passam a consumir as configurações.</small></div><div class="settings-overview-card"><span>Auditoria</span><strong>Ativa</strong><small>Alterações são registradas nos Logs do Sistema.</small></div></div>${SETTINGS_SECTIONS.map(settingsSectionHtml).join('')}<div class="settings-save-bar"><p>As alterações passam a valer nas próximas aberturas de formulários e consultas do ambiente.</p><button class="btn btn-yellow" id="settingsSaveButton" onclick="salvarConfiguracoesGerenciaisUI()">Salvar configurações</button></div></div>`;
+      } catch (error) {
+        renderError(error.message);
+      }
+    }
+
+    async function salvarConfiguracoesGerenciaisUI() {
+      const controls = Array.from(els.viewRoot.querySelectorAll('[data-config-key]'));
+      const configuracoes = {};
+      controls.forEach(control => { configuracoes[control.dataset.configKey] = String(control.value || '').trim(); });
+      const buttons = Array.from(els.viewRoot.querySelectorAll('button')).filter(btn => btn.textContent.includes('Salvar'));
+      buttons.forEach(btn => { btn.disabled = true; });
+      try {
+        const result = await apiPost({ action:'salvar_configuracoes', configuracoes });
+        state.options = result.data || configuracoes;
+        toast(result.message || 'Configurações atualizadas.');
+        await renderConfiguracoes();
+      } catch (error) {
+        toast(error.message, 'error');
+      } finally {
+        buttons.forEach(btn => { btn.disabled = false; });
+      }
+    }
+
     async function renderGruposPermissao() {
       if (!hasPermission('grupos_permissao')) return renderBlocked('grupos_permissao');
       els.viewRoot.innerHTML = topbar('Grupos de Permissão', 'Estrutura de acesso separada entre Comercial e Operacional.') + loadingPanel('Carregando grupos...');
@@ -4020,7 +4309,7 @@
     function openConsultorModal(item = null) {
       const isEdit = !!item;
       ensureCooperativasCache().catch(()=>{});
-      const tipos = ['Consultor', 'Gerente'];
+      const tipos = parseOptions('funcoes_voluntario', ['Consultor', 'Gerente']);
       const statuses = ['Ativo', 'Inativo', 'Pendente'];
       openModal(isEdit ? 'Editar Voluntário' : 'Novo Voluntário', `
         <div class="form-grid">
@@ -4029,7 +4318,7 @@
           ${field('telefone', 'Telefone', '81999999999', '', item?.telefone || '')}
           ${field('email', 'E-mail', 'email@dominio.com', '', item?.email || '')}
           ${cooperativaSelectField(item?.id_cooperativa || '', item?.cooperativa || item?.regional || '')}
-          ${selectField('tipo', 'Função', ['Consultor','Gerente'], item?.tipo || 'Consultor')}
+          ${selectField('tipo', 'Função', tipos, item?.tipo || 'Consultor')}
           ${selectField('status', 'Status', statuses, item?.status || 'Ativo')}
           ${textareaField('observacoes', 'Observações', 'Observações internas...', 'span-2', item?.observacoes || '')}
         </div>`, isEdit ? 'Salvar alterações' : 'Cadastrar', async data => {
@@ -4962,7 +5251,7 @@
           ${field('mensalidade_base', 'Mensalidade base', 'R$ 0,00', '', item?.mensalidade_base || '')}${field('adicional_categoria', 'Adicional de categoria', 'R$ 0,00', '', item?.adicional_categoria || '')}
           ${selectField('rastreador', 'Rastreador', parseOptions('rastreador_cotacao', ['Sim','Não','A definir']), item?.rastreador || 'A definir')}${field('valor_rastreador', 'Valor do rastreador', 'R$ 0,00', '', item?.valor_rastreador || '')}
           ${field('desconto_percentual', 'Desconto (%)', '0', '', item?.desconto_percentual || '0')}${field('desconto_valor', 'Valor do desconto', 'R$ 0,00', '', item?.desconto_valor || '')}
-          ${field('mensalidade_final', 'Mensalidade final', 'R$ 0,00', '', item?.mensalidade_final || item?.mensalidade_sugerida || '')}${field('valor_adesao', 'Valor adesão', 'R$ 0,00', '', item?.valor_adesao || '')}
+          ${field('mensalidade_final', 'Mensalidade final', 'R$ 0,00', '', item?.mensalidade_final || item?.mensalidade_sugerida || '')}${field('valor_adesao', 'Valor adesão', 'R$ 0,00', '', item?.valor_adesao || state.options.taxa_adesao_padrao || '')}
           ${field('validade_dias', 'Validade (dias)', '5', '', item?.validade_dias || validadePadrao)}${field('data_validade', 'Data de validade', 'AAAA-MM-DD', '', item?.data_validade ? String(item.data_validade).slice(0,10) : '')}
           ${field('associado', 'Nome / associado', 'Nome do interessado', '', item?.associado || '')}${field('telefone', 'Telefone', '(00) 00000-0000', '', item?.telefone || '')}
           ${selectConsultorField(item?.voluntario || item?.consultor || '', item?.id_voluntario || '')}${hiddenField('id_cooperativa', item?.id_cooperativa || '')}${field('cooperativa', 'Cooperativa', 'Preenchida automaticamente pelo Voluntário', '', item?.cooperativa || item?.regional || '')}${hiddenField('regional', item?.regional || item?.cooperativa || '')}
@@ -4992,6 +5281,7 @@
         delete data._consultor_ref;
         if (!data.codigo_ano) throw new Error('Selecione o ano/combustível antes de salvar.');
         if (!data.valor_fipe) throw new Error('Informe ou consulte o valor FIPE.');
+        if (!isEdit && normalizeText(state.options.exigir_telefone_cotacao || 'Sim') === 'sim' && !String(data.telefone || '').trim()) throw new Error('Informe o telefone do interessado.');
         atualizarCalculoCotacao();
         data.percentual_base = data.percentual;
         data.mensalidade_sugerida = data.mensalidade_final || data.mensalidade_sugerida;
@@ -5160,7 +5450,7 @@
       const descontoPct = parseMoneyBR(els.modalRoot.querySelector('[name="desconto_percentual"]')?.value || 0);
       const plano = planoSelecionadoCotacao();
       let base = valor > 0 && percentual > 0 ? valor * percentual / 100 : 0;
-      const minimo = parseMoneyBR(plano?.mensalidade_minima || 0);
+      const minimo = parseMoneyBR(plano?.mensalidade_minima || state.options.mensalidade_minima_padrao || 0);
       if (minimo && base < minimo) base = minimo;
       const subtotal = base + adicional + valorRastreador;
       const descontoValor = subtotal * descontoPct / 100;
@@ -5309,8 +5599,8 @@
     async function openFinanceiroModal(item = null) {
       const isEdit = Boolean(item?.id_financeiro);
       await Promise.all([ensureVeiculosCache(), ensureAssociadosCache(), ensureConsultoresCache()]);
-      const status = ['Aberto', 'Pago', 'Atrasado', 'Cancelado'];
-      const formas = ['Pix', 'Boleto', 'Cartão', 'Dinheiro', 'Transferência', 'Outro'];
+      const status = parseOptions('status_financeiro', ['Aberto', 'Pago', 'Atrasado', 'Cancelado']);
+      const formas = parseOptions('formas_pagamento', ['Pix', 'Boleto', 'Cartão', 'Dinheiro', 'Transferência', 'Outro']);
       openModal(isEdit ? 'Editar lançamento financeiro' : 'Novo lançamento financeiro', `
         <div class="form-grid">
           ${financeiroVehicleSelect(item?.id_veiculo || '')}
@@ -6216,7 +6506,7 @@
       const origemPadrao = item?.origem_compra || (selectedEventId ? 'Evento' : (roleKey()==='eventos' ? 'Evento' : 'Financeiro / Administrativo'));
       openModal(isEdit ? 'Editar compra' : 'Criar solicitação de compra', `
         <div class="form-grid">
-          ${selectField('origem_compra','Origem da compra',['Evento','Financeiro / Administrativo'],origemPadrao)}
+          ${selectField('origem_compra','Origem da compra',parseOptions('origem_compra',['Evento','Financeiro / Administrativo']),origemPadrao)}
           ${selectField('categoria_compra','Categoria',parseOptions('categorias_compra',['Peças','Serviços','Equipamentos','Estrutura','Marketing','Tecnologia','Administrativo','Outro']),item?.categoria_compra||'Peças')}
           <div class="field full" id="compraEventoWrap">${eventSelectField(selectedEventId)}</div>
           <div class="field full" id="compraFinalidadeWrap">${textareaField('descricao_finalidade','Finalidade da compra','Descreva claramente do que se trata esta compra...','full',item?.descricao_finalidade||'')}</div>
@@ -6224,10 +6514,11 @@
           ${field('quantidade','Quantidade','1','',item?.quantidade||'1')}${field('fornecedor','Fornecedor','Nome do fornecedor','',item?.fornecedor||'')}
           ${field('valor_estimado','Valor estimado','0','',item?.valor_estimado||'')}${field('valor_cotado','Valor cotado','0','',item?.valor_cotado||'')}
           ${field('valor_aprovado','Valor aprovado','0','',item?.valor_aprovado||'')}${field('valor_pago','Valor pago','0','',item?.valor_pago||'')}
-          ${selectField('status_compra','Status da compra',statusCompra,item?.status_compra||'Solicitado')}${selectField('status_financeiro','Status financeiro',['Pendente','Pago','Cancelado'],item?.status_financeiro||'Pendente')}
+          ${selectField('status_compra','Status da compra',statusCompra,item?.status_compra||'Solicitado')}${selectField('status_financeiro','Status financeiro',parseOptions('status_financeiro',['Aberto','Pago','Atrasado','Cancelado']),item?.status_financeiro||'Aberto')}
           ${field('responsavel_solicitacao','Solicitante','Nome do solicitante','',item?.responsavel_solicitacao||item?.responsavel||state.user?.nome||'')}${field('responsavel_compra','Responsável pela compra','Nome do comprador','',item?.responsavel_compra||'')}
           ${field('data_pagamento','Data de pagamento','AAAA-MM-DD','',item?.data_pagamento?String(item.data_pagamento).slice(0,10):'')}${field('data_entrega','Data de entrega','AAAA-MM-DD','',item?.data_entrega?String(item.data_entrega).slice(0,10):'')}
-          ${field('forma_pagamento','Forma de pagamento','PIX, Boleto...','',item?.forma_pagamento||'')}${textareaField('observacoes','Observações','Detalhes adicionais','full',item?.observacoes||'')}
+          ${selectField('forma_pagamento','Forma de pagamento',parseOptions('formas_pagamento',['Pix','Boleto','Cartão','Dinheiro','Transferência','Outro']),item?.forma_pagamento||'Pix')}${textareaField('observacoes','Observações','Detalhes adicionais','full',item?.observacoes||'')}
+          <div class="lookup-note full">Referência de aprovação gerencial: compras acima de <strong>${money(state.options.limite_aprovacao_compra || 5000)}</strong> merecem validação do responsável definido pela operação.</div>
         </div>`, isEdit ? 'Salvar compra' : 'Criar compra', async data => {
           if (!String(data.item||'').trim()) throw new Error('Informe o item ou serviço.');
           const origem = normalizeText(data.origem_compra);
@@ -6322,8 +6613,8 @@
       const isEdit = Boolean(item?.id_regulacao);
       try { await ensureEventosCache(); } catch (error) { console.warn(error.message); }
       const evento = findEventById(item?.id_evento || eventId);
-      const statusReg = ['Solicitado', 'Agendado', 'Em vistoria', 'Em análise', 'Aguardando parecer', 'Aguardando aprovação', 'Aprovado', 'Finalizado', 'Cancelado'];
-      const tipos = ['Vistoria', 'Regulação', 'Auditoria', 'Entrada em oficina', 'Parecer técnico'];
+      const statusReg = parseOptions('status_vistoria', ['Solicitado', 'Agendado', 'Em vistoria', 'Em análise', 'Aguardando parecer', 'Aguardando aprovação', 'Aprovado', 'Finalizado', 'Cancelado']);
+      const tipos = parseOptions('tipo_vistoria', ['Vistoria', 'Regulação', 'Auditoria', 'Entrada em oficina', 'Parecer técnico']);
       const eventField = eventId && !isEdit ? hiddenField('id_evento', eventId) + `<div class="lookup-note full">Evento vinculado: <strong>${escapeHtml(evento?.numero_evento || eventId)}</strong> • Placa: <strong>${escapeHtml(evento?.placa || '-')}</strong></div>` : eventSelectField(item?.id_evento || eventId || '');
       openModal(isEdit ? 'Editar vistoria/regulação' : 'Nova vistoria/regulação', `
         <div class="form-grid">
@@ -7103,6 +7394,8 @@
     window.openCooperativaModalById = openCooperativaModalById;
     window.openCooperativaDetails = openCooperativaDetails;
     window.renderGruposPermissao = renderGruposPermissao;
+    window.renderConfiguracoes = renderConfiguracoes;
+    window.salvarConfiguracoesGerenciaisUI = salvarConfiguracoesGerenciaisUI;
     window.renderCotacoes = renderCotacoes;
     window.openCotacaoModal = openCotacaoModal;
     window.openCotacaoModalById = openCotacaoModalById;
