@@ -2777,7 +2777,7 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.2.5.1';
+    const APP_VERSION = '0.2.6';
 
     const state = {
       user: null,
@@ -2786,6 +2786,10 @@
       options: {},
       tablePageSize: 10,
       tablePages: {},
+      cacheTTL: 30000,
+      cacheMeta: {},
+      pendingGets: {},
+      pendingWrites: {},
       cache: {
         dashboard: null,
         associados: [],
@@ -3069,16 +3073,93 @@
     }
 
     async function apiGet(action, params = {}) {
-      const query = new URLSearchParams({ action, token: state.token || '', _ts: String(Date.now()), ...params });
-      return fetchJsonWithRetry(`${Conexão_BASE}?${query.toString()}`);
+      const requestKey = `${action}:${JSON.stringify(params)}`;
+      if (state.pendingGets[requestKey]) return state.pendingGets[requestKey];
+
+      const promise = (async () => {
+        const query = new URLSearchParams({ action, token: state.token || '', _ts: String(Date.now()), ...params });
+        return fetchJsonWithRetry(`${Conexão_BASE}?${query.toString()}`);
+      })();
+
+      state.pendingGets[requestKey] = promise;
+      try {
+        return await promise;
+      } finally {
+        delete state.pendingGets[requestKey];
+      }
+    }
+
+    const CACHE_KEY_MAP = {
+      Associados: 'associados',
+      Veiculos: 'veiculos',
+      Eventos: 'eventos',
+      Historico_Eventos: 'historico',
+      Compras: 'compras',
+      Financeiro: 'financeiro',
+      Cotacoes: 'cotacoes',
+      Planos: 'planos',
+      Vistorias_Regulacao: 'regulacoes',
+      Reclamacoes: 'reclamacoes',
+      Consultores_Regionais: 'consultores',
+      Cooperativas: 'cooperativas',
+      Grupos_Permissao: 'gruposPermissao',
+      Permissoes_Grupo: 'permissoesGrupo',
+      Oficinas: 'oficinas',
+      Usuarios: 'usuarios'
+    };
+
+    function markCacheFresh(cacheKey) {
+      state.cacheMeta[cacheKey] = Date.now();
+    }
+
+    function cacheIsFresh(cacheKey) {
+      const ts = Number(state.cacheMeta[cacheKey] || 0);
+      return ts && (Date.now() - ts) < state.cacheTTL;
+    }
+
+    function invalidateClientCache(tabela) {
+      const cacheKey = CACHE_KEY_MAP[tabela];
+      if (!cacheKey) return;
+      if (Array.isArray(state.cache[cacheKey])) state.cache[cacheKey] = [];
+      else state.cache[cacheKey] = null;
+      delete state.cacheMeta[cacheKey];
+      if (tabela === 'Eventos') {
+        state.cache.historico = [];
+        delete state.cacheMeta.historico;
+      }
+    }
+
+
+    function resetClientCache() {
+      Object.keys(state.cache).forEach(key => {
+        if (Array.isArray(state.cache[key])) state.cache[key] = [];
+        else state.cache[key] = null;
+      });
+      state.cacheMeta = {};
+      state.pendingGets = {};
+      state.pendingWrites = {};
     }
 
     async function apiPost(payload = {}) {
-      return fetchJsonWithRetry(Conexão_BASE, {
+      const requestPayload = { token: state.token || '', usuario: state.user?.email || 'Sistema', ...payload };
+      const writeKey = JSON.stringify(requestPayload);
+      if (state.pendingWrites[writeKey]) return state.pendingWrites[writeKey];
+
+      const promise = fetchJsonWithRetry(Conexão_BASE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: state.token || '', usuario: state.user?.email || 'Sistema', ...payload })
+        body: JSON.stringify(requestPayload)
       });
+
+      state.pendingWrites[writeKey] = promise;
+      try {
+        const result = await promise;
+        if (payload.tabela) invalidateClientCache(payload.tabela);
+        if (payload.action === 'mover_evento_kanban') invalidateClientCache('Eventos');
+        return result;
+      } finally {
+        delete state.pendingWrites[writeKey];
+      }
     }
 
     function saveSession(session) { localStorage.setItem('erp_evento_session', JSON.stringify(session)); }
@@ -3112,6 +3193,36 @@
       }
     }
 
+
+    async function hydrateBootstrap() {
+      try {
+        const result = await apiGet('bootstrap');
+        state.options = result.opcoes || state.options || {};
+        if (result.usuario) state.user = { ...state.user, ...result.usuario };
+
+        const entries = [
+          ['planos', result.planos],
+          ['cooperativas', result.cooperativas],
+          ['consultores', result.voluntarios],
+          ['oficinas', result.oficinas],
+          ['gruposPermissao', result.grupos_permissao],
+          ['permissoesGrupo', result.permissoes_grupo]
+        ];
+
+        entries.forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            state.cache[key] = value;
+            markCacheFresh(key);
+          }
+        });
+        return result;
+      } catch (error) {
+        console.warn('Bootstrap indisponível, usando carregamento tradicional:', error.message);
+        await loadOptions();
+        return null;
+      }
+    }
+
     function parseOptions(key, fallback = []) {
       const value = state.options[key];
       if (!value) return fallback;
@@ -3130,10 +3241,11 @@
         button.classList.add('loading');
         button.textContent = 'Entrando...';
         const result = await apiPost({ action: 'login', email: form.get('email'), senha: form.get('senha') });
+        resetClientCache();
         state.user = result.usuario;
         state.token = result.token;
         saveSession({ user: state.user, token: state.token });
-        await loadOptions();
+        await hydrateBootstrap();
         showApp();
         toast('Login realizado com sucesso.');
       } catch (error) {
@@ -3146,6 +3258,7 @@
 
     els.logoutBtn.addEventListener('click', () => {
       clearSession();
+      resetClientCache();
       state.user = null;
       state.token = '';
       showLogin();
@@ -3272,12 +3385,12 @@
 
     async function renderImplantacao() {
       await Promise.all([
-        ensureUsuariosCache(true).catch(() => {}),
-        ensureConsultoresCache(true).catch(() => {}),
-        ensureOficinasCache(true).catch(() => {}),
-        ensureAssociadosCache(true).catch(() => {}),
-        ensureVeiculosCache(true).catch(() => {}),
-        ensureFinanceiroCache(true).catch(() => {})
+        ensureUsuariosCache().catch(() => {}),
+        ensureConsultoresCache().catch(() => {}),
+        ensureOficinasCache().catch(() => {}),
+        ensureAssociadosCache().catch(() => {}),
+        ensureVeiculosCache().catch(() => {}),
+        ensureFinanceiroCache().catch(() => {})
       ]);
 
       const usuariosAtivos = state.cache.usuarios.filter(u => normalizeText(u.status) === 'ativo').length;
@@ -3342,21 +3455,45 @@
       if (isCommercialRole()) return renderCommercialDashboard();
       els.viewRoot.innerHTML = topbar('Painel Executivo', 'Visão consolidada da operação, alertas e indicadores gerenciais.') + skeletonDashboard();
       try {
+        const quickSummary = apiGet('dashboard_resumo')
+          .then(result => {
+            state.cache.dashboard = result.data || {};
+            paintDashboardQuick(state.cache.dashboard);
+          })
+          .catch(() => null);
+
         await Promise.all([
-          apiGet('dashboard').then(result => { state.cache.dashboard = result.data || {}; }),
-          ensureAssociadosCache(true),
-          ensureVeiculosCache(true),
-          ensureEventosCache(true),
-          ensureComprasCache(true),
-          ensureRegulacoesCache(true),
-          ensureFinanceiroCache(true),
-          ensureCotacoesCache(true),
-          ensureConsultoresCache(true),
-          ensureOficinasCache(true)
+          quickSummary,
+          ensureAssociadosCache(),
+          ensureVeiculosCache(),
+          ensureEventosCache(),
+          ensureComprasCache(),
+          ensureRegulacoesCache(),
+          ensureFinanceiroCache(),
+          ensureCotacoesCache(),
+          ensureConsultoresCache(),
+          ensureOficinasCache()
         ]);
 
         paintDashboardAvancado();
       } catch (error) { renderError(error.message); }
+    }
+
+    function paintDashboardQuick(data = {}) {
+      if (state.view !== 'dashboard') return;
+      els.viewRoot.innerHTML = `
+        ${topbar('Painel Executivo', 'Indicadores essenciais carregados. Os gráficos estão sendo atualizados em segundo plano.')}
+        <div class="grid-cards">
+          ${metric('Associados', data.total_associados || 0, 'Base cadastrada')}
+          ${metric('Veículos ativos', data.veiculos_ativos || 0, `${data.total_veiculos || 0} veículo(s)`) }
+          ${metric('FIPE total', money(data.valor_fipe_total || 0), 'Carteira cadastrada')}
+          ${metric('Mensalidade prevista', money(data.mensalidade_total_prevista || 0), 'Projeção da base')}
+          ${metric('Eventos abertos', data.eventos_abertos || 0, 'Operação em andamento')}
+          ${metric('Compras pendentes', data.compras_pendentes || 0, 'Aguardando conclusão')}
+          ${metric('Financeiro em aberto', data.financeiro_em_aberto || 0, 'Lançamentos pendentes')}
+          ${metric('Cotações em aberto', data.cotacoes_em_aberto || 0, 'Fluxo comercial')}
+        </div>
+        <div class="content-panel">${loadingPanel('Atualizando gráficos e alertas...')}</div>`;
     }
 
     function getDashboardFilterOptions() {
@@ -3596,105 +3733,92 @@
       return `<div class="dashboard-alert-list">${items.map(item => `<div class="dashboard-alert-item"><div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.note)}</small></div>${statusBadge(item.value)}</div>`).join('')}</div>`;
     }
 
+    async function loadTableCached(cacheKey, tabela, force = false, transform = null) {
+      const current = state.cache[cacheKey];
+      const hasData = Array.isArray(current) ? current.length > 0 : Boolean(current);
+      const hardForce = force === 'hard';
+
+      if (!hardForce && hasData && cacheIsFresh(cacheKey)) return current;
+
+      if (!hardForce && hasData && !cacheIsFresh(cacheKey)) {
+        const backgroundKey = `refresh:${cacheKey}`;
+        if (!state.pendingGets[backgroundKey]) {
+          state.pendingGets[backgroundKey] = apiGet('listar', { tabela })
+            .then(result => {
+              const data = transform ? transform(result.data || []) : (result.data || []);
+              state.cache[cacheKey] = data;
+              markCacheFresh(cacheKey);
+              return data;
+            })
+            .catch(() => current)
+            .finally(() => { delete state.pendingGets[backgroundKey]; });
+        }
+        return current;
+      }
+
+      const result = await apiGet('listar', { tabela });
+      const data = transform ? transform(result.data || []) : (result.data || []);
+      state.cache[cacheKey] = data;
+      markCacheFresh(cacheKey);
+      return data;
+    }
+
     async function ensureAssociadosCache(force = false) {
-      if (!force && state.cache.associados.length) return state.cache.associados;
-      const result = await apiGet('listar', { tabela: 'Associados' });
-      state.cache.associados = result.data || [];
-      return state.cache.associados;
+      return loadTableCached('associados', 'Associados', force);
     }
 
     async function ensureVeiculosCache(force = false) {
-      if (!force && state.cache.veiculos.length) return state.cache.veiculos;
-      const result = await apiGet('listar', { tabela: 'Veiculos' });
-      state.cache.veiculos = result.data || [];
-      return state.cache.veiculos;
+      return loadTableCached('veiculos', 'Veiculos', force);
     }
 
     async function ensureEventosCache(force = false) {
-      if (!force && state.cache.eventos.length) return state.cache.eventos;
-      const result = await apiGet('listar', { tabela: 'Eventos' });
-      state.cache.eventos = result.data || [];
-      return state.cache.eventos;
+      return loadTableCached('eventos', 'Eventos', force);
     }
 
     async function ensureHistoricoCache(force = false) {
-      if (!force && state.cache.historico.length) return state.cache.historico;
-      const result = await apiGet('listar', { tabela: 'Historico_Eventos' });
-      state.cache.historico = result.data || [];
-      return state.cache.historico;
+      return loadTableCached('historico', 'Historico_Eventos', force);
     }
 
     async function ensureComprasCache(force = false) {
-      if (!force && state.cache.compras.length) return state.cache.compras;
-      const result = await apiGet('listar', { tabela: 'Compras' });
-      state.cache.compras = result.data || [];
-      return state.cache.compras;
+      return loadTableCached('compras', 'Compras', force);
     }
 
-
-
     async function ensureFinanceiroCache(force = false) {
-      if (!force && state.cache.financeiro.length) return state.cache.financeiro;
-      const result = await apiGet('listar', { tabela: 'Financeiro' });
-      state.cache.financeiro = result.data || [];
-      return state.cache.financeiro;
+      return loadTableCached('financeiro', 'Financeiro', force);
     }
 
     async function ensureCotacoesCache(force = false) {
-      if (!force && state.cache.cotacoes.length) return state.cache.cotacoes;
-      const result = await apiGet('listar', { tabela: 'Cotacoes' });
-      state.cache.cotacoes = result.data || [];
-      return state.cache.cotacoes;
+      return loadTableCached('cotacoes', 'Cotacoes', force);
     }
 
-
     async function ensurePlanosCache(force = false) {
-      if (!force && state.cache.planos.length) return state.cache.planos;
-      const result = await apiGet('listar', { tabela: 'Planos' });
-      state.cache.planos = result.data || [];
-      return state.cache.planos;
+      return loadTableCached('planos', 'Planos', force);
     }
 
     async function ensureRegulacoesCache(force = false) {
-      if (!force && state.cache.regulacoes.length) return state.cache.regulacoes;
-      const result = await apiGet('listar', { tabela: 'Vistorias_Regulacao' });
-      state.cache.regulacoes = result.data || [];
-      return state.cache.regulacoes;
+      return loadTableCached('regulacoes', 'Vistorias_Regulacao', force);
     }
 
     async function ensureReclamacoesCache(force = false) {
-      if (!force && state.cache.reclamacoes.length) return state.cache.reclamacoes;
-      const result = await apiGet('listar', { tabela: 'Reclamacoes' });
-      state.cache.reclamacoes = result.data || [];
-      return state.cache.reclamacoes;
+      return loadTableCached('reclamacoes', 'Reclamacoes', force);
     }
 
     async function ensureConsultoresCache(force = false) {
-      if (!force && state.cache.consultores.length) return state.cache.consultores;
-      const result = await apiGet('listar', { tabela: 'Consultores_Regionais' });
-      state.cache.consultores = result.data || [];
-      return state.cache.consultores;
+      return loadTableCached('consultores', 'Consultores_Regionais', force);
     }
 
     async function ensureOficinasCache(force = false) {
-      if (!force && state.cache.oficinas.length) return state.cache.oficinas;
-      const result = await apiGet('listar', { tabela: 'Oficinas' });
-      state.cache.oficinas = result.data || [];
-      return state.cache.oficinas;
+      return loadTableCached('oficinas', 'Oficinas', force);
     }
 
-
     async function ensureUsuariosCache(force = false) {
-      if (!force && state.cache.usuarios.length) return state.cache.usuarios;
-      const result = await apiGet('listar', { tabela: 'Usuarios' });
-      state.cache.usuarios = (result.data || []).map(user => {
+      return loadTableCached('usuarios', 'Usuarios', force, users => users.map(user => {
         const clean = { ...user };
         delete clean.senha_hash;
         delete clean.token;
         delete clean.token_expira_em;
         return clean;
-      });
-      return state.cache.usuarios;
+      }));
     }
 
     function findAssociadoById(id) {
@@ -3762,23 +3886,7 @@
     }
 
     function invalidarCacheTabela(tabela) {
-      const mapa = {
-        Associados: 'associados',
-        Consultores_Regionais: 'consultores',
-        Cooperativas: 'cooperativas',
-        Grupos_Permissao: 'gruposPermissao',
-        Permissoes_Grupo: 'permissoesGrupo',
-        Oficinas: 'oficinas',
-        Eventos: 'eventos',
-        Vistorias_Regulacao: 'regulacoes',
-        Compras: 'compras',
-        Financeiro: 'financeiro',
-        Cotacoes: 'cotacoes',
-        Planos: 'planos'
-      };
-      const chave = mapa[tabela];
-      if (chave && state.cache[chave]) state.cache[chave] = [];
-      if (tabela === 'Eventos') state.cache.historico = [];
+      invalidateClientCache(tabela);
     }
 
     async function excluirRegistroDefinitivoUI(tabela, id, rotulo = 'registro') {
@@ -3798,20 +3906,14 @@
 
 
     async function ensureCooperativasCache(force = false) {
-      if (!force && state.cache.cooperativas.length) return state.cache.cooperativas;
-      const result = await apiGet('listar', { tabela: 'Cooperativas' });
-      state.cache.cooperativas = result.data || [];
-      return state.cache.cooperativas;
+      return loadTableCached('cooperativas', 'Cooperativas', force);
     }
 
     async function ensureGruposPermissaoCache(force = false) {
-      if (!force && state.cache.gruposPermissao.length) return state.cache.gruposPermissao;
-      const [g,p] = await Promise.all([
-        apiGet('listar', { tabela: 'Grupos_Permissao' }),
-        apiGet('listar', { tabela: 'Permissoes_Grupo' })
+      await Promise.all([
+        loadTableCached('gruposPermissao', 'Grupos_Permissao', force),
+        loadTableCached('permissoesGrupo', 'Permissoes_Grupo', force)
       ]);
-      state.cache.gruposPermissao = g.data || [];
-      state.cache.permissoesGrupo = p.data || [];
       return state.cache.gruposPermissao;
     }
 
@@ -3819,7 +3921,7 @@
       if (!hasPermission('cooperativas')) return renderBlocked('cooperativas');
       els.viewRoot.innerHTML = topbar('Cooperativas', 'Bases comerciais, gerentes responsáveis, voluntários e carteira vinculada.', canManageBase() ? '<button class="btn btn-yellow" onclick="openCooperativaModal()">+ Nova Cooperativa</button><button class="btn btn-ghost" onclick="renderCooperativas()">Atualizar</button>' : '<button class="btn btn-ghost" onclick="renderCooperativas()">Atualizar</button>') + loadingPanel('Carregando Cooperativas...');
       try {
-        await Promise.all([ensureCooperativasCache(true), ensureConsultoresCache(true), ensureVeiculosCache().catch(()=>[]), ensureCotacoesCache().catch(()=>[]), ensureEventosCache().catch(()=>[])]);
+        await Promise.all([ensureCooperativasCache(), ensureConsultoresCache(), ensureVeiculosCache().catch(()=>[]), ensureCotacoesCache().catch(()=>[]), ensureEventosCache().catch(()=>[])]);
         paintCooperativasTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -3856,7 +3958,7 @@
       if (!hasPermission('grupos_permissao')) return renderBlocked('grupos_permissao');
       els.viewRoot.innerHTML = topbar('Grupos de Permissão', 'Estrutura de acesso separada entre Comercial e Operacional.') + loadingPanel('Carregando grupos...');
       try {
-        await ensureGruposPermissaoCache(true);
+        await ensureGruposPermissaoCache();
         const grupos = state.cache.gruposPermissao || [];
         els.viewRoot.innerHTML = `${topbar('Grupos de Permissão', 'Estrutura de acesso separada entre Comercial e Operacional.')}<div class="content-panel"><div class="panel-head"><div><h3>Grupos configurados</h3><p>${grupos.length} grupo(s) disponíveis.</p></div></div><div class="permission-grid">${grupos.map(renderGrupoPermissaoCard).join('')}</div></div>`;
       } catch (error) {
@@ -3866,14 +3968,14 @@
 
     async function renderCommercialDashboard() {
       els.viewRoot.innerHTML=topbar('Painel Comercial','Cotações e indicadores dentro do seu escopo de acesso.')+loadingPanel('Carregando painel comercial...');
-      try { await Promise.all([ensureCotacoesCache(true),ensureConsultoresCache(true),ensureCooperativasCache(true)]); const cots=state.cache.cotacoes; const convertidas=cots.filter(c=>normalizeText(c.status_cotacao)==='convertida').length; const abertas=cots.filter(c=>!['convertida','cancelada','recusada','expirada'].includes(normalizeText(statusCotacaoReal(c)))).length; const fipe=cots.reduce((s,c)=>s+parseMoneyBR(c.valor_fipe),0); const mensal=cots.reduce((s,c)=>s+parseMoneyBR(c.mensalidade_final||c.mensalidade_sugerida),0); els.viewRoot.innerHTML=`${topbar('Painel Comercial',roleKey()==='consultor'?'Visão das suas próprias cotações.':'Visão da sua Cooperativa e produção comercial.','<button class="btn btn-yellow" onclick="openCotacaoModal()">+ Nova cotação</button>')}<div class="grid-cards">${metric('Cotações',cots.length,'Dentro do seu escopo')}${metric('Em andamento',abertas,'Aguardando conclusão')}${metric('Convertidas',convertidas,'Conversões realizadas')}${metric('FIPE cotada',money(fipe),'Soma das propostas')}${metric('Mensalidade projetada',money(mensal),'Valor das cotações')}${metric('Voluntários visíveis',state.cache.consultores.length,'Equipe comercial no escopo')}</div>`; } catch(error){renderError(error.message);}
+      try { await Promise.all([ensureCotacoesCache(),ensureConsultoresCache(),ensureCooperativasCache()]); const cots=state.cache.cotacoes; const convertidas=cots.filter(c=>normalizeText(c.status_cotacao)==='convertida').length; const abertas=cots.filter(c=>!['convertida','cancelada','recusada','expirada'].includes(normalizeText(statusCotacaoReal(c)))).length; const fipe=cots.reduce((s,c)=>s+parseMoneyBR(c.valor_fipe),0); const mensal=cots.reduce((s,c)=>s+parseMoneyBR(c.mensalidade_final||c.mensalidade_sugerida),0); els.viewRoot.innerHTML=`${topbar('Painel Comercial',roleKey()==='consultor'?'Visão das suas próprias cotações.':'Visão da sua Cooperativa e produção comercial.','<button class="btn btn-yellow" onclick="openCotacaoModal()">+ Nova cotação</button>')}<div class="grid-cards">${metric('Cotações',cots.length,'Dentro do seu escopo')}${metric('Em andamento',abertas,'Aguardando conclusão')}${metric('Convertidas',convertidas,'Conversões realizadas')}${metric('FIPE cotada',money(fipe),'Soma das propostas')}${metric('Mensalidade projetada',money(mensal),'Valor das cotações')}${metric('Voluntários visíveis',state.cache.consultores.length,'Equipe comercial no escopo')}</div>`; } catch(error){renderError(error.message);}
     }
 
     async function renderConsultores(filter = '') {
       if (!hasPermission('consultores')) return renderBlocked('consultores');
       els.viewRoot.innerHTML = topbar('Voluntários', 'Consultores e Gerentes vinculados às Cooperativas.', canManageBase() ? '<button class="btn btn-yellow" onclick="openConsultorModal()">+ Novo Voluntário</button><button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>' : '<button class="btn btn-ghost" onclick="renderConsultores()">Atualizar</button>') + loadingPanel('Carregando Voluntários...');
       try {
-        await Promise.all([ensureConsultoresCache(true), ensureCooperativasCache(true).catch(()=>[])]);
+        await Promise.all([ensureConsultoresCache(), ensureCooperativasCache().catch(()=>[])]);
         paintConsultorTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -3978,7 +4080,7 @@
       if (!hasPermission('oficinas')) return renderBlocked('oficinas');
       els.viewRoot.innerHTML = topbar('Oficinas', 'Cadastro gerencial de oficinas credenciadas e prestadores operacionais.', '<button class="btn btn-yellow" onclick="openOficinaModal()">+ Nova oficina</button><button class="btn btn-ghost" onclick="renderOficinas()">Atualizar</button>') + loadingPanel('Carregando oficinas...');
       try {
-        await ensureOficinasCache(true);
+        await ensureOficinasCache();
         paintOficinaTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -4073,7 +4175,7 @@
       if (!hasPermission('usuarios')) return renderBlocked('usuarios');
       els.viewRoot.innerHTML = topbar('Usuários e Permissões', 'Controle de acesso, perfis e status dos usuários do sistema.', '<button class="btn btn-yellow" onclick="openUsuarioModal()">+ Novo usuário</button><button class="btn btn-ghost" onclick="renderUsuarios()">Atualizar</button>') + loadingPanel('Carregando usuários...');
       try {
-        await ensureUsuariosCache(true);
+        await ensureUsuariosCache();
         paintUsuarioTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -4122,7 +4224,7 @@
     async function openUsuarioModal(item = null) {
       if (!hasPermission('usuarios')) return renderBlocked('usuarios');
       const isEdit = Boolean(item?.id_usuario);
-      await Promise.all([ensureConsultoresCache(true).catch(()=>{}), ensureCooperativasCache(true).catch(()=>{})]);
+      await Promise.all([ensureConsultoresCache().catch(()=>{}), ensureCooperativasCache().catch(()=>{})]);
       const perfis = parseOptions('perfis_usuario', ['Super Admin','Administrador','Cadastro','Eventos','Regulação','Compras','Financeiro','Gestor Operacional','Consultor','Gerente','Oficina']);
       const setores = ['Administração','Cadastro','Eventos','Regulação','Compras','Financeiro','Comercial','Operações','Oficina'];
       const status = ['Ativo', 'Inativo'];
@@ -4232,7 +4334,7 @@
     async function renderAssociados(filter = '') {
       els.viewRoot.innerHTML = topbar('Associados', 'Cadastro, consulta e relacionamento com veículos.', '<button class="btn btn-yellow" onclick="openAssociadoModal()">+ Novo associado</button><button class="btn btn-ghost" onclick="renderAssociados()">Atualizar</button>') + loadingPanel('Carregando associados...');
       try {
-        await ensureAssociadosCache(true);
+        await ensureAssociadosCache();
         paintAssociadoTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -4301,7 +4403,7 @@
 
     async function openAssociadoDetails(id) {
       try {
-        await Promise.all([ensureAssociadosCache(), ensureVeiculosCache(true), ensureEventosCache(true)]);
+        await Promise.all([ensureAssociadosCache(), ensureVeiculosCache(), ensureEventosCache()]);
         const item = findAssociadoById(id);
         if (!item) return toast('Associado não encontrado.', 'error');
         const veiculos = state.cache.veiculos.filter(v => String(v.id_associado) === String(item.id_associado) || normalizeText(v.associado) === normalizeText(item.nome));
@@ -4322,7 +4424,7 @@
     async function renderVeiculos(filter = '') {
       els.viewRoot.innerHTML = topbar('Veículos', 'Controle da base de veículos protegidos.', '<button class="btn btn-yellow" onclick="openVehicleModal()">+ Novo veículo</button><button class="btn btn-ghost" onclick="renderVeiculos()">Atualizar</button>') + loadingPanel('Carregando veículos...');
       try {
-        await ensureVeiculosCache(true);
+        await ensureVeiculosCache();
         await ensureAssociadosCache();
         paintVehicleTable(filter);
       } catch (error) { renderError(error.message); }
@@ -4469,7 +4571,7 @@
 
     async function openVehicleDetails(id) {
       try {
-        await Promise.all([ensureVeiculosCache(), ensureAssociadosCache(true), ensureEventosCache(true), ensureFinanceiroCache(true)]);
+        await Promise.all([ensureVeiculosCache(), ensureAssociadosCache(), ensureEventosCache(), ensureFinanceiroCache()]);
         const item = findVehicleById(id);
         if (!item) return toast('Veículo não encontrado.', 'error');
         const associado = findAssociadoById(item.id_associado) || state.cache.associados.find(a => normalizeText(a.nome) === normalizeText(item.associado));
@@ -4491,7 +4593,7 @@
     async function renderEventos(filter = '') {
       els.viewRoot.innerHTML = topbar('Eventos', 'Central de acompanhamento, comentários, prazos e movimentações.', '<button class="btn btn-yellow" onclick="openEventModal()">+ Novo evento</button><button class="btn btn-ghost" onclick="renderEventos()">Atualizar</button>') + loadingPanel('Carregando eventos...');
       try {
-        await ensureEventosCache(true);
+        await ensureEventosCache();
         paintEventTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -4519,7 +4621,7 @@
     async function renderVistorias(filter = '') {
       els.viewRoot.innerHTML = topbar('Vistorias e Regulação', 'Controle técnico de vistorias, pareceres e valores aprovados.', '<button class="btn btn-yellow" onclick="openRegulacaoModal()">+ Nova vistoria</button><button class="btn btn-ghost" onclick="renderVistorias()">Atualizar</button>') + loadingPanel('Carregando vistorias e regulações...');
       try {
-        await Promise.all([ensureRegulacoesCache(true), ensureEventosCache(true)]);
+        await Promise.all([ensureRegulacoesCache(), ensureEventosCache()]);
         paintRegulacaoTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -4556,7 +4658,7 @@
     async function renderCompras(filter = '') {
       els.viewRoot.innerHTML = topbar('Compras', 'Controle de peças, fornecedores, aprovações e entregas vinculadas aos eventos.', '<button class="btn btn-yellow" onclick="openCompraAvulsaModal()">+ Nova compra</button><button class="btn btn-ghost" onclick="renderCompras()">Atualizar</button>') + loadingPanel('Carregando compras...');
       try {
-        await Promise.all([ensureComprasCache(true), ensureEventosCache(true)]);
+        await Promise.all([ensureComprasCache(), ensureEventosCache()]);
         paintCompraTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -4676,7 +4778,7 @@
       if (!hasPermission('planos')) return renderBlocked('planos');
       els.viewRoot.innerHTML = topbar('Planos Comerciais', 'Regras configuráveis de cálculo, adesão, rastreador e desconto.', '<button class="btn btn-yellow" onclick="openPlanoModal()">+ Novo plano</button><button class="btn btn-ghost" onclick="renderPlanos()">Atualizar</button>') + loadingPanel('Carregando planos...');
       try {
-        await ensurePlanosCache(true);
+        await ensurePlanosCache();
         paintPlanosTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -4771,7 +4873,7 @@
     async function renderCotacoes(filter = '') {
       els.viewRoot.innerHTML = topbar('Cotações', 'Consulta FIPE, regras comerciais, proposta e conversão para veículo.', '<button class="btn btn-yellow" onclick="openCotacaoModal()">+ Nova cotação</button><button class="btn btn-ghost" onclick="renderCotacoes()">Atualizar</button>') + loadingPanel('Carregando cotações...');
       try {
-        await Promise.all([ensureCotacoesCache(true), ensureConsultoresCache(true), ensurePlanosCache(true), isCommercialRole() ? Promise.resolve([]) : ensureVeiculosCache(true)]);
+        await Promise.all([ensureCotacoesCache(), ensureConsultoresCache(), ensurePlanosCache(), isCommercialRole() ? Promise.resolve([]) : ensureVeiculosCache()]);
         paintCotacoesTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -4844,7 +4946,7 @@
 
     async function openCotacaoModal(item = null) {
       const isEdit = Boolean(item?.id_cotacao);
-      await Promise.all([ensureConsultoresCache(true).catch(() => {}), ensureCooperativasCache(true).catch(() => {}), ensurePlanosCache(true).catch(() => {})]);
+      await Promise.all([ensureConsultoresCache().catch(() => {}), ensureCooperativasCache().catch(() => {}), ensurePlanosCache().catch(() => {})]);
       const percentualPadrao = state.options.percentual_cotacao_padrao || '0,28';
       const validadePadrao = state.options.validade_cotacao_padrao || '5';
       openModal(isEdit ? 'Editar cotação' : 'Nova cotação', `
@@ -5069,7 +5171,7 @@
     }
 
     async function openCotacaoDetails(id) {
-      await Promise.all([ensureCotacoesCache(true), ensurePlanosCache(true), isCommercialRole() ? Promise.resolve([]) : ensureVeiculosCache(true)]);
+      await Promise.all([ensureCotacoesCache(), ensurePlanosCache(), isCommercialRole() ? Promise.resolve([]) : ensureVeiculosCache()]);
       const item = findCotacaoById(id);
       if (!item) return toast('Cotação não encontrada.', 'error');
       const veiculoConvertido = item.id_veiculo_convertido ? findVehicleById(item.id_veiculo_convertido) : null;
@@ -5097,7 +5199,7 @@
     }
 
     async function imprimirPropostaCotacao(id) {
-      await ensureCotacoesCache(true);
+      await ensureCotacoesCache();
       const item = findCotacaoById(id);
       if (!item) return toast('Cotação não encontrada.', 'error');
       const w = window.open('', '_blank', 'width=900,height=900');
@@ -5109,7 +5211,7 @@
     }
 
     async function converterCotacaoEmVeiculo(id) {
-      await Promise.all([ensureCotacoesCache(true), ensureVeiculosCache(true)]);
+      await Promise.all([ensureCotacoesCache(), ensureVeiculosCache()]);
       const item = findCotacaoById(id);
       if (!item) return toast('Cotação não encontrada.', 'error');
       if (normalizeText(item.status_cotacao) === 'convertida' && item.id_veiculo_convertido) return toast('Esta cotação já foi convertida.', 'error');
@@ -5149,7 +5251,7 @@
       if (!hasPermission('financeiro')) return renderBlocked('financeiro');
       els.viewRoot.innerHTML = topbar('Financeiro Gerencial', 'Controle de mensalidades, vencimentos, recebimentos e inadimplência.', '<button class="btn btn-yellow" onclick="openFinanceiroModal()">+ Novo lançamento</button><button class="btn btn-ghost" onclick="renderFinanceiro()">Atualizar</button>') + loadingPanel('Carregando financeiro...');
       try {
-        await Promise.all([ensureFinanceiroCache(true), ensureVeiculosCache(true), ensureAssociadosCache(true), ensureConsultoresCache(true)]);
+        await Promise.all([ensureFinanceiroCache(), ensureVeiculosCache(), ensureAssociadosCache(), ensureConsultoresCache()]);
         paintFinanceiroTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -5206,7 +5308,7 @@
 
     async function openFinanceiroModal(item = null) {
       const isEdit = Boolean(item?.id_financeiro);
-      await Promise.all([ensureVeiculosCache(true), ensureAssociadosCache(true), ensureConsultoresCache(true)]);
+      await Promise.all([ensureVeiculosCache(), ensureAssociadosCache(), ensureConsultoresCache()]);
       const status = ['Aberto', 'Pago', 'Atrasado', 'Cancelado'];
       const formas = ['Pix', 'Boleto', 'Cartão', 'Dinheiro', 'Transferência', 'Outro'];
       openModal(isEdit ? 'Editar lançamento financeiro' : 'Novo lançamento financeiro', `
@@ -5263,7 +5365,7 @@
     }
 
     async function openFinanceiroDetails(id) {
-      await Promise.all([ensureFinanceiroCache(true), ensureVeiculosCache(true)]);
+      await Promise.all([ensureFinanceiroCache(), ensureVeiculosCache()]);
       const item = findFinanceiroById(id);
       if (!item) return toast('Lançamento financeiro não encontrado.', 'error');
       const veiculo = findVehicleById(item.id_veiculo) || findVehicleByPlate(item.placa);
@@ -5336,7 +5438,7 @@
     async function renderReclamacoes(filter = '') {
       els.viewRoot.innerHTML = topbar('Reclamações / Operação', 'Controle de reclamações, tratativas, responsáveis e prazos de resposta.', '<button class="btn btn-yellow" onclick="openReclamacaoModal()">+ Nova reclamação</button><button class="btn btn-ghost" onclick="renderReclamacoes()">Atualizar</button>') + loadingPanel('Carregando reclamações...');
       try {
-        await Promise.all([ensureReclamacoesCache(true), ensureAssociadosCache(), ensureVeiculosCache(), ensureEventosCache()]);
+        await Promise.all([ensureReclamacoesCache(), ensureAssociadosCache(), ensureVeiculosCache(), ensureEventosCache()]);
         paintReclamacaoTable(filter);
       } catch (error) { renderError(error.message); }
     }
@@ -5535,15 +5637,15 @@
       els.viewRoot.innerHTML = topbar('Relatórios e Indicadores', 'Painel gerencial com filtros por regional, consultor, status, etapa, prazo e compras.', '<button class="btn btn-ghost" onclick="renderRelatorios()">Atualizar</button>') + loadingPanel('Carregando relatórios...');
       try {
         await Promise.all([
-          ensureAssociadosCache(true),
-          ensureVeiculosCache(true),
-          ensureEventosCache(true),
-          ensureComprasCache(true),
-          ensureRegulacoesCache(true),
-          ensureFinanceiroCache(true),
-          ensureCotacoesCache(true),
-          ensureConsultoresCache(true),
-          ensureOficinasCache(true)
+          ensureAssociadosCache(),
+          ensureVeiculosCache(),
+          ensureEventosCache(),
+          ensureComprasCache(),
+          ensureRegulacoesCache(),
+          ensureFinanceiroCache(),
+          ensureCotacoesCache(),
+          ensureConsultoresCache(),
+          ensureOficinasCache()
         ]);
 
         const regionais = uniqueValues(state.cache.veiculos.map(v => v.regional).concat(state.cache.eventos.map(e => e.regional || '')));
@@ -5959,16 +6061,16 @@
     async function openEventDetails(id) {
       try {
         await Promise.all([
-          ensureEventosCache(true),
-          ensureVeiculosCache(true),
-          ensureAssociadosCache(true),
-          ensureHistoricoCache(true),
-          ensureComprasCache(true),
-          ensureRegulacoesCache(true),
-          ensureFinanceiroCache(true),
-          ensureCotacoesCache(true),
-          ensureConsultoresCache(true),
-          ensureOficinasCache(true)
+          ensureEventosCache(),
+          ensureVeiculosCache(),
+          ensureAssociadosCache(),
+          ensureHistoricoCache(),
+          ensureComprasCache(),
+          ensureRegulacoesCache(),
+          ensureFinanceiroCache(),
+          ensureCotacoesCache(),
+          ensureConsultoresCache(),
+          ensureOficinasCache()
         ]);
 
         const item = findEventById(id);
@@ -6218,7 +6320,7 @@
 
     async function openRegulacaoModal(item = null, eventId = '', tipoPadrao = 'Vistoria') {
       const isEdit = Boolean(item?.id_regulacao);
-      try { await ensureEventosCache(true); } catch (error) { console.warn(error.message); }
+      try { await ensureEventosCache(); } catch (error) { console.warn(error.message); }
       const evento = findEventById(item?.id_evento || eventId);
       const statusReg = ['Solicitado', 'Agendado', 'Em vistoria', 'Em análise', 'Aguardando parecer', 'Aguardando aprovação', 'Aprovado', 'Finalizado', 'Cancelado'];
       const tipos = ['Vistoria', 'Regulação', 'Auditoria', 'Entrada em oficina', 'Parecer técnico'];
@@ -6270,7 +6372,7 @@
 
     async function openRegulacaoDetails(id) {
       try {
-        await Promise.all([ensureRegulacoesCache(true), ensureEventosCache(true)]);
+        await Promise.all([ensureRegulacoesCache(), ensureEventosCache()]);
         const item = findRegulacaoById(id);
         if (!item) return toast('Registro técnico não encontrado.', 'error');
         const evento = findEventById(item.id_evento);
@@ -7120,7 +7222,7 @@
       if (session?.user && session?.token) {
         state.user = session.user;
         state.token = session.token;
-        await loadOptions();
+        await hydrateBootstrap();
         showApp();
       } else showLogin();
     }
