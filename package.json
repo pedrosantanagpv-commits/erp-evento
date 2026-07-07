@@ -1,6 +1,6 @@
 {
   "name": "sistema-gerencial-white-label",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,5 +9,5 @@
   },
   "dependencies": {},
   "devDependencies": {},
-  "description": "Sistema gerencial white label - v0.2.6 com cache inteligente, bootstrap, dashboard rápido e otimizações de requisição"
+  "description": "Sistema gerencial white label - v0.2.7 com parâmetros gerenciais configuráveis e catálogos dinâmicos"
 }
