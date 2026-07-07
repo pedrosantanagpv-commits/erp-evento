@@ -989,6 +989,151 @@
       color: #1e40af;
     }
 
+
+
+    .permission-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .permission-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 100%;
+      padding: 22px;
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, .16);
+      background:
+        radial-gradient(circle at top right, rgba(148, 163, 184, .10), transparent 28%),
+        linear-gradient(180deg, rgba(15, 23, 42, .78), rgba(12, 18, 28, .96));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
+      overflow: hidden;
+    }
+
+    .permission-card * {
+      word-break: normal;
+      overflow-wrap: anywhere;
+      hyphens: none;
+    }
+
+    .permission-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .permission-card-head h3 {
+      margin: 6px 0 8px;
+      font-size: 28px;
+      line-height: 1.1;
+      color: #f8fafc;
+    }
+
+    .permission-card-head p {
+      margin: 0;
+      color: #94a3b8;
+      line-height: 1.55;
+      max-width: 38ch;
+    }
+
+    .permission-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748b;
+    }
+
+    .permission-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .permission-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, .16);
+      background: rgba(148, 163, 184, .08);
+      color: #e2e8f0;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .permission-pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: .9;
+    }
+
+    .permission-pill.admin { color: #cbd5e1; background: rgba(148, 163, 184, .10); }
+    .permission-pill.operacional { color: #bfdbfe; background: rgba(96, 165, 250, .10); }
+    .permission-pill.comercial { color: #bbf7d0; background: rgba(34, 197, 94, .10); }
+    .permission-pill.global { color: #fde68a; background: rgba(245, 158, 11, .10); }
+    .permission-pill.proprio { color: #c4b5fd; background: rgba(139, 92, 246, .12); }
+    .permission-pill.cooperativa { color: #fbcfe8; background: rgba(236, 72, 153, .10); }
+
+    .permission-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .permission-meta div {
+      padding: 14px 14px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, .12);
+      background: rgba(15, 23, 42, .42);
+      min-width: 0;
+    }
+
+    .permission-meta dt {
+      margin: 0 0 8px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #64748b;
+      font-weight: 800;
+    }
+
+    .permission-meta dd {
+      margin: 0;
+      color: #f1f5f9;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .permission-card-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    .permission-card-footer small {
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .permission-card-footer .btn {
+      white-space: nowrap;
+    }
+
     @media (max-width: 980px) {
       .login-page { grid-template-columns: 1fr; }
       .login-hero { display: none; }
@@ -2801,6 +2946,96 @@
       return `<span class="badge ${cls}">${escapeHtml(text)}</span>`;
     }
 
+
+
+    function permissionTypeLabel(value) {
+      const key = normalizeText(value);
+      if (key.includes('admin')) return 'Administrativo';
+      if (key.includes('oper')) return 'Operacional';
+      if (key.includes('com')) return 'Comercial';
+      return value || 'Não definido';
+    }
+
+    function permissionScopeLabel(value) {
+      const key = normalizeText(value);
+      if (key.includes('global')) return 'Global';
+      if (key.includes('coop')) return 'Cooperativa';
+      if (key.includes('proprio') || key.includes('propr')) return 'Próprio';
+      return value || 'Não definido';
+    }
+
+    function permissionPillClass(kind, value) {
+      const key = normalizeText(value);
+      if (kind === 'type') {
+        if (key.includes('admin')) return 'admin';
+        if (key.includes('oper')) return 'operacional';
+        if (key.includes('com')) return 'comercial';
+      }
+      if (kind === 'scope') {
+        if (key.includes('global')) return 'global';
+        if (key.includes('coop')) return 'cooperativa';
+        if (key.includes('proprio') || key.includes('propr')) return 'proprio';
+      }
+      return '';
+    }
+
+    function getGrupoPermissaoRules(grupo) {
+      const nome = normalizeText(grupo.nome_grupo || grupo.grupo || '');
+      return (state.cache.permissoesGrupo || []).filter(item => {
+        if (grupo.id_grupo && String(item.id_grupo || '') === String(grupo.id_grupo)) return true;
+        return normalizeText(item.nome_grupo || item.grupo || '') === nome;
+      });
+    }
+
+    function renderGrupoPermissaoCard(grupo) {
+      const tipoLabel = permissionTypeLabel(grupo.tipo_acesso);
+      const escopoLabel = permissionScopeLabel(grupo.escopo_dados);
+      const regras = getGrupoPermissaoRules(grupo);
+      return `
+        <article class="permission-card">
+          <div class="permission-card-head">
+            <div>
+              <span class="permission-eyebrow">Grupo de acesso</span>
+              <h3>${escapeHtml(grupo.nome_grupo || '-')}</h3>
+              <p>${escapeHtml(grupo.descricao || 'Configuração de acesso vinculada ao ambiente.')}</p>
+            </div>
+            ${statusBadge(grupo.status || 'Ativo')}
+          </div>
+          <div class="permission-pills">
+            <span class="permission-pill ${permissionPillClass('type', grupo.tipo_acesso)}"><span class="permission-pill-dot"></span>${escapeHtml(tipoLabel)}</span>
+            <span class="permission-pill ${permissionPillClass('scope', grupo.escopo_dados)}"><span class="permission-pill-dot"></span>${escapeHtml(escopoLabel)}</span>
+          </div>
+          <dl class="permission-meta">
+            <div><dt>Tipo</dt><dd>${escapeHtml(tipoLabel)}</dd></div>
+            <div><dt>Escopo</dt><dd>${escapeHtml(escopoLabel)}</dd></div>
+            <div><dt>Status</dt><dd>${escapeHtml(grupo.status || 'Ativo')}</dd></div>
+          </dl>
+          <div class="permission-card-footer">
+            <small>${regras.length} permissão(ões) configurada(s) neste grupo.</small>
+            <button class="btn btn-ghost btn-small" onclick="openGrupoPermissaoDetails(${jsArg(grupo.id_grupo || grupo.nome_grupo)})">Ver permissões</button>
+          </div>
+        </article>`;
+    }
+
+    function openGrupoPermissaoDetails(groupRef) {
+      const grupos = state.cache.gruposPermissao || [];
+      const grupo = grupos.find(item => String(item.id_grupo || item.nome_grupo) === String(groupRef));
+      if (!grupo) return toast('Grupo não encontrado.', 'error');
+      const regras = getGrupoPermissaoRules(grupo);
+      const body = regras.length
+        ? `<div class="table-wrap"><table><thead><tr><th>Módulo</th><th>Visualizar</th><th>Criar</th><th>Editar</th><th>Excluir</th></tr></thead><tbody>${regras.map(item => `<tr><td><strong>${escapeHtml(item.modulo || item.tela || item.recurso || '-')}</strong></td><td>${statusBadge(item.pode_ver || item.visualizar || 'Não')}</td><td>${statusBadge(item.pode_criar || item.criar || 'Não')}</td><td>${statusBadge(item.pode_editar || item.editar || 'Não')}</td><td>${statusBadge(item.pode_excluir || item.excluir || 'Não')}</td></tr>`).join('')}</tbody></table></div>`
+        : emptyState('Nenhuma permissão detalhada cadastrada.', 'Esse grupo ainda não possui regras registradas na tabela Permissões_Grupo.');
+      openCustomModal(`Grupo de Permissão — ${escapeHtml(grupo.nome_grupo || '-')}`, `
+        <div class="detail-grid">
+          ${detailCard('Grupo', grupo.nome_grupo)}
+          ${detailCard('Tipo', permissionTypeLabel(grupo.tipo_acesso))}
+          ${detailCard('Escopo', permissionScopeLabel(grupo.escopo_dados))}
+          ${detailCard('Status', grupo.status || 'Ativo')}
+        </div>
+        <div class="detail-section"><h4>Permissões do grupo</h4>${body}</div>
+      `, true);
+    }
+
     function toast(message, type = 'success') {
       els.toast.textContent = message;
       els.toast.className = `toast show ${type}`;
@@ -3619,8 +3854,14 @@
 
     async function renderGruposPermissao() {
       if (!hasPermission('grupos_permissao')) return renderBlocked('grupos_permissao');
-      els.viewRoot.innerHTML=topbar('Grupos de Permissão','Estrutura de acesso separada entre Comercial e Operacional.')+loadingPanel('Carregando grupos...');
-      try { await ensureGruposPermissaoCache(true); const grupos=state.cache.gruposPermissao; els.viewRoot.innerHTML=`${topbar('Grupos de Permissão','Estrutura de acesso separada entre Comercial e Operacional.')}<div class="content-panel"><div class="panel-head"><div><h3>Grupos configurados</h3><p>${grupos.length} grupo(s) disponíveis.</p></div></div><div class="grid-cards">${grupos.map(g=>`<div class="card panel"><h3>${escapeHtml(g.nome_grupo||'-')}</h3><p>${escapeHtml(g.descricao||'')}</p><div class="detail-grid">${detailCard('Tipo',g.tipo_acesso)}${detailCard('Escopo',g.escopo_dados)}${detailCard('Status',g.status)}</div></div>`).join('')}</div></div>`; } catch(error){renderError(error.message);}
+      els.viewRoot.innerHTML = topbar('Grupos de Permissão', 'Estrutura de acesso separada entre Comercial e Operacional.') + loadingPanel('Carregando grupos...');
+      try {
+        await ensureGruposPermissaoCache(true);
+        const grupos = state.cache.gruposPermissao || [];
+        els.viewRoot.innerHTML = `${topbar('Grupos de Permissão', 'Estrutura de acesso separada entre Comercial e Operacional.')}<div class="content-panel"><div class="panel-head"><div><h3>Grupos configurados</h3><p>${grupos.length} grupo(s) disponíveis.</p></div></div><div class="permission-grid">${grupos.map(renderGrupoPermissaoCard).join('')}</div></div>`;
+      } catch (error) {
+        renderError(error.message);
+      }
     }
 
     async function renderCommercialDashboard() {
