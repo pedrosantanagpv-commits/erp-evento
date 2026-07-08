@@ -70,19 +70,28 @@ function randomId(prefix = 'REQ') {
   return `${prefix}-${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
 }
 
+function normalizeJsonPayload(value) {
+  // Garante que o conteúdo assinado seja exatamente o mesmo conteúdo
+  // que será transmitido por JSON.stringify para o Apps Script.
+  return JSON.parse(JSON.stringify(value));
+}
+
 function signEnvelope(method, payload, requestId) {
   const now = Math.floor(Date.now() / 1000).toString();
   const nonce = crypto.randomBytes(18).toString('hex');
-  const signedPayload = {
+  const envelope = normalizeJsonPayload({
     ...payload,
     client_id: CLIENT_ID,
     _sig_ts: now,
     _sig_nonce: nonce,
     _request_id: requestId
-  };
-  const canonical = `${method.toUpperCase()}\n${stableStringify(signedPayload)}`;
-  const signature = crypto.createHmac('sha256', API_SHARED_SECRET).update(canonical).digest('hex');
-  return { ...signedPayload, _sig: signature };
+  });
+  const canonical = `${method.toUpperCase()}\n${stableStringify(envelope)}`;
+  const signature = crypto
+    .createHmac('sha256', API_SHARED_SECRET)
+    .update(canonical, 'utf8')
+    .digest('hex');
+  return { ...envelope, _sig: signature };
 }
 
 function assertEnvironment() {
