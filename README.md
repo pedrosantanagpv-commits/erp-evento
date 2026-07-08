@@ -24,3 +24,25 @@ A v0.3.0 consolida o ERP para implantação comercial assistida, mantendo o mode
 6. Teste login, troca de senha temporária, Administração do Ambiente e módulos principais.
 
 **Nunca execute `setupBancoERP` em uma planilha com dados reais.**
+
+
+## Hotfix v0.3.0.1 — assinatura de POST
+
+Corrige divergência de assinatura em payloads POST mais complexos, especialmente em Compras.
+
+- normaliza o envelope JSON antes da assinatura no proxy Vercel;
+- força UTF-8 explicitamente no HMAC do Apps Script;
+- não altera banco de dados;
+- não exige migração.
+
+### Atualização
+1. Substitua `api/erp.js` no GitHub e faça o deploy/redeploy da Vercel.
+2. Substitua o `Code.gs` pelo `APPS_SCRIPT_V030_COMPLETO.gs` deste pacote.
+3. Salve e publique uma **New version** do Apps Script.
+4. Não execute migração.
+
+
+## Atualização adicional do hotfix
+- Kanban de Eventos agora aceita arrastar e soltar cartões entre etapas no desktop.
+- O movimento usa a mesma ação de backend já existente (`mover_evento_kanban`), registra comentário no histórico e preserva o botão Mover como alternativa.
+- A etapa de destino define o status operacional correspondente quando houver mapeamento conhecido.
