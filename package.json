@@ -1,6 +1,6 @@
 {
-  "name": "sistema-gerencial-white-label",
-  "version": "0.2.7",
+  "name": "sistema-gerencial-core",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,5 +9,5 @@
   },
   "dependencies": {},
   "devDependencies": {},
-  "description": "Sistema gerencial white label - v0.2.7 com parâmetros gerenciais configuráveis e catálogos dinâmicos"
+  "description": "ERP Core v0.2.9 com isolamento por cliente, sessão HttpOnly, assinatura HMAC, logs ampliados e backup por ambiente"
 }
