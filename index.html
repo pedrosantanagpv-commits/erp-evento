@@ -2826,6 +2826,7 @@
       <nav class="nav nav-commercial">
         <span class="nav-section">Visão geral</span>
         <button data-view="dashboard" class="active"><span class="nav-icon">▦</span>Painel Executivo</button>
+        <button data-view="pendencias"><span class="nav-icon">◴</span>Central de Pendências</button>
         <button data-view="implantacao"><span class="nav-icon">▣</span>Preparação</button>
 
         <span class="nav-section">Base</span>
@@ -2953,7 +2954,23 @@
 
     applyBrandConfig();
 
-    const APP_VERSION = '0.2.7';
+    async function loadBrandConfigFromEnvironment() {
+      try {
+        const response = await fetch(`${Conexão_BASE}?action=brand&_ts=${Date.now()}`, { cache: 'no-store', credentials: 'same-origin' });
+        const payload = await response.json();
+        if (payload?.success && payload?.data) {
+          const remote = payload.data;
+          Object.assign(BRAND_CONFIG, remote, {
+            colors: { ...(BRAND_CONFIG.colors || {}), ...(remote.colors || {}) }
+          });
+          applyBrandConfig();
+        }
+      } catch (error) {
+        console.warn('Identidade remota indisponível; usando configuração local.', error.message);
+      }
+    }
+
+    const APP_VERSION = '0.3.0';
 
     const state = {
       user: null,
@@ -3007,6 +3024,7 @@
 
     const MODULE_LABELS = {
       dashboard: 'Painel Executivo',
+      pendencias: 'Central de Pendências',
       implantacao: 'Preparação',
       associados: 'Associados',
       veiculos: 'Veículos',
@@ -3030,19 +3048,19 @@
     };
 
     const ROLE_PERMISSIONS = {
-      'super admin': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','configuracoes','manutencao','sobre'],
-      'administrador': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','configuracoes','manutencao','sobre'],
-      'administrativo': ['dashboard','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','configuracoes','manutencao','sobre'],
-      'cadastro': ['dashboard','associados','veiculos','cooperativas','consultores','oficinas','cotacoes','relatorios','importacao','sobre'],
-      'eventos': ['dashboard','associados','veiculos','eventos','vistorias','compras','oficinas','kanban','relatorios','sobre'],
-      'regulação': ['dashboard','associados','veiculos','eventos','vistorias','oficinas','kanban','relatorios','sobre'],
-      'regulacao': ['dashboard','associados','veiculos','eventos','vistorias','oficinas','kanban','relatorios','sobre'],
-      'compras': ['dashboard','eventos','compras','oficinas','kanban','relatorios','sobre'],
-      'financeiro': ['dashboard','associados','veiculos','compras','financeiro','relatorios','sobre'],
-      'gestor operacional': ['dashboard','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','oficinas','kanban','cotacoes','financeiro','relatorios','sobre'],
-      'consultor': ['dashboard','cotacoes','sobre'],
-      'gerente': ['dashboard','cooperativas','consultores','cotacoes','sobre'],
-      'regional': ['dashboard','cooperativas','consultores','cotacoes','sobre'],
+      'super admin': ['dashboard','pendencias','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','configuracoes','manutencao','sobre'],
+      'administrador': ['dashboard','pendencias','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','configuracoes','manutencao','sobre'],
+      'administrativo': ['dashboard','pendencias','implantacao','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','kanban','cotacoes','planos','financeiro','oficinas','relatorios','importacao','usuarios','grupos_permissao','configuracoes','manutencao','sobre'],
+      'cadastro': ['dashboard','pendencias','associados','veiculos','cooperativas','consultores','oficinas','cotacoes','relatorios','importacao','sobre'],
+      'eventos': ['dashboard','pendencias','associados','veiculos','eventos','vistorias','compras','oficinas','kanban','relatorios','sobre'],
+      'regulação': ['dashboard','pendencias','associados','veiculos','eventos','vistorias','oficinas','kanban','relatorios','sobre'],
+      'regulacao': ['dashboard','pendencias','associados','veiculos','eventos','vistorias','oficinas','kanban','relatorios','sobre'],
+      'compras': ['dashboard','pendencias','eventos','compras','oficinas','kanban','relatorios','sobre'],
+      'financeiro': ['dashboard','pendencias','associados','veiculos','compras','financeiro','relatorios','sobre'],
+      'gestor operacional': ['dashboard','pendencias','associados','veiculos','cooperativas','consultores','eventos','vistorias','compras','oficinas','kanban','cotacoes','financeiro','relatorios','sobre'],
+      'consultor': ['dashboard','pendencias','cotacoes','sobre'],
+      'gerente': ['dashboard','pendencias','cooperativas','consultores','cotacoes','sobre'],
+      'regional': ['dashboard','pendencias','cooperativas','consultores','cotacoes','sobre'],
       'oficina': ['dashboard','eventos','vistorias','compras','sobre']
     };
 
@@ -3229,6 +3247,7 @@
         try {
           const response = await fetch(url, {
             cache: 'no-store',
+            credentials: 'same-origin',
             ...options,
             headers: { ...(options.headers || {}), 'X-ERP-Request': String(Date.now()) }
           });
@@ -3239,7 +3258,20 @@
           } catch (error) {
             throw new Error('A conexão não retornou dados válidos. Tentando novamente...');
           }
-          if (!data.success) throw new Error(data.message || 'Erro de conexão.');
+          if (!data.success) {
+            const message = data.message || 'Erro de conexão.';
+            const sessionFailure = ['token inválido','token expirado','sessão ausente','sessao ausente','usuário inativo','usuario inativo']
+              .some(term => normalizeText(message).includes(normalizeText(term)));
+            if (sessionFailure && state.user) {
+              clearSession();
+              resetClientCache();
+              state.user = null;
+              state.token = '';
+              showLogin();
+              toast('Sua sessão foi encerrada. Faça login novamente.', 'error');
+            }
+            throw new Error(message);
+          }
           return data;
         } catch (error) {
           lastError = error;
@@ -3254,7 +3286,7 @@
       if (state.pendingGets[requestKey]) return state.pendingGets[requestKey];
 
       const promise = (async () => {
-        const query = new URLSearchParams({ action, token: state.token || '', _ts: String(Date.now()), ...params });
+        const query = new URLSearchParams({ action, _ts: String(Date.now()), ...params });
         return fetchJsonWithRetry(`${Conexão_BASE}?${query.toString()}`);
       })();
 
@@ -3318,7 +3350,7 @@
     }
 
     async function apiPost(payload = {}) {
-      const requestPayload = { token: state.token || '', usuario: state.user?.email || 'Sistema', ...payload };
+      const requestPayload = { usuario: state.user?.email || 'Sistema', ...payload };
       const writeKey = JSON.stringify(requestPayload);
       if (state.pendingWrites[writeKey]) return state.pendingWrites[writeKey];
 
@@ -3346,14 +3378,18 @@
     }
     function clearSession() { localStorage.removeItem('erp_evento_session'); }
 
-    function showApp() {
+    function showApp(skipInitialRender = false) {
       els.loginPage.classList.add('hidden');
       els.appPage.classList.remove('hidden');
       els.userName.textContent = state.user?.nome || 'Usuário';
       els.userRole.textContent = state.user?.perfil || 'Perfil';
       els.userAvatar.textContent = (state.user?.nome || 'A').slice(0, 1).toUpperCase();
       updateNavVisibility();
-      renderView('dashboard');
+      if (skipInitialRender) {
+        els.viewRoot.innerHTML = topbar('Atualização de acesso necessária', 'Defina uma nova senha para liberar o restante do sistema.') + '<div class="content-panel"><div class="empty"><strong>Troca de senha obrigatória</strong>Conclua a atualização da senha para continuar.</div></div>';
+      } else {
+        renderView('dashboard');
+      }
     }
 
     function showLogin() {
@@ -3371,7 +3407,7 @@
     }
 
 
-    async function hydrateBootstrap() {
+    async function hydrateBootstrap(strict = false) {
       try {
         const result = await apiGet('bootstrap');
         state.options = result.opcoes || state.options || {};
@@ -3394,6 +3430,7 @@
         });
         return result;
       } catch (error) {
+        if (strict) throw error;
         console.warn('Bootstrap indisponível, usando carregamento tradicional:', error.message);
         await loadOptions();
         return null;
@@ -3420,11 +3457,17 @@
         const result = await apiPost({ action: 'login', email: form.get('email'), senha: form.get('senha') });
         resetClientCache();
         state.user = result.usuario;
-        state.token = result.token;
-        saveSession({ user: state.user, token: state.token });
-        await hydrateBootstrap();
-        showApp();
-        toast('Login realizado com sucesso.');
+        state.token = '';
+        saveSession({ user: state.user, session_expires_at: result.session_expires_at || '' });
+        if (String(state.user?.exigir_troca_senha || '').toLowerCase() === 'true' || normalizeText(state.user?.exigir_troca_senha) === 'sim') {
+          showApp(true);
+          setTimeout(() => openTrocaSenhaObrigatoria(), 80);
+          toast('Acesso temporário válido. Defina uma nova senha para continuar.');
+        } else {
+          await hydrateBootstrap(true);
+          showApp();
+          toast('Login realizado com sucesso.');
+        }
       } catch (error) {
         toast(error.message, 'error');
       } finally {
@@ -3433,7 +3476,8 @@
       }
     });
 
-    els.logoutBtn.addEventListener('click', () => {
+    els.logoutBtn.addEventListener('click', async () => {
+      try { await apiPost({ action: 'logout' }); } catch (error) { console.warn('Falha ao encerrar sessão no backend:', error.message); }
       clearSession();
       resetClientCache();
       state.user = null;
@@ -3463,6 +3507,7 @@
       state.view = view;
       setActiveNav(view);
       if (view === 'dashboard') return renderDashboard();
+      if (view === 'pendencias') return renderPendencias();
       if (view === 'implantacao') return renderImplantacao();
       if (view === 'associados') return renderAssociados();
       if (view === 'veiculos') return renderVeiculos();
@@ -3562,71 +3607,71 @@
 
 
     async function renderImplantacao() {
+      els.viewRoot.innerHTML = topbar('Preparação do Ambiente', 'Checklist comercial e técnico para validar uma nova implantação.') + skeletonDashboard();
       await Promise.all([
         ensureUsuariosCache().catch(() => {}),
         ensureConsultoresCache().catch(() => {}),
-        ensureOficinasCache().catch(() => {}),
+        ensureCooperativasCache().catch(() => {}),
+        ensurePlanosCache().catch(() => {}),
         ensureAssociadosCache().catch(() => {}),
         ensureVeiculosCache().catch(() => {}),
-        ensureFinanceiroCache().catch(() => {})
+        ensureGruposPermissaoCache().catch(() => {})
+      ]);
+      const [health, backupsResult, versionsResult] = await Promise.all([
+        apiGet('health').catch(error => ({ success:false, message:error.message })),
+        carregarTabelaBackup('Backups_Sistema'),
+        carregarTabelaBackup('Versoes_Sistema')
       ]);
 
       const usuariosAtivos = state.cache.usuarios.filter(u => normalizeText(u.status) === 'ativo').length;
       const consultoresAtivos = state.cache.consultores.filter(c => normalizeText(c.status) === 'ativo').length;
-      const oficinasAtivas = state.cache.oficinas.filter(o => normalizeText(o.status) === 'ativo').length;
-      const associados = state.cache.associados.length;
-      const veiculos = state.cache.veiculos.length;
-      const financeiro = state.cache.financeiro.length;
+      const cooperativasAtivas = state.cache.cooperativas.filter(c => !normalizeText(c.status).includes('inativ')).length;
+      const planosAtivos = state.cache.planos.filter(p => !normalizeText(p.status).includes('inativ')).length;
+      const backups = backupsResult.data || [];
+      const ultimoBackup = backups.slice().sort((a,b) => new Date(b.data_hora||0)-new Date(a.data_hora||0))[0];
+      const versoes = versionsResult.data || [];
+      const ultimaVersao = versoes.slice().sort((a,b) => new Date(b.data_aplicacao||0)-new Date(a.data_aplicacao||0))[0];
 
       const steps = [
-        { label: 'Usuário administrador ativo', note: 'Garanta pelo menos um Super Admin ativo.', done: usuariosAtivos > 0, view: 'usuarios' },
-        { label: 'Consultores/regionais cadastrados', note: 'Base de Voluntários para vínculo com veículos e relatórios.', done: consultoresAtivos > 0, view: 'consultores' },
-        { label: 'Oficinas cadastradas', note: 'Base operacional para eventos e vistorias.', done: oficinasAtivas > 0, view: 'oficinas' },
-        { label: 'Associados cadastrados/importados', note: 'Base principal da operação.', done: associados > 0, view: 'associados' },
-        { label: 'Veículos cadastrados/importados', note: 'Carteira operacional e indicadores de FIPE/mensalidade.', done: veiculos > 0, view: 'veiculos' },
-        { label: 'Financeiro iniciado', note: 'Controle de competência, vencimento e status financeiro.', done: financeiro > 0, view: 'financeiro' }
+        { label:'Segurança do proxy ativa', note:'CLIENT_ID, segredo e assinatura configurados.', done:Boolean(health.assinatura_proxy_ativa && health.client_id), view:'manutencao' },
+        { label:'Super Admin ativo', note:'Existe acesso administrativo válido para a implantação.', done:usuariosAtivos > 0, view:'usuarios' },
+        { label:'Grupos de permissão carregados', note:'Perfis e escopos disponíveis para os usuários.', done:(state.cache.gruposPermissao||[]).length > 0, view:'grupos_permissao' },
+        { label:'Cooperativa cadastrada', note:'Base comercial preparada para vínculos de Voluntários.', done:cooperativasAtivas > 0, view:'cooperativas' },
+        { label:'Voluntários cadastrados', note:'Consultores e Gerentes vinculados à operação.', done:consultoresAtivos > 0, view:'consultores' },
+        { label:'Plano comercial ativo', note:'Regras de cotação disponíveis para a equipe comercial.', done:planosAtivos > 0, view:'planos' },
+        { label:'Base inicial carregada', note:'Associados ou veículos já disponíveis no ambiente.', done:state.cache.associados.length > 0 || state.cache.veiculos.length > 0, view:'importacao' },
+        { label:'Backup executado', note:'Há pelo menos um backup registrado no ambiente.', done:Boolean(ultimoBackup), view:'manutencao' },
+        { label:'Versão estrutural registrada', note:'Migrações e versão do banco possuem histórico.', done:Boolean(ultimaVersao), view:'manutencao' }
       ];
-
       const doneCount = steps.filter(s => s.done).length;
       const percent = Math.round((doneCount / steps.length) * 100);
 
-      els.viewRoot.innerHTML = topbar('Preparação do Ambiente', 'Checklist inicial para preparar a operação.', `
-        <button class="btn btn-secondary" onclick="renderView('sobre')">Sobre o sistema</button>
-        <button class="btn btn-primary" onclick="renderView('importacao')">Importar dados</button>
-      `) + `
+      els.viewRoot.innerHTML = `${topbar('Preparação do Ambiente', 'Checklist comercial e técnico para validar uma nova implantação.', '<button class="btn btn-ghost" onclick="renderImplantacao()">Atualizar</button><button class="btn btn-primary" onclick="renderView(\'importacao\')">Importar dados</button>')}
         <div class="grid-cards">
           ${metric('Progresso', percent + '%', doneCount + ' de ' + steps.length + ' etapas')}
           ${metric('Usuários ativos', usuariosAtivos, 'Acessos autorizados')}
-          ${metric('Base cadastrada', associados + veiculos, 'Associados + veículos')}
-          ${metric('Versão', APP_VERSION, 'Ambiente operacional')}
+          ${metric('Cliente', health.client_id || 'Não configurado', 'Identidade técnica do ambiente')}
+          ${metric('Versão estrutural', ultimaVersao?.versao || health.schema_version || '-', 'Última migração registrada')}
         </div>
-
         <div class="onboarding-grid">
           <section class="card panel">
-            <div class="panel-head"><div><h3>Checklist inicial</h3><p>Use esta lista para preparar o ambiente antes de operar com dados reais.</p></div></div>
+            <div class="panel-head"><div><h3>Checklist de implantação</h3><p>O ambiente fica pronto para produção quando os itens essenciais estiverem concluídos.</p></div></div>
             <div class="checklist">
-              ${steps.map(step => `
-                <div class="check-item ${step.done ? 'done' : ''}">
-                  <div class="check-icon">${step.done ? '✓' : '•'}</div>
-                  <div><strong>${escapeHtml(step.label)}</strong><small>${escapeHtml(step.note)}</small></div>
-                  <button class="btn btn-secondary" onclick="renderView('${step.view}')">Abrir</button>
-                </div>
-              `).join('')}
+              ${steps.map(step => `<div class="check-item ${step.done ? 'done' : ''}"><div class="check-icon">${step.done ? '✓' : '•'}</div><div><strong>${escapeHtml(step.label)}</strong><small>${escapeHtml(step.note)}</small></div><button class="btn btn-secondary" onclick="renderView('${step.view}')">Abrir</button></div>`).join('')}
             </div>
           </section>
-
           <aside class="card panel">
-            <div class="panel-head"><div><h3>Identidade do ambiente</h3><p>Resumo da configuração visual e operacional ativa.</p></div></div>
+            <div class="panel-head"><div><h3>Resumo da implantação</h3><p>Informações úteis para publicação e suporte.</p></div></div>
             <div class="summary-strip vertical-strip">
-              ${summaryItem('Sistema', BRAND_CONFIG.appName || 'Sistema Gerencial')}
-              ${summaryItem('Operação', BRAND_CONFIG.appSubtitle || 'Operação Veicular')}
-              ${summaryItem('Ambiente', BRAND_CONFIG.companyName || 'Operação')}
-              ${summaryItem('Versão', APP_VERSION)}
+              ${summaryItem('ERP Core', APP_VERSION)}
+              ${summaryItem('Cliente', health.client_id || '-')}
+              ${summaryItem('Último backup', ultimoBackup ? dateTimeBR(ultimoBackup.data_hora) : 'Não executado')}
+              ${summaryItem('Migração', ultimaVersao?.migracao || '-')}
+              ${summaryItem('Abas críticas', health.abas_criticas_ok ? 'OK' : 'Atenção')}
             </div>
-            <div class="empty-state compact"><strong>Ambiente configurado</strong><p>Identidade, usuários, base e módulos prontos para operação gerencial.</p></div>
+            <div class="empty-state compact"><strong>${percent === 100 ? 'Ambiente validado' : 'Implantação em andamento'}</strong><p>${percent === 100 ? 'Os controles essenciais estão preenchidos.' : 'Conclua os itens restantes antes da entrada em produção.'}</p></div>
           </aside>
-        </div>
-      `;
+        </div>`;
     }
 
     async function renderDashboard() {
@@ -4048,6 +4093,110 @@
       return !isCommercialRole() && hasPermission('consultores');
     }
 
+
+    function canOperateCommercialInspection() {
+      return ['super admin','administrador','administrativo','cadastro','regulacao','regulação','gestor operacional'].includes(roleKey());
+    }
+
+    function canApproveCommercialActivation() {
+      return ['super admin','administrador','administrativo','gestor operacional'].includes(roleKey());
+    }
+
+    function canApprovePurchase() {
+      return ['super admin','administrador','administrativo','gestor operacional','financeiro'].includes(roleKey());
+    }
+
+    function statusAtivacaoCotacao(item) {
+      if (normalizeText(item?.status_cotacao) === 'convertida') return 'Veículo ativo';
+      const status = String(item?.status_ativacao || '').trim();
+      if (status) return status;
+      if (normalizeText(item?.status_vistoria_comercial) === 'concluida') return 'Aguardando aprovação';
+      if (item?.data_solicitacao_vistoria) return 'Aguardando vistoria';
+      return 'Não iniciado';
+    }
+
+    function statusAprovacaoCompra(item) {
+      const atual = String(item?.status_aprovacao || '').trim();
+      if (atual) return atual;
+      const status = normalizeText(item?.status_compra);
+      if (status.includes('aprov')) return 'Aprovada';
+      if (status.includes('recus')) return 'Recusada';
+      return 'Pendente';
+    }
+
+    function daysSince(value) {
+      if (!value) return null;
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return null;
+      return Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
+    }
+
+    async function renderPendencias() {
+      if (!hasPermission('pendencias')) return renderBlocked('pendencias');
+      els.viewRoot.innerHTML = topbar('Central de Pendências', 'Ações humanas que precisam de acompanhamento, vistoria, decisão ou pagamento.') + loadingPanel('Organizando pendências...');
+      try {
+        await Promise.all([
+          ensureCotacoesCache(),
+          ensureComprasCache(),
+          ensureEventosCache().catch(() => []),
+          ensureRegulacoesCache().catch(() => [])
+        ]);
+
+        const cotacoes = state.cache.cotacoes || [];
+        const compras = state.cache.compras || [];
+        const eventos = state.cache.eventos || [];
+        const alertaCotacao = Number(state.options.dias_alerta_cotacao_vencimento || 3);
+        const alertaEvento = Number(state.options.dias_alerta_evento_parado || 3);
+
+        const vistoriaPendente = cotacoes.filter(c => normalizeText(statusAtivacaoCotacao(c)) === 'aguardando vistoria');
+        const ativacaoPendente = cotacoes.filter(c => normalizeText(statusAtivacaoCotacao(c)) === 'aguardando aprovacao');
+        const comprasAprovacao = compras.filter(c => normalizeText(statusAprovacaoCompra(c)) === 'pendente');
+        const comprasPagamento = compras.filter(c => normalizeText(statusAprovacaoCompra(c)) === 'aprovada' && normalizeText(c.status_financeiro || '') !== 'pago');
+        const cotacoesVencendo = cotacoes.filter(c => {
+          const dias = diasRestantesCotacao(c);
+          return dias !== null && dias >= 0 && dias <= alertaCotacao && !['convertida','cancelada','recusada'].includes(normalizeText(statusCotacaoReal(c)));
+        });
+        const eventosParados = eventos.filter(e => {
+          if (['finalizado','cancelado','recusado'].includes(normalizeText(e.status_evento))) return false;
+          const dias = daysSince(e.data_ultima_atualizacao || e.data_abertura);
+          return dias !== null && dias >= alertaEvento;
+        });
+
+        const total = vistoriaPendente.length + ativacaoPendente.length + comprasAprovacao.length + comprasPagamento.length + cotacoesVencendo.length + (isCommercialRole() ? 0 : eventosParados.length);
+        const sections = [];
+
+        if (vistoriaPendente.length) sections.push(`
+          <section class="content-panel" style="margin-top:18px"><div class="panel-head"><div><h3>Vistorias comerciais pendentes</h3><p>${vistoriaPendente.length} cotação(ões) aguardando operador.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Interessado</th><th>Veículo</th><th>Cooperativa</th><th>Status</th><th>Ação</th></tr></thead><tbody>${vistoriaPendente.map(c => `<tr><td><strong>${escapeHtml(c.associado || '-')}</strong><br><small>${escapeHtml(c.telefone || '')}</small></td><td>${escapeHtml([c.marca,c.modelo,c.ano_modelo].filter(Boolean).join(' '))}</td><td>${escapeHtml(c.cooperativa || c.regional || '-')}</td><td>${statusBadge(statusAtivacaoCotacao(c))}</td><td><button class="btn btn-blue btn-small" onclick="openCotacaoDetails(${jsArg(c.id_cotacao)})">Abrir</button></td></tr>`).join('')}</tbody></table></div></section>`);
+
+        if (ativacaoPendente.length) sections.push(`
+          <section class="content-panel" style="margin-top:18px"><div class="panel-head"><div><h3>Ativações aguardando decisão</h3><p>${ativacaoPendente.length} vistoria(s) concluída(s) aguardando aprovação manual.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Interessado</th><th>Veículo</th><th>Operador</th><th>Vistoria</th><th>Ação</th></tr></thead><tbody>${ativacaoPendente.map(c => `<tr><td><strong>${escapeHtml(c.associado || '-')}</strong></td><td>${escapeHtml([c.marca,c.modelo,c.ano_modelo].filter(Boolean).join(' '))}</td><td>${escapeHtml(c.operador_vistoria || '-')}</td><td>${statusBadge(c.status_vistoria_comercial || 'Concluída')}</td><td><button class="btn btn-blue btn-small" onclick="openCotacaoDetails(${jsArg(c.id_cotacao)})">Analisar</button></td></tr>`).join('')}</tbody></table></div></section>`);
+
+        if (comprasAprovacao.length) sections.push(`
+          <section class="content-panel" style="margin-top:18px"><div class="panel-head"><div><h3>Compras pendentes de aprovação</h3><p>${comprasAprovacao.length} solicitação(ões) aguardando decisão de um superior.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Item</th><th>Origem</th><th>Solicitante</th><th>Valor</th><th>Status</th><th>Ação</th></tr></thead><tbody>${comprasAprovacao.map(c => `<tr><td><strong>${escapeHtml(c.item || '-')}</strong><br><small>${escapeHtml(c.fornecedor || '')}</small></td><td>${escapeHtml(c.origem_compra || (c.id_evento ? 'Evento' : 'Financeiro / Administrativo'))}</td><td>${escapeHtml(c.solicitado_por || c.responsavel_solicitacao || c.responsavel || '-')}</td><td>${money(c.valor_cotado || c.valor_estimado || 0)}</td><td>${statusBadge(statusAprovacaoCompra(c))}</td><td><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(c.id_compra)})">Analisar</button></td></tr>`).join('')}</tbody></table></div></section>`);
+
+        if (comprasPagamento.length) sections.push(`
+          <section class="content-panel" style="margin-top:18px"><div class="panel-head"><div><h3>Compras aprovadas aguardando financeiro</h3><p>${comprasPagamento.length} compra(s) liberada(s) sem pagamento registrado.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Item</th><th>Fornecedor</th><th>Valor aprovado</th><th>Aprovação</th><th>Ação</th></tr></thead><tbody>${comprasPagamento.map(c => `<tr><td><strong>${escapeHtml(c.item || '-')}</strong></td><td>${escapeHtml(c.fornecedor || '-')}</td><td>${money(c.valor_aprovado || c.valor_cotado || 0)}</td><td>${escapeHtml(c.aprovado_por || '-')}<br><small>${dateTimeBR(c.data_decisao_aprovacao)}</small></td><td><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(c.id_compra)})">Abrir</button></td></tr>`).join('')}</tbody></table></div></section>`);
+
+        if (cotacoesVencendo.length) sections.push(`
+          <section class="content-panel" style="margin-top:18px"><div class="panel-head"><div><h3>Cotações próximas do vencimento</h3><p>${cotacoesVencendo.length} proposta(s) exigem acompanhamento comercial.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Interessado</th><th>Veículo</th><th>Validade</th><th>Voluntário</th><th>Ação</th></tr></thead><tbody>${cotacoesVencendo.map(c => `<tr><td><strong>${escapeHtml(c.associado || '-')}</strong></td><td>${escapeHtml([c.marca,c.modelo].filter(Boolean).join(' '))}</td><td>${escapeHtml(cotacaoValidadeLabel(c))}</td><td>${escapeHtml(c.voluntario || c.consultor || '-')}</td><td><button class="btn btn-blue btn-small" onclick="openCotacaoDetails(${jsArg(c.id_cotacao)})">Abrir</button></td></tr>`).join('')}</tbody></table></div></section>`);
+
+        if (!isCommercialRole() && eventosParados.length) sections.push(`
+          <section class="content-panel" style="margin-top:18px"><div class="panel-head"><div><h3>Eventos sem atualização</h3><p>${eventosParados.length} evento(s) sem movimentação há ${alertaEvento} dia(s) ou mais.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Evento</th><th>Placa</th><th>Etapa</th><th>Dias sem atualização</th><th>Ação</th></tr></thead><tbody>${eventosParados.map(e => `<tr><td><strong>${escapeHtml(e.numero_evento || e.id_evento || '-')}</strong></td><td>${escapeHtml(e.placa || '-')}</td><td>${statusBadge(e.etapa_kanban || e.status_evento)}</td><td>${daysSince(e.data_ultima_atualizacao || e.data_abertura)} dia(s)</td><td><button class="btn btn-blue btn-small" onclick="openEventDetails(${jsArg(e.id_evento)})">Central</button></td></tr>`).join('')}</tbody></table></div></section>`);
+
+        els.viewRoot.innerHTML = `${topbar('Central de Pendências', 'Ações humanas que precisam de acompanhamento, vistoria, decisão ou pagamento.', '<button class="btn btn-ghost" onclick="renderPendencias()">Atualizar</button>')}
+          <div class="grid-cards">${metric('Total de pendências', total, 'Itens que exigem acompanhamento')}${metric('Vistorias comerciais', vistoriaPendente.length, 'Aguardando operador')}${metric('Ativações', ativacaoPendente.length, 'Aguardando aprovação manual')}${metric('Compras para aprovar', comprasAprovacao.length, 'Aguardando superior')}${metric('Compras para pagar', comprasPagamento.length, 'Já aprovadas')}${metric('Cotações vencendo', cotacoesVencendo.length, `Próximos ${alertaCotacao} dia(s)`)}</div>
+          ${sections.length ? sections.join('') : emptyState('Nenhuma pendência crítica encontrada.', 'O ambiente está sem ações pendentes dentro dos critérios atuais.')}`;
+      } catch (error) {
+        renderError(error.message);
+      }
+    }
+
     function findOficinaById(id) {
       return state.cache.oficinas.find(o => String(o.id_oficina) === String(id));
     }
@@ -4162,6 +4311,8 @@
           { key:'prioridades', label:'Prioridades', help:'Níveis de prioridade usados no sistema.', type:'list' },
           { key:'categorias_compra', label:'Categorias de Compra', help:'Categorias disponíveis para solicitações de compra.', type:'list', full:true },
           { key:'status_compra', label:'Status de Compra', help:'Etapas do fluxo de solicitação até entrega.', type:'list', full:true },
+          { key:'status_aprovacao_compra', label:'Status de aprovação de Compra', help:'Decisões manuais possíveis no fluxo de compras.', type:'list', full:true },
+          { key:'dias_alerta_evento_parado', label:'Alerta de Evento sem atualização', help:'Quantidade de dias sem atualização para entrar na Central de Pendências.', type:'integer', suffix:'dias' },
           { key:'tipo_vistoria', label:'Tipos de Vistoria / Regulação', help:'Tipos de registros técnicos disponíveis.', type:'list', full:true },
           { key:'status_vistoria', label:'Status técnico', help:'Status disponíveis para vistoria e regulação.', type:'list', full:true }
         ]
@@ -4189,7 +4340,9 @@
           { key:'funcoes_voluntario', label:'Funções de Voluntário', help:'Funções comerciais permitidas.', type:'list' },
           { key:'origem_compra', label:'Origens de Compra', help:'Origens disponíveis na abertura de uma compra.', type:'list' },
           { key:'prefixo_evento', label:'Prefixo de Evento', help:'Identificador de referência para numeração operacional.', type:'text' },
-          { key:'exigir_telefone_cotacao', label:'Exigir telefone na Cotação', help:'Quando ativo, novas cotações não podem ser salvas sem telefone.', type:'boolean' }
+          { key:'exigir_telefone_cotacao', label:'Exigir telefone na Cotação', help:'Quando ativo, novas cotações não podem ser salvas sem telefone.', type:'boolean' },
+          { key:'dias_alerta_cotacao_vencimento', label:'Alerta de vencimento da Cotação', help:'Quantidade de dias antes do vencimento para aparecer como pendência.', type:'integer', suffix:'dias' },
+          { key:'status_ativacao_comercial', label:'Status da ativação comercial', help:'Fluxo manual entre vistoria, aprovação e ativação do veículo.', type:'list', full:true }
         ]
       }
     ];
@@ -4562,14 +4715,39 @@
     function resetSenhaUsuario(id) {
       const item = findUsuarioById(id);
       if (!item) return toast('Usuário não encontrado.', 'error');
-      openModal('Trocar senha', `
-        <div class="form-grid">${field('senha', 'Nova senha', 'Digite a nova senha', 'full', '')}</div>
-      `, 'Atualizar senha', async (data) => {
-        if (!data.senha) throw new Error('Informe a nova senha.');
-        await apiPost({ action: 'editar', tabela: 'Usuarios', id, dados: { senha: data.senha } });
+      confirmAction('Gerar acesso temporário', `Gerar uma senha temporária para ${item.nome || item.email}? A sessão atual desse usuário será encerrada e a troca de senha será obrigatória no próximo login.`, 'Gerar acesso', async () => {
+        const result = await apiPost({ action: 'resetar_senha_temporaria', id_usuario: id });
         state.cache.usuarios = [];
-        await renderUsuarios();
-        toast('Senha atualizada com sucesso.');
+        openCustomModal('Acesso temporário gerado', `
+          <div class="temporary-access-box">
+            <strong>Senha temporária</strong>
+            <span class="temporary-password">${escapeHtml(result.senha_temporaria || '-')}</span>
+            <p>Entregue essa senha ao usuário por um canal seguro. Ela deverá ser alterada no primeiro acesso.</p>
+          </div>
+          <div class="lookup-note"><strong>Importante:</strong> a senha temporária é exibida somente neste momento. O sistema guarda apenas o hash.</div>
+        `, false);
+      });
+    }
+
+    function openTrocaSenhaObrigatoria() {
+      openModal('Defina uma nova senha', `
+        <div class="lookup-note"><strong>Troca obrigatória:</strong> este acesso foi emitido com senha temporária. Cadastre uma nova senha antes de continuar.</div>
+        <div class="form-grid">
+          ${field('senha_atual', 'Senha temporária atual', 'Digite a senha usada no login', 'full', '')}
+          ${field('nova_senha', 'Nova senha', 'Mínimo de 8 caracteres', '', '')}
+          ${field('confirmar_senha', 'Confirmar nova senha', 'Repita a nova senha', '', '')}
+        </div>
+      `, 'Salvar nova senha', async (data) => {
+        if (!data.senha_atual || !data.nova_senha) throw new Error('Preencha a senha atual e a nova senha.');
+        if (String(data.nova_senha).length < 8) throw new Error('A nova senha precisa ter pelo menos 8 caracteres.');
+        if (data.nova_senha !== data.confirmar_senha) throw new Error('A confirmação da nova senha não confere.');
+        const result = await apiPost({ action: 'alterar_senha_propria', senha_atual: data.senha_atual, nova_senha: data.nova_senha });
+        state.user = { ...state.user, exigir_troca_senha: false };
+        saveSession({ user: state.user, session_expires_at: result.session_expires_at || '' });
+        closeModal();
+        await hydrateBootstrap(true);
+        renderView('dashboard');
+        toast('Senha alterada com sucesso.');
       });
     }
 
@@ -4971,10 +5149,10 @@
     function compraTable(data) {
       const pager = paginateData('compras', data);
       data = pager.items;
-      return `<div class="table-wrap"><table><thead><tr><th>Origem</th><th>Evento / Finalidade</th><th>Item</th><th>Fornecedor</th><th>Status</th><th>Valor aprovado</th><th>Solicitação</th><th>Ações</th></tr></thead><tbody>
+      return `<div class="table-wrap"><table><thead><tr><th>Origem</th><th>Evento / Finalidade</th><th>Item</th><th>Fornecedor</th><th>Status</th><th>Aprovação</th><th>Valor aprovado</th><th>Solicitação</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
-          <td>${statusBadge(item.origem_compra || (item.id_evento?'Evento':'Financeiro / Administrativo'))}</td><td><strong>${escapeHtml(item.id_evento ? eventLabel(item.id_evento) : (item.descricao_finalidade || '-'))}</strong><br><small>${escapeHtml(item.placa || item.categoria_compra || '')}</small></td><td>${escapeHtml(item.item || '-')}</td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${statusBadge(item.status_compra)}</td><td>${money(item.valor_aprovado || item.valor_cotado || 0)}</td><td>${dateBR(item.data_solicitacao)}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(item.id_compra)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCompraModalById(${jsArg(item.id_compra)})">Editar</button><button class="btn btn-yellow btn-small" onclick="marcarCompraEntregue(${jsArg(item.id_compra)})">Entregar</button><button class="btn btn-danger btn-small" onclick="cancelarCompra(${jsArg(item.id_compra)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Compras', ${jsArg(item.id_compra)}, 'esta compra')">Excluir</button>` : ''}</div></td>
+          <td>${statusBadge(item.origem_compra || (item.id_evento?'Evento':'Financeiro / Administrativo'))}</td><td><strong>${escapeHtml(item.id_evento ? eventLabel(item.id_evento) : (item.descricao_finalidade || '-'))}</strong><br><small>${escapeHtml(item.placa || item.categoria_compra || '')}</small></td><td>${escapeHtml(item.item || '-')}</td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${statusBadge(item.status_compra)}</td><td>${statusBadge(statusAprovacaoCompra(item))}</td><td>${money(item.valor_aprovado || item.valor_cotado || 0)}</td><td>${dateBR(item.data_solicitacao)}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCompraDetails(${jsArg(item.id_compra)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="openCompraModalById(${jsArg(item.id_compra)})">Editar</button>${normalizeText(statusAprovacaoCompra(item))==='aprovada'?`<button class="btn btn-yellow btn-small" onclick="marcarCompraEntregue(${jsArg(item.id_compra)})">Entregar</button>`:''}<button class="btn btn-danger btn-small" onclick="cancelarCompra(${jsArg(item.id_compra)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Compras', ${jsArg(item.id_compra)}, 'esta compra')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('compras', pager)}</div>`;
     }
@@ -5197,7 +5375,7 @@
     function cotacoesTable(data) {
       const pager = paginateData('cotacoes', data);
       data = pager.items;
-      return `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Veículo</th><th>Plano</th><th>FIPE</th><th>Mensalidade final</th><th>Validade</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+      return `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Veículo</th><th>Plano</th><th>FIPE</th><th>Mensalidade final</th><th>Validade</th><th>Status</th><th>Ativação</th><th>Ações</th></tr></thead><tbody>
         ${data.map(item => `<tr>
           <td>${dateBR(item.data_cotacao)}</td>
           <td><strong>${escapeHtml([item.marca, item.modelo].filter(Boolean).join(' ') || '-')}</strong><br><small>${escapeHtml([item.ano_modelo, item.combustivel, item.codigo_fipe].filter(Boolean).join(' • '))}</small></td>
@@ -5205,7 +5383,8 @@
           <td>${money(item.valor_fipe)}</td><td>${money(item.mensalidade_final || item.mensalidade_sugerida)}</td>
           <td>${escapeHtml(cotacaoValidadeLabel(item))}<br><small>${dateBR(item.data_validade)}</small></td>
           <td>${statusBadge(statusCotacaoReal(item))}</td>
-          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCotacaoDetails(${jsArg(item.id_cotacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="imprimirPropostaCotacao(${jsArg(item.id_cotacao)})">Proposta</button><button class="btn btn-ghost btn-small" onclick="openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button>${!isCommercialRole()?`<button class="btn btn-yellow btn-small" onclick="converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter</button>`:''}<button class="btn btn-danger btn-small" onclick="cancelarCotacao(${jsArg(item.id_cotacao)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Cotacoes', ${jsArg(item.id_cotacao)}, 'esta cotação')">Excluir</button>` : ''}</div></td>
+          <td>${statusBadge(statusAtivacaoCotacao(item))}</td>
+          <td><div class="row-actions"><button class="btn btn-blue btn-small" onclick="openCotacaoDetails(${jsArg(item.id_cotacao)})">Detalhes</button><button class="btn btn-ghost btn-small" onclick="imprimirPropostaCotacao(${jsArg(item.id_cotacao)})">Proposta</button><button class="btn btn-ghost btn-small" onclick="openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button><button class="btn btn-danger btn-small" onclick="cancelarCotacao(${jsArg(item.id_cotacao)})">Cancelar</button>${podeExcluirDefinitivo() ? `<button class="btn btn-danger btn-small" onclick="excluirRegistroDefinitivoUI('Cotacoes', ${jsArg(item.id_cotacao)}, 'esta cotação')">Excluir</button>` : ''}</div></td>
         </tr>`).join('')}
       </tbody></table>${paginationHtml('cotacoes', pager)}</div>`;
     }
@@ -5465,19 +5644,107 @@
       const item = findCotacaoById(id);
       if (!item) return toast('Cotação não encontrada.', 'error');
       const veiculoConvertido = item.id_veiculo_convertido ? findVehicleById(item.id_veiculo_convertido) : null;
+      const ativacao = statusAtivacaoCotacao(item);
+      const ativacaoKey = normalizeText(ativacao);
+      const vistoriaKey = normalizeText(item.status_vistoria_comercial || '');
+      const actions = [
+        `<button class="btn btn-ghost" onclick="imprimirPropostaCotacao(${jsArg(item.id_cotacao)})">Imprimir proposta</button>`,
+        `<button class="btn btn-ghost" onclick="closeModal(); openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button>`
+      ];
+      if (['nao iniciado','nao iniciada',''].includes(ativacaoKey) && normalizeText(item.status_cotacao) !== 'convertida') {
+        actions.push(`<button class="btn btn-blue" onclick="solicitarVistoriaComercial(${jsArg(item.id_cotacao)})">Solicitar vistoria</button>`);
+      }
+      if (canOperateCommercialInspection() && ativacaoKey === 'aguardando vistoria' && vistoriaKey !== 'concluida') {
+        actions.push(`<button class="btn btn-yellow" onclick="closeModal(); concluirVistoriaComercial(${jsArg(item.id_cotacao)})">Registrar vistoria</button>`);
+      }
+      if (canApproveCommercialActivation() && ativacaoKey === 'aguardando aprovacao') {
+        actions.push(`<button class="btn btn-yellow" onclick="closeModal(); decidirAtivacaoCotacao(${jsArg(item.id_cotacao)}, 'Aprovada')">Aprovar ativação</button>`);
+        actions.push(`<button class="btn btn-danger" onclick="closeModal(); decidirAtivacaoCotacao(${jsArg(item.id_cotacao)}, 'Recusada')">Recusar</button>`);
+      }
+      if (!isCommercialRole() && ativacaoKey === 'aprovada') {
+        actions.push(`<button class="btn btn-yellow" onclick="closeModal(); converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter em veículo ativo</button>`);
+      }
       openCustomModal('Detalhes da cotação', `
         <div class="detail-grid">
-          ${detailCard('Status', statusCotacaoReal(item))}${detailCard('Data', dateBR(item.data_cotacao))}${detailCard('Validade', cotacaoValidadeLabel(item))}
+          ${detailCard('Status da cotação', statusCotacaoReal(item))}${detailCard('Ativação', ativacao)}${detailCard('Data', dateBR(item.data_cotacao))}${detailCard('Validade', cotacaoValidadeLabel(item))}
           ${detailCard('Veículo', [item.marca, item.modelo, item.ano_modelo].filter(Boolean).join(' '))}${detailCard('Código FIPE', item.codigo_fipe)}${detailCard('Combustível', item.combustivel)}
-          ${detailCard('Valor FIPE', money(item.valor_fipe))}${detailCard('Plano', item.plano)}${detailCard('Percentual', `${item.percentual || item.percentual_base || '-'}%`)}
-          ${detailCard('Mensalidade base', money(item.mensalidade_base))}${detailCard('Adicional', money(item.adicional_categoria))}${detailCard('Rastreador', `${item.rastreador || '-'} • ${money(item.valor_rastreador)}`)}
-          ${detailCard('Desconto', `${item.desconto_percentual || 0}% • ${money(item.desconto_valor)}`)}${detailCard('Mensalidade final', money(item.mensalidade_final || item.mensalidade_sugerida))}${detailCard('Adesão', money(item.valor_adesao))}
-          ${detailCard('Associado/interessado', item.associado)}${detailCard('Telefone', item.telefone)}${detailCard('Voluntário', item.voluntario || item.consultor)}
-          ${detailCard('Cooperativa', item.cooperativa || item.regional)}${detailCard('Referência FIPE', item.referencia_fipe || '-')}${detailCard('Convertido em veículo', veiculoConvertido?.placa || item.id_veiculo_convertido || '-')}${detailCard('Conversão', dateBR(item.data_conversao))}
+          ${detailCard('Valor FIPE', money(item.valor_fipe))}${detailCard('Plano', item.plano)}${detailCard('Mensalidade final', money(item.mensalidade_final || item.mensalidade_sugerida))}
+          ${detailCard('Associado/interessado', item.associado)}${detailCard('Telefone', item.telefone)}${detailCard('Voluntário', item.voluntario || item.consultor)}${detailCard('Cooperativa', item.cooperativa || item.regional)}
+          ${detailCard('Vistoria comercial', item.status_vistoria_comercial || '-')}${detailCard('Operador da vistoria', item.operador_vistoria || '-')}${detailCard('Data da vistoria', dateTimeBR(item.data_vistoria_comercial))}${detailCard('Placa vistoriada', item.placa_vistoriada || '-')}
+          ${detailCard('Aprovado por', item.aprovado_por || '-')}${detailCard('Data da aprovação', dateTimeBR(item.data_aprovacao_ativacao))}${detailCard('Convertido em veículo', veiculoConvertido?.placa || item.id_veiculo_convertido || '-')}${detailCard('Conversão', dateBR(item.data_conversao))}
         </div>
-        <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
-        <div class="quick-actions"><button class="btn btn-ghost" onclick="imprimirPropostaCotacao(${jsArg(item.id_cotacao)})">Imprimir proposta</button><button class="btn btn-blue" onclick="alterarStatusCotacao(${jsArg(item.id_cotacao)}, 'Aprovada')">Aprovar</button><button class="btn btn-ghost" onclick="closeModal(); openCotacaoModalById(${jsArg(item.id_cotacao)})">Editar</button>${!isCommercialRole()?`<button class="btn btn-yellow" onclick="closeModal(); converterCotacaoEmVeiculo(${jsArg(item.id_cotacao)})">Converter em veículo</button>`:''}</div>
+        <div class="detail-section"><h4>Parecer da vistoria comercial</h4><p>${escapeHtml(item.parecer_vistoria_comercial || 'Vistoria ainda não concluída ou sem parecer registrado.')}</p></div>
+        <div class="detail-section"><h4>Observação da aprovação</h4><p>${escapeHtml(item.observacao_aprovacao_ativacao || 'Sem observação registrada.')}</p></div>
+        <div class="detail-section"><h4>Observações da cotação</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
+        <div class="quick-actions">${actions.join('')}</div>
       `, true);
+    }
+
+    async function solicitarVistoriaComercial(id) {
+      await ensureCotacoesCache();
+      const item = findCotacaoById(id);
+      if (!item) return toast('Cotação não encontrada.', 'error');
+      confirmAction('Solicitar vistoria comercial', `A cotação de ${item.associado || 'este interessado'} ficará aguardando vistoria de um operador antes da aprovação.`, 'Solicitar vistoria', async () => {
+        await apiPost({ action:'editar', tabela:'Cotacoes', id, dados:{
+          status_cotacao:'Aguardando vistoria',
+          status_ativacao:'Aguardando vistoria',
+          status_vistoria_comercial:'Pendente',
+          data_solicitacao_vistoria:new Date().toISOString()
+        }});
+        state.cache.cotacoes = [];
+        closeModal();
+        toast('Vistoria comercial solicitada.');
+        if (state.view === 'pendencias') await renderPendencias(); else if (state.view === 'cotacoes') await renderCotacoes();
+      });
+    }
+
+    async function concluirVistoriaComercial(id) {
+      await ensureCotacoesCache();
+      const item = findCotacaoById(id);
+      if (!item) return toast('Cotação não encontrada.', 'error');
+      openModal('Registrar vistoria comercial', `
+        <div class="form-grid">
+          ${field('operador_vistoria','Operador responsável','Nome do operador','',state.user?.nome || '')}
+          ${field('placa_vistoriada','Placa vistoriada','ABC1D23','',item.placa_vistoriada || '')}
+          ${selectField('status_vistoria_comercial','Resultado da vistoria',['Concluída','Reprovada'],item.status_vistoria_comercial === 'Reprovada' ? 'Reprovada' : 'Concluída')}
+          ${textareaField('parecer_vistoria_comercial','Parecer da vistoria','Descreva o resultado técnico da vistoria...','full',item.parecer_vistoria_comercial || '')}
+        </div>`, 'Registrar vistoria', async data => {
+          if (!String(data.operador_vistoria || '').trim()) throw new Error('Informe o operador responsável.');
+          if (!String(data.parecer_vistoria_comercial || '').trim()) throw new Error('Registre o parecer da vistoria.');
+          const aprovada = normalizeText(data.status_vistoria_comercial) === 'concluida';
+          await apiPost({ action:'editar', tabela:'Cotacoes', id, dados:{
+            ...data,
+            data_vistoria_comercial:new Date().toISOString(),
+            status_ativacao: aprovada ? 'Aguardando aprovação' : 'Vistoria reprovada',
+            status_cotacao: aprovada ? 'Aguardando decisão' : 'Recusada'
+          }});
+          state.cache.cotacoes = [];
+          toast(aprovada ? 'Vistoria concluída. A ativação aguarda aprovação manual.' : 'Vistoria registrada como reprovada.');
+          if (state.view === 'pendencias') await renderPendencias(); else await renderCotacoes();
+        });
+    }
+
+    async function decidirAtivacaoCotacao(id, decisao) {
+      if (!canApproveCommercialActivation()) return toast('Seu perfil não possui alçada para esta decisão.', 'error');
+      await ensureCotacoesCache();
+      const item = findCotacaoById(id);
+      if (!item) return toast('Cotação não encontrada.', 'error');
+      const aprovando = normalizeText(decisao) === 'aprovada';
+      openModal(`${aprovando ? 'Aprovar' : 'Recusar'} ativação`, `
+        <div class="lookup-note full">Esta decisão é manual e ficará registrada no histórico do sistema. A aprovação libera a conversão da cotação em veículo ativo.</div>
+        <div class="form-grid">${textareaField('observacao_aprovacao_ativacao','Observação da decisão',aprovando?'Registre uma observação da aprovação...':'Informe o motivo da recusa...','full','')}</div>`, aprovando ? 'Aprovar ativação' : 'Recusar ativação', async data => {
+          if (!aprovando && !String(data.observacao_aprovacao_ativacao || '').trim()) throw new Error('Informe o motivo da recusa.');
+          await apiPost({ action:'editar', tabela:'Cotacoes', id, dados:{
+            status_ativacao: decisao,
+            status_cotacao: aprovando ? 'Aprovada' : 'Recusada',
+            aprovado_por: state.user?.nome || state.user?.email || 'Usuário',
+            data_aprovacao_ativacao: new Date().toISOString(),
+            observacao_aprovacao_ativacao: data.observacao_aprovacao_ativacao || ''
+          }});
+          state.cache.cotacoes = [];
+          toast(aprovando ? 'Ativação aprovada manualmente.' : 'Ativação recusada.');
+          if (state.view === 'pendencias') await renderPendencias(); else await renderCotacoes();
+        });
     }
 
     async function alterarStatusCotacao(id, status) {
@@ -5496,7 +5763,183 @@
       if (!w) return toast('Permita pop-ups para imprimir a proposta.', 'error');
       const marca = BRAND_CONFIG?.appName || 'Sistema Gerencial';
       const subtitulo = BRAND_CONFIG?.appSubtitle || 'Operação Veicular';
-      w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Proposta ${escapeHtml(item.id_cotacao || '')}</title><style>body{font-family:Arial,sans-serif;color:#111827;margin:0;padding:40px;background:#fff}h1{margin:0;font-size:28px}.sub{color:#64748b;margin-top:6px}.box{border:1px solid #d1d5db;border-radius:14px;padding:20px;margin-top:22px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.item{padding:12px;background:#f8fafc;border-radius:10px}.item span{display:block;font-size:11px;text-transform:uppercase;color:#64748b;font-weight:700}.item strong{display:block;margin-top:6px;font-size:18px}.total{font-size:30px}.footer{margin-top:28px;color:#64748b;font-size:12px}@media print{button{display:none}}</style></head><body><h1>${escapeHtml(marca)}</h1><div class="sub">${escapeHtml(subtitulo)} • Proposta ${escapeHtml(item.id_cotacao || '')}</div><div class="box"><div class="grid"><div class="item"><span>Veículo</span><strong>${escapeHtml([item.marca,item.modelo,item.ano_modelo].filter(Boolean).join(' '))}</strong></div><div class="item"><span>Valor FIPE</span><strong>${money(item.valor_fipe)}</strong></div><div class="item"><span>Plano</span><strong>${escapeHtml(item.plano || '-')}</strong></div><div class="item"><span>Mensalidade final</span><strong class="total">${money(item.mensalidade_final || item.mensalidade_sugerida)}</strong></div><div class="item"><span>Adesão</span><strong>${money(item.valor_adesao)}</strong></div><div class="item"><span>Rastreador</span><strong>${escapeHtml(item.rastreador || '-')}</strong></div><div class="item"><span>Interessado</span><strong>${escapeHtml(item.associado || '-')}</strong></div><div class="item"><span>Validade</span><strong>${escapeHtml(cotacaoValidadeLabel(item))}</strong></div><div class="item"><span>Voluntário</span><strong>${escapeHtml(item.voluntario || item.consultor || '-')}</strong></div><div class="item"><span>Cooperativa</span><strong>${escapeHtml(item.cooperativa || item.regional || '-')}</strong></div></div></div><div class="footer">Documento gerado pelo sistema em ${new Date().toLocaleString('pt-BR')}.</div><script>window.onload=()=>window.print()<\/script></body></html>`);
+      w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Proposta ${escapeHtml(item.id_cotacao || '')}</title><style>body{font-family:Arial,sans-serif;color:#111827;margin:0;padding:40px;background:#fff}h1{margin:0;font-size:28px}.sub{color:#64748b;margin-top:6px}.box{border:1px solid #d1d5db;border-radius:14px;padding:20px;margin-top:22px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.item{padding:12px;background:#f8fafc;border-radius:10px}.item span{display:block;font-size:11px;text-transform:uppercase;color:#64748b;font-weight:700}.item strong{display:block;margin-top:6px;font-size:18px}.total{font-size:30px}.footer{margin-top:28px;color:#64748b;font-size:12px}@media print{button{display:none}}
+
+    /* v0.3.0 — consistência visual e administração comercial */
+    .modal .mini-table,
+    .modal .mini-row,
+    .modal .history-item,
+    .modal .data-table-wrap,
+    .modal .table-wrap {
+      background: rgba(10, 16, 24, .86) !important;
+      color: #eef2f7 !important;
+      border-color: rgba(148, 163, 184, .16) !important;
+    }
+
+    .modal .mini-row {
+      background: rgba(15, 23, 42, .52) !important;
+      color: #e5e7eb !important;
+      border-bottom-color: rgba(148, 163, 184, .14) !important;
+    }
+
+    .modal .mini-row.header {
+      background: rgba(30, 41, 59, .78) !important;
+      color: #aebdce !important;
+    }
+
+    .modal .mini-row strong,
+    .modal .mini-row div,
+    .modal .mini-row span:not(.badge),
+    .modal .history-item,
+    .modal .history-item strong,
+    .modal td,
+    .modal td strong {
+      color: #eef2f7 !important;
+    }
+
+    .modal th {
+      background: rgba(30, 41, 59, .86) !important;
+      color: #aebdce !important;
+      border-bottom-color: rgba(148, 163, 184, .16) !important;
+    }
+
+    .modal td {
+      background: rgba(15, 23, 42, .38) !important;
+      border-bottom-color: rgba(148, 163, 184, .12) !important;
+    }
+
+    .modal tr:hover td { background: rgba(51, 65, 85, .42) !important; }
+    .modal .btn-blue { color: #dbeafe !important; background: rgba(59, 130, 246, .18) !important; }
+
+    .health-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .health-card {
+      padding: 18px;
+      border: 1px solid rgba(148, 163, 184, .15);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(18, 24, 33, .94), rgba(12, 18, 26, .94));
+    }
+
+    .health-card small {
+      display: block;
+      color: #8fa0b5;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      margin-bottom: 9px;
+    }
+
+    .health-card strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.2;
+      color: #f8fafc;
+    }
+
+    .health-card p {
+      margin: 7px 0 0;
+      color: #94a3b8;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .admin-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .admin-tab {
+      border: 1px solid rgba(148, 163, 184, .16);
+      background: rgba(15, 23, 42, .54);
+      color: #cbd5e1;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .admin-tab.active {
+      background: rgba(148, 163, 184, .18);
+      color: #fff;
+      border-color: rgba(203, 213, 225, .28);
+    }
+
+    .admin-section.hidden { display: none !important; }
+
+    .log-filter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      padding: 16px;
+      border-bottom: 1px solid rgba(148, 163, 184, .12);
+      background: rgba(15, 23, 42, .32);
+    }
+
+    .log-filter-grid input,
+    .log-filter-grid select {
+      width: 100%;
+      background: #0b1118;
+      color: #e5e7eb;
+      border: 1px solid #273444;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .version-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .version-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid rgba(148, 163, 184, .16);
+      background: rgba(148, 163, 184, .08);
+      color: #e2e8f0;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .temporary-access-box {
+      border: 1px solid rgba(245, 158, 11, .26);
+      background: rgba(245, 158, 11, .08);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .temporary-password {
+      display: block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      color: #fde68a;
+      margin-top: 8px;
+      word-break: break-all;
+    }
+
+    @media (max-width: 900px) {
+      .log-filter-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 580px) {
+      .log-filter-grid { grid-template-columns: 1fr; }
+      .health-grid { grid-template-columns: 1fr; }
+    }
+
+</style></head><body><h1>${escapeHtml(marca)}</h1><div class="sub">${escapeHtml(subtitulo)} • Proposta ${escapeHtml(item.id_cotacao || '')}</div><div class="box"><div class="grid"><div class="item"><span>Veículo</span><strong>${escapeHtml([item.marca,item.modelo,item.ano_modelo].filter(Boolean).join(' '))}</strong></div><div class="item"><span>Valor FIPE</span><strong>${money(item.valor_fipe)}</strong></div><div class="item"><span>Plano</span><strong>${escapeHtml(item.plano || '-')}</strong></div><div class="item"><span>Mensalidade final</span><strong class="total">${money(item.mensalidade_final || item.mensalidade_sugerida)}</strong></div><div class="item"><span>Adesão</span><strong>${money(item.valor_adesao)}</strong></div><div class="item"><span>Rastreador</span><strong>${escapeHtml(item.rastreador || '-')}</strong></div><div class="item"><span>Interessado</span><strong>${escapeHtml(item.associado || '-')}</strong></div><div class="item"><span>Validade</span><strong>${escapeHtml(cotacaoValidadeLabel(item))}</strong></div><div class="item"><span>Voluntário</span><strong>${escapeHtml(item.voluntario || item.consultor || '-')}</strong></div><div class="item"><span>Cooperativa</span><strong>${escapeHtml(item.cooperativa || item.regional || '-')}</strong></div></div></div><div class="footer">Documento gerado pelo sistema em ${new Date().toLocaleString('pt-BR')}.</div><script>window.onload=()=>window.print()<\/script></body></html>`);
       w.document.close();
     }
 
@@ -5505,13 +5948,15 @@
       const item = findCotacaoById(id);
       if (!item) return toast('Cotação não encontrada.', 'error');
       if (normalizeText(item.status_cotacao) === 'convertida' && item.id_veiculo_convertido) return toast('Esta cotação já foi convertida.', 'error');
-      openModal('Converter cotação em veículo', `
-        <div class="form-grid">${field('placa', 'Placa', 'ABC1D23', '', '')}${selectField('status', 'Status inicial', ['Pendente','Ativo'], 'Pendente')}${selectField('rastreador', 'Rastreador', ['Sim','Não','A definir'], item.rastreador || 'A definir')}${textareaField('observacoes', 'Observações do veículo', 'Gerado a partir de cotação...', 'full', `Criado a partir da cotação ${item.id_cotacao || ''}`)}</div>`, 'Converter', async data => {
+      if (normalizeText(statusAtivacaoCotacao(item)) !== 'aprovada') return toast('A conversão só é liberada após vistoria concluída e aprovação manual.', 'error');
+      openModal('Converter cotação em veículo ativo', `
+        <div class="lookup-note full">Vistoria concluída e ativação aprovada. O veículo será criado diretamente como <strong>Ativo</strong>.</div>
+        <div class="form-grid">${field('placa', 'Placa', 'ABC1D23', '', item.placa_vistoriada || '')}${selectField('rastreador', 'Rastreador', ['Sim','Não','A definir'], item.rastreador || 'A definir')}${textareaField('observacoes', 'Observações do veículo', 'Gerado a partir de cotação...', 'full', `Criado a partir da cotação ${item.id_cotacao || ''}`)}</div>`, 'Ativar veículo', async data => {
           if (!data.placa) throw new Error('Informe a placa para criar o veículo.');
           const placaNormalizada = String(data.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
           const placaJaExiste = state.cache.veiculos.some(v => String(v.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '') === placaNormalizada);
           if (placaJaExiste) throw new Error(`Já existe um veículo cadastrado com a placa ${placaNormalizada}.`);
-          const veiculo = { placa: data.placa, associado: item.associado || '', marca: item.marca || '', modelo: item.modelo || '', ano_modelo: item.ano_modelo || '', tipo_combustivel: item.combustivel || '', codigo_fipe: item.codigo_fipe || '', valor_fipe: item.valor_fipe || '', mensalidade: item.mensalidade_final || item.mensalidade_sugerida || '', consultor: item.consultor || '', regional: item.regional || '', status: data.status || 'Pendente', rastreador: data.rastreador || item.rastreador || '', observacoes: data.observacoes || '' };
+          const veiculo = { placa: data.placa, associado: item.associado || '', marca: item.marca || '', modelo: item.modelo || '', ano_modelo: item.ano_modelo || '', tipo_combustivel: item.combustivel || '', codigo_fipe: item.codigo_fipe || '', valor_fipe: item.valor_fipe || '', mensalidade: item.mensalidade_final || item.mensalidade_sugerida || '', id_voluntario: item.id_voluntario || '', voluntario: item.voluntario || item.consultor || '', id_cooperativa: item.id_cooperativa || '', cooperativa: item.cooperativa || item.regional || '', consultor: item.consultor || item.voluntario || '', regional: item.regional || item.cooperativa || '', status: 'Ativo', rastreador: data.rastreador || item.rastreador || '', observacoes: data.observacoes || '' };
           const result = await apiPost({ action: 'criar', tabela: 'Veiculos', dados: veiculo });
           await apiPost({ action: 'editar', tabela: 'Cotacoes', id, dados: { status_cotacao: 'Convertida', data_conversao: new Date().toISOString(), id_veiculo_convertido: result.id || '' } });
           state.cache.veiculos = []; state.cache.cotacoes = [];
@@ -6529,6 +6974,15 @@
           if(ev){ data.numero_evento=ev.numero_evento||''; data.placa=ev.placa||data.placa||''; data.associado=ev.associado||''; }
           data.responsavel=data.responsavel_solicitacao||data.responsavel||state.user?.nome||'';
           data.data_solicitacao=item?.data_solicitacao||new Date().toISOString();
+          if (!isEdit) {
+            data.status_aprovacao='Pendente';
+            data.status_compra='Pendente de aprovação';
+            data.solicitado_por=state.user?.nome||state.user?.email||data.responsavel||'Usuário';
+            data.data_envio_aprovacao=new Date().toISOString();
+          } else {
+            data.status_aprovacao=item.status_aprovacao||'Pendente';
+            if (normalizeText(data.status_aprovacao)==='pendente') data.status_compra=item.status_compra||'Pendente de aprovação';
+          }
           const payload=isEdit?{action:'editar',tabela:'Compras',id:item.id_compra,dados:data}:{action:'criar',tabela:'Compras',dados:data};
           await apiPost(payload);
           if(!isEdit&&data.id_evento) await apiPost({action:'mover_evento_kanban',id_evento:data.id_evento,nova_etapa:'Compras',novo_status:'Em compras',comentario:`Compra criada: ${data.item||'item não informado'}.`});
@@ -6557,22 +7011,57 @@
       const item = findCompraById(id);
       if (!item) return toast('Compra não encontrada.', 'error');
       const evento = findEventById(item.id_evento);
+      const aprovacao = statusAprovacaoCompra(item);
+      const pendente = normalizeText(aprovacao) === 'pendente';
+      const actions = [`<button class="btn btn-ghost" onclick="closeModal(); openCompraModalById(${jsArg(item.id_compra)})">Editar compra</button>`];
+      if (canApprovePurchase() && pendente) {
+        actions.push(`<button class="btn btn-yellow" onclick="closeModal(); decidirCompra(${jsArg(item.id_compra)}, 'Aprovada')">Aprovar compra</button>`);
+        actions.push(`<button class="btn btn-danger" onclick="closeModal(); decidirCompra(${jsArg(item.id_compra)}, 'Recusada')">Recusar compra</button>`);
+      }
+      if (normalizeText(aprovacao) === 'aprovada') actions.push(`<button class="btn btn-yellow" onclick="closeModal(); marcarCompraEntregue(${jsArg(item.id_compra)})">Marcar como entregue</button>`);
+      if (evento) actions.push(`<button class="btn btn-blue" onclick="closeModal(); openEventDetails(${jsArg(evento.id_evento)})">Abrir evento</button>`);
       openCustomModal('Detalhes da compra', `
         <div class="detail-grid">
-          ${detailCard('Origem', item.origem_compra || (item.id_evento?'Evento':'Financeiro / Administrativo'))}${detailCard('Evento', item.id_evento ? eventLabel(item.id_evento) : '-')}${detailCard('Status', item.status_compra || '-')}${detailCard('Finalidade', item.descricao_finalidade || '-')}
-          ${detailCard('Item / peça', item.item || '-')}${detailCard('Fornecedor', item.fornecedor || '-')}${detailCard('Responsável', item.responsavel || '-')}
-          ${detailCard('Valor cotado', money(item.valor_cotado || 0))}${detailCard('Valor aprovado', money(item.valor_aprovado || 0))}${detailCard('Solicitação', dateBR(item.data_solicitacao))}
-          ${detailCard('Aprovação', dateBR(item.data_aprovacao))}${detailCard('Entrega', dateBR(item.data_entrega))}${detailCard('Associado', evento?.associado || '-')}
+          ${detailCard('Origem', item.origem_compra || (item.id_evento?'Evento':'Financeiro / Administrativo'))}${detailCard('Evento', item.id_evento ? eventLabel(item.id_evento) : '-')}${detailCard('Status da compra', item.status_compra || '-')}${detailCard('Aprovação', aprovacao)}
+          ${detailCard('Finalidade', item.descricao_finalidade || '-')}${detailCard('Item / serviço', item.item || '-')}${detailCard('Fornecedor', item.fornecedor || '-')}${detailCard('Solicitante', item.solicitado_por || item.responsavel_solicitacao || item.responsavel || '-')}
+          ${detailCard('Valor estimado', money(item.valor_estimado || 0))}${detailCard('Valor cotado', money(item.valor_cotado || 0))}${detailCard('Valor aprovado', money(item.valor_aprovado || 0))}${detailCard('Solicitação', dateBR(item.data_solicitacao))}
+          ${detailCard('Decidido por', item.aprovado_por || '-')}${detailCard('Data da decisão', dateTimeBR(item.data_decisao_aprovacao))}${detailCard('Status financeiro', item.status_financeiro || '-')}${detailCard('Entrega', dateBR(item.data_entrega))}
         </div>
+        <div class="detail-section"><h4>Observação da aprovação</h4><p>${escapeHtml(item.observacao_aprovacao || 'Sem decisão registrada.')}</p></div>
         <div class="detail-section"><h4>Observações</h4><p>${escapeHtml(item.observacoes || 'Sem observações.')}</p></div>
-        <div class="quick-actions"><button class="btn btn-ghost" onclick="closeModal(); openCompraModalById(${jsArg(item.id_compra)})">Editar compra</button><button class="btn btn-yellow" onclick="closeModal(); marcarCompraEntregue(${jsArg(item.id_compra)})">Marcar como entregue</button>${evento ? `<button class="btn btn-blue" onclick="closeModal(); openEventDetails(${jsArg(evento.id_evento)})">Abrir evento</button>` : ''}</div>
+        <div class="quick-actions">${actions.join('')}</div>
       `, true);
+    }
+
+    async function decidirCompra(id, decisao) {
+      if (!canApprovePurchase()) return toast('Seu perfil não possui alçada para aprovar compras.', 'error');
+      await ensureComprasCache();
+      const item = findCompraById(id);
+      if (!item) return toast('Compra não encontrada.', 'error');
+      const aprovando = normalizeText(decisao) === 'aprovada';
+      openModal(`${aprovando ? 'Aprovar' : 'Recusar'} compra`, `
+        <div class="detail-grid">${detailCard('Item', item.item)}${detailCard('Fornecedor', item.fornecedor || '-')}${detailCard('Valor de referência', money(item.valor_cotado || item.valor_estimado || 0))}${detailCard('Solicitante', item.solicitado_por || item.responsavel_solicitacao || '-')}</div>
+        <div class="form-grid">${field('valor_aprovado','Valor aprovado','0','',aprovando ? (item.valor_cotado || item.valor_estimado || '') : '')}${textareaField('observacao_aprovacao','Observação da decisão',aprovando?'Registre uma observação da aprovação...':'Informe o motivo da recusa...','full','')}</div>`, aprovando ? 'Aprovar compra' : 'Recusar compra', async data => {
+          if (!aprovando && !String(data.observacao_aprovacao || '').trim()) throw new Error('Informe o motivo da recusa.');
+          await apiPost({ action:'editar', tabela:'Compras', id, dados:{
+            status_aprovacao: decisao,
+            status_compra: aprovando ? 'Aprovada' : 'Recusada',
+            valor_aprovado: aprovando ? (data.valor_aprovado || item.valor_cotado || item.valor_estimado || '') : item.valor_aprovado || '',
+            aprovado_por: state.user?.nome || state.user?.email || 'Usuário',
+            data_decisao_aprovacao: new Date().toISOString(),
+            observacao_aprovacao: data.observacao_aprovacao || ''
+          }});
+          state.cache.compras = [];
+          toast(aprovando ? 'Compra aprovada e liberada.' : 'Compra recusada.');
+          if (state.view === 'pendencias') await renderPendencias(); else if (state.view === 'compras') await renderCompras();
+        });
     }
 
     async function marcarCompraEntregue(id) {
       await ensureComprasCache();
       const item = findCompraById(id);
       if (!item) return toast('Compra não encontrada.', 'error');
+      if (normalizeText(statusAprovacaoCompra(item)) !== 'aprovada') return toast('A compra precisa estar aprovada antes de ser concluída.', 'error');
       confirmAction('Marcar compra como entregue', `Deseja marcar o item ${item.item || id} como entregue?`, 'Marcar entregue', async () => {
         await apiPost({ action: 'editar', tabela: 'Compras', id, dados: { status_compra: 'Entregue', data_entrega: new Date().toISOString() } });
         state.cache.compras = [];
@@ -7087,7 +7576,9 @@
       { tabela: 'Oficinas', label: 'Oficinas' },
       { tabela: 'Usuarios', label: 'Usuários' },
       { tabela: 'Configuracoes', label: 'Configurações' },
-      { tabela: 'Logs_Sistema', label: 'Logs / Auditoria' }
+      { tabela: 'Logs_Sistema', label: 'Logs / Auditoria' },
+      { tabela: 'Backups_Sistema', label: 'Histórico de backups' },
+      { tabela: 'Versoes_Sistema', label: 'Versões e migrações' }
     ];
 
     async function carregarTabelaBackup(tabela) {
@@ -7099,88 +7590,124 @@
       }
     }
 
+    let adminLogsCacheV030 = [];
+
+    function setAdminSectionV030(section) {
+      document.querySelectorAll('.admin-section').forEach(el => el.classList.toggle('hidden', el.dataset.adminSection !== section));
+      document.querySelectorAll('.admin-tab').forEach(el => el.classList.toggle('active', el.dataset.adminTab === section));
+    }
+
+    function paintAdminLogsV030() {
+      const query = normalizeText(document.getElementById('logBuscaV030')?.value || '');
+      const modulo = normalizeText(document.getElementById('logModuloV030')?.value || '');
+      const resultado = normalizeText(document.getElementById('logResultadoV030')?.value || '');
+      const usuario = normalizeText(document.getElementById('logUsuarioV030')?.value || '');
+      const filtered = adminLogsCacheV030.filter(log => {
+        const hay = normalizeText([log.usuario,log.modulo,log.acao,log.detalhes,log.codigo_erro,log.contexto].join(' '));
+        return (!query || hay.includes(query)) && (!modulo || normalizeText(log.modulo) === modulo) && (!resultado || normalizeText(log.resultado) === resultado) && (!usuario || normalizeText(log.usuario).includes(usuario));
+      }).slice(0, 120);
+      const tbody = document.getElementById('adminLogsBodyV030');
+      const count = document.getElementById('adminLogsCountV030');
+      if (count) count.textContent = `${filtered.length} registro(s)`;
+      if (!tbody) return;
+      tbody.innerHTML = filtered.length ? filtered.map(log => `<tr><td>${dateTimeBR(log.data_hora)}</td><td>${escapeHtml(log.usuario || '-')}</td><td>${escapeHtml(log.modulo || '-')}</td><td>${escapeHtml(log.acao || '-')}</td><td>${statusBadge(log.resultado || (log.codigo_erro ? 'Falha' : 'Sucesso'))}</td><td>${escapeHtml(log.codigo_erro || '-')}</td><td>${escapeHtml(String(log.detalhes || '').slice(0, 120))}</td><td>${escapeHtml(log.duracao_ms ? String(log.duracao_ms) + ' ms' : '-')}</td></tr>`).join('') : '<tr><td colspan="8" class="muted">Nenhum log encontrado para os filtros aplicados.</td></tr>';
+    }
+
+    async function registrarRestauracaoTestadaV030(idBackup) {
+      confirmAction('Registrar teste de restauração', 'Use esta ação somente depois de restaurar o backup em um ambiente de homologação e conferir os dados. Deseja registrar a validação?', 'Registrar validação', async () => {
+        await apiPost({ action:'registrar_teste_restauracao', id_backup:idBackup });
+        toast('Teste de restauração registrado.');
+        await renderManutencao();
+        setTimeout(() => setAdminSectionV030('backups'), 30);
+      });
+    }
+
     async function renderManutencao() {
       if (!hasPermission('manutencao')) return renderBlocked('manutencao');
-      els.viewRoot.innerHTML = topbar('Administração do Ambiente', 'Backup, exportações, auditoria e integridade do ambiente.', '<button class="btn btn-ghost" onclick="renderManutencao()">Atualizar</button>') + skeletonDashboard();
+      els.viewRoot.innerHTML = topbar('Administração do Ambiente', 'Saúde, versões, backups, logs e integridade da implantação.', '<button class="btn btn-ghost" onclick="renderManutencao()">Atualizar</button>') + skeletonDashboard();
       try {
-        const apiInfo = await apiGet('ping').catch(error => ({ success: false, message: error.message }));
-        const resultados = await Promise.all(BACKUP_TABLES.map(item => carregarTabelaBackup(item.tabela)));
+        const [health, ...resultados] = await Promise.all([
+          apiGet('health').catch(error => ({ success:false, message:error.message })),
+          ...BACKUP_TABLES.map(item => carregarTabelaBackup(item.tabela))
+        ]);
         const ok = resultados.filter(r => r.success).length;
-        const totalRegistros = resultados.reduce((sum, r) => sum + (r.total || 0), 0);
-        const logs = (resultados.find(r => r.tabela === 'Logs_Sistema')?.data || []).slice(-12).reverse();
-        const inativos = resultados.reduce((sum, r) => sum + (r.data || []).filter(item => {
-          const status = normalizeText(item.status || item.status_evento || item.status_compra || item.status_financeiro || '');
-          return ['inativo', 'cancelado', 'recusado'].some(term => status.includes(term));
-        }).length, 0);
+        const totalRegistros = resultados.filter(r => !['Logs_Sistema','Backups_Sistema','Versoes_Sistema'].includes(r.tabela)).reduce((sum,r)=>sum+(r.total||0),0);
+        const logs = (resultados.find(r => r.tabela === 'Logs_Sistema')?.data || []).slice().sort((a,b)=>new Date(b.data_hora||0)-new Date(a.data_hora||0));
+        const backups = (resultados.find(r => r.tabela === 'Backups_Sistema')?.data || []).slice().sort((a,b)=>new Date(b.data_hora||0)-new Date(a.data_hora||0));
+        const versions = (resultados.find(r => r.tabela === 'Versoes_Sistema')?.data || []).slice().sort((a,b)=>new Date(b.data_aplicacao||0)-new Date(a.data_aplicacao||0));
+        adminLogsCacheV030 = logs;
+        const errors24h = logs.filter(log => new Date(log.data_hora||0).getTime() >= Date.now()-86400000 && (normalizeText(log.resultado).includes('falha') || log.codigo_erro)).length;
+        const denied24h = logs.filter(log => new Date(log.data_hora||0).getTime() >= Date.now()-86400000 && (normalizeText(log.acao).includes('negad') || normalizeText(log.codigo_erro).includes('permiss'))).length;
+        const durations = logs.map(l=>Number(l.duracao_ms||0)).filter(v=>v>0);
+        const avgMs = durations.length ? Math.round(durations.reduce((a,b)=>a+b,0)/durations.length) : Number(health.tempo_medio_api_ms || 0);
+        const lastBackup = backups[0];
+        const lastVersion = versions[0];
+        const restoreTest = backups.find(b => b.restauracao_testada_em);
+        const modules = [...new Set(logs.map(l=>l.modulo).filter(Boolean))].sort();
+        const results = [...new Set(logs.map(l=>l.resultado).filter(Boolean))].sort();
 
-        const rowsHtml = resultados.map(r => `
-          <tr>
-            <td><strong>${escapeHtml((BACKUP_TABLES.find(t => t.tabela === r.tabela) || {}).label || r.tabela)}</strong><small>${escapeHtml(r.tabela)}</small></td>
-            <td>${r.success ? statusBadge('OK') : statusBadge('Falha')}</td>
-            <td>${r.total || 0}</td>
-            <td>${r.success ? '-' : escapeHtml(r.message || 'Erro')}</td>
-            <td><button class="btn btn-soft" onclick="exportarTabelaManutencao(${jsArg(r.tabela)})">CSV</button></td>
-          </tr>
-        `).join('');
+        const integrityRows = resultados.filter(r => !['Logs_Sistema','Backups_Sistema','Versoes_Sistema'].includes(r.tabela)).map(r => `<tr><td><strong>${escapeHtml((BACKUP_TABLES.find(t=>t.tabela===r.tabela)||{}).label || r.tabela)}</strong><small>${escapeHtml(r.tabela)}</small></td><td>${r.success?statusBadge('OK'):statusBadge('Falha')}</td><td>${r.total||0}</td><td>${r.success?'-':escapeHtml(r.message||'Erro')}</td><td><button class="btn btn-soft" onclick="exportarTabelaManutencao(${jsArg(r.tabela)})">CSV</button></td></tr>`).join('');
+        const backupRows = backups.length ? backups.slice(0,40).map(b => `<tr><td>${dateTimeBR(b.data_hora)}</td><td>${statusBadge(b.tipo || '-')}</td><td>${escapeHtml(b.arquivo_nome || '-')}</td><td>${statusBadge(b.status || '-')}</td><td>${b.restauracao_testada_em ? `${statusBadge('Testado')}<br><small>${dateTimeBR(b.restauracao_testada_em)} • ${escapeHtml(b.restauracao_testada_por||'')}</small>` : '<span class="muted">Não registrado</span>'}</td><td>${!b.restauracao_testada_em ? `<button class="btn btn-soft btn-small" onclick="registrarRestauracaoTestadaV030(${jsArg(b.id_backup)})">Marcar teste</button>` : '-'}</td></tr>`).join('') : '<tr><td colspan="6" class="muted">Nenhum backup registrado.</td></tr>';
+        const versionRows = versions.length ? versions.map(v => `<tr><td>${escapeHtml(v.versao||'-')}</td><td>${dateTimeBR(v.data_aplicacao)}</td><td>${escapeHtml(v.migracao||'-')}</td><td>${statusBadge(v.status||'-')}</td><td>${escapeHtml(v.observacoes||'-')}</td></tr>`).join('') : '<tr><td colspan="5" class="muted">Nenhuma versão registrada.</td></tr>';
 
-        const logsHtml = logs.length ? logs.map(log => `
-          <tr>
-            <td>${dateTimeBR(log.data_hora)}</td>
-            <td>${escapeHtml(log.usuario || '-')}</td>
-            <td>${escapeHtml(log.modulo || '-')}</td>
-            <td>${escapeHtml(log.acao || '-')}</td>
-            <td>${escapeHtml(String(log.detalhes || '').slice(0, 120))}</td>
-          </tr>
-        `).join('') : '<tr><td colspan="5" class="muted">Nenhum log encontrado.</td></tr>';
-
-        els.viewRoot.innerHTML = `
-          ${topbar('Administração do Ambiente', 'Backup, exportações, auditoria e integridade do ambiente.', `
-            <button class="btn btn-primary" onclick="exportarBackupJson()">Gerar backup</button>
-            <button class="btn btn-ghost" onclick="exportarTodosCSVs()">Exportar CSV</button>
-            <button class="btn btn-ghost" onclick="renderManutencao()">Atualizar</button>
-          `)}
-
+        els.viewRoot.innerHTML = `${topbar('Administração do Ambiente', 'Saúde, versões, backups, logs e integridade da implantação.', '<button class="btn btn-primary" onclick="exportarBackupJson()">Exportar backup JSON</button><button class="btn btn-ghost" onclick="renderManutencao()">Atualizar</button>')}
           <div class="grid-cards">
-            ${metric('Conexão do sistema', apiInfo.success ? 'Online' : 'Falha', apiInfo.message || 'Ambiente conectado')}
-            ${metric('Bases OK', `${ok}/${BACKUP_TABLES.length}`, 'Bases verificadas')}
-            ${metric('Registros totais', String(totalRegistros), 'Soma de todas as tabelas')}
-            ${metric('Inativos/cancelados', String(inativos), 'Registros encerrados')}
+            ${metric('Saúde do ambiente', health.success && health.abas_criticas_ok ? 'Saudável' : 'Atenção', health.message || 'Diagnóstico do backend')}
+            ${metric('Último backup', lastBackup ? dateTimeBR(lastBackup.data_hora) : 'Não executado', lastBackup?.tipo || 'Sem registro')}
+            ${metric('Versão', APP_VERSION, `Banco ${lastVersion?.versao || health.schema_version || '-'}`)}
+            ${metric('Erros 24h', String(errors24h), `${denied24h} acesso(s) negado(s)`) }
+            ${metric('Tempo médio API', avgMs ? avgMs + ' ms' : '-', 'Amostra dos logs disponíveis')}
           </div>
 
           <div class="content-panel">
-            <div class="panel-head">
-              <div><h3>Integridade dos dados</h3><p>Contagem por base e exportação individual.</p></div>
-              <div class="actions"><button class="btn btn-soft" onclick="exportarResumoManutencao()">Exportar resumo</button></div>
-            </div>
-            <div class="data-table-wrap">
-              <table>
-                <thead><tr><th>Tabela</th><th>Status</th><th>Registros</th><th>Observação</th><th>Ações</th></tr></thead>
-                <tbody>${rowsHtml}</tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="content-panel">
-            <div class="panel-head">
-              <div><h3>Últimas ações de auditoria</h3><p>Leitura dos registros mais recentes da aba Logs_Sistema.</p></div>
-              <div class="actions"><button class="btn btn-soft" onclick="exportarTabelaManutencao('Logs_Sistema')">Exportar logs</button></div>
-            </div>
-            <div class="data-table-wrap">
-              <table>
-                <thead><tr><th>Data</th><th>Usuário</th><th>Módulo</th><th>Ação</th><th>Detalhes</th></tr></thead>
-                <tbody>${logsHtml}</tbody>
-              </table>
+            <div class="panel-head"><div><h3>Saúde do Sistema</h3><p>Diagnóstico técnico do ambiente isolado deste cliente.</p></div><div class="version-strip"><span class="version-chip">Cliente ${escapeHtml(health.client_id||'-')}</span><span class="version-chip">Core ${APP_VERSION}</span><span class="version-chip">Schema ${escapeHtml(lastVersion?.versao || health.schema_version || '-')}</span></div></div>
+            <div class="health-grid" style="padding:18px">
+              <div class="health-card"><small>API</small><strong>${health.success?'Online':'Falha'}</strong><p>${escapeHtml(health.message||'Conexão respondendo.')}</p></div>
+              <div class="health-card"><small>Planilha</small><strong>${health.spreadsheet_id_configurado?'Conectada':'Atenção'}</strong><p>${health.abas_criticas_ok?'Abas críticas disponíveis.':`Faltando: ${(health.abas_faltantes||[]).join(', ')||'-'}`}</p></div>
+              <div class="health-card"><small>Assinatura</small><strong>${health.assinatura_proxy_ativa?'Ativa':'Inativa'}</strong><p>Validação entre Vercel e Apps Script.</p></div>
+              <div class="health-card"><small>Backup automático</small><strong>${health.backup_rotina_instalada?'Ativo':'Não detectado'}</strong><p>${lastBackup?`Último ${dateTimeBR(lastBackup.data_hora)}`:'Execute e valide um backup.'}</p></div>
+              <div class="health-card"><small>Restauração testada</small><strong>${restoreTest?'Registrada':'Pendente'}</strong><p>${restoreTest?dateTimeBR(restoreTest.restauracao_testada_em):'Validar em homologação antes da produção.'}</p></div>
+              <div class="health-card"><small>Identidade</small><strong>${escapeHtml(BRAND_CONFIG.companyName||'Operação')}</strong><p>${escapeHtml(BRAND_CONFIG.appName||'Sistema Gerencial')}</p></div>
             </div>
           </div>
 
           <div class="content-panel">
-            <div class="panel-head"><div><h3>Orientação de segurança</h3><p>Use esta tela antes de limpezas, migrações ou alterações estruturais.</p></div></div>
-            <div class="empty align-left"><strong>Boa prática</strong> Antes de excluir registros ou importar bases grandes, gere um Gerar backup e exporte os CSVs principais. Esta versão não executa limpeza automática para evitar perda acidental de dados.</div>
-          </div>
-        `;
-      } catch (error) {
-        renderError(error.message);
-      }
+            <div class="panel-head"><div><h3>Gestão do ambiente</h3><p>Auditoria, backups, versões e integridade em uma única central.</p></div></div>
+            <div style="padding:16px 18px 0" class="admin-tabs">
+              <button class="admin-tab active" data-admin-tab="logs" onclick="setAdminSectionV030('logs')">Logs</button>
+              <button class="admin-tab" data-admin-tab="backups" onclick="setAdminSectionV030('backups')">Backups</button>
+              <button class="admin-tab" data-admin-tab="versoes" onclick="setAdminSectionV030('versoes')">Versões</button>
+              <button class="admin-tab" data-admin-tab="integridade" onclick="setAdminSectionV030('integridade')">Integridade</button>
+            </div>
+
+            <section class="admin-section" data-admin-section="logs">
+              <div class="log-filter-grid">
+                <input id="logBuscaV030" placeholder="Buscar ação, detalhe ou erro..." oninput="paintAdminLogsV030()" />
+                <input id="logUsuarioV030" placeholder="Filtrar usuário..." oninput="paintAdminLogsV030()" />
+                <select id="logModuloV030" onchange="paintAdminLogsV030()"><option value="">Todos os módulos</option>${modules.map(m=>`<option>${escapeHtml(m)}</option>`).join('')}</select>
+                <select id="logResultadoV030" onchange="paintAdminLogsV030()"><option value="">Todos os resultados</option>${results.map(r=>`<option>${escapeHtml(r)}</option>`).join('')}</select>
+              </div>
+              <div class="panel-head"><div><h3>Central de Logs</h3><p id="adminLogsCountV030">${logs.length} registro(s)</p></div><div class="actions"><button class="btn btn-soft" onclick="exportarTabelaManutencao('Logs_Sistema')">Exportar logs</button></div></div>
+              <div class="data-table-wrap"><table><thead><tr><th>Data</th><th>Usuário</th><th>Módulo</th><th>Ação</th><th>Resultado</th><th>Código</th><th>Detalhes</th><th>Duração</th></tr></thead><tbody id="adminLogsBodyV030"></tbody></table></div>
+            </section>
+
+            <section class="admin-section hidden" data-admin-section="backups">
+              <div class="panel-head"><div><h3>Histórico de backups</h3><p>O teste de restauração deve ser feito em homologação antes de ser marcado como validado.</p></div></div>
+              <div class="data-table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Arquivo</th><th>Status</th><th>Restauração</th><th>Ação</th></tr></thead><tbody>${backupRows}</tbody></table></div>
+            </section>
+
+            <section class="admin-section hidden" data-admin-section="versoes">
+              <div class="panel-head"><div><h3>Versões e migrações</h3><p>Histórico estrutural deste cliente.</p></div></div>
+              <div class="data-table-wrap"><table><thead><tr><th>Versão</th><th>Aplicada em</th><th>Migração</th><th>Status</th><th>Observações</th></tr></thead><tbody>${versionRows}</tbody></table></div>
+            </section>
+
+            <section class="admin-section hidden" data-admin-section="integridade">
+              <div class="panel-head"><div><h3>Integridade dos dados</h3><p>${ok}/${BACKUP_TABLES.length} bases técnicas responderam à verificação.</p></div><div class="actions"><button class="btn btn-soft" onclick="exportarResumoManutencao()">Exportar resumo</button></div></div>
+              <div class="data-table-wrap"><table><thead><tr><th>Tabela</th><th>Status</th><th>Registros</th><th>Observação</th><th>Ações</th></tr></thead><tbody>${integrityRows}</tbody></table></div>
+            </section>
+          </div>`;
+        paintAdminLogsV030();
+      } catch (error) { renderError(error.message); }
     }
 
     async function obterBackupCompleto() {
@@ -7394,6 +7921,11 @@
     window.openCooperativaModalById = openCooperativaModalById;
     window.openCooperativaDetails = openCooperativaDetails;
     window.renderGruposPermissao = renderGruposPermissao;
+    window.renderPendencias = renderPendencias;
+    window.solicitarVistoriaComercial = solicitarVistoriaComercial;
+    window.concluirVistoriaComercial = concluirVistoriaComercial;
+    window.decidirAtivacaoCotacao = decidirAtivacaoCotacao;
+    window.decidirCompra = decidirCompra;
     window.renderConfiguracoes = renderConfiguracoes;
     window.salvarConfiguracoesGerenciaisUI = salvarConfiguracoesGerenciaisUI;
     window.renderCotacoes = renderCotacoes;
@@ -7424,6 +7956,10 @@
     window.renderCompras = renderCompras;
     window.renderImportacao = renderImportacao;
     window.renderManutencao = renderManutencao;
+    window.setAdminSectionV030 = setAdminSectionV030;
+    window.paintAdminLogsV030 = paintAdminLogsV030;
+    window.registrarRestauracaoTestadaV030 = registrarRestauracaoTestadaV030;
+    window.openTrocaSenhaObrigatoria = openTrocaSenhaObrigatoria;
     window.exportarBackupJson = exportarBackupJson;
     window.exportarTodosCSVs = exportarTodosCSVs;
     window.exportarTabelaManutencao = exportarTabelaManutencao;
@@ -7511,13 +8047,29 @@
     window.exportFinanceiroCSV = exportFinanceiroCSV;
 
     async function init() {
+      await loadBrandConfigFromEnvironment();
       const session = getSession();
-      if (session?.user && session?.token) {
+      if (session?.user) {
         state.user = session.user;
-        state.token = session.token;
-        await hydrateBootstrap();
-        showApp();
-      } else showLogin();
+        state.token = '';
+        try {
+          const mustChange = String(state.user?.exigir_troca_senha || '').toLowerCase() === 'true' || normalizeText(state.user?.exigir_troca_senha) === 'sim';
+          if (mustChange) {
+            showApp(true);
+            setTimeout(() => openTrocaSenhaObrigatoria(), 80);
+          } else {
+            await hydrateBootstrap(true);
+            showApp();
+          }
+        } catch (error) {
+          clearSession();
+          resetClientCache();
+          state.user = null;
+          showLogin();
+        }
+      } else {
+        showLogin();
+      }
     }
 
     init();
